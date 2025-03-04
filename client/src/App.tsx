@@ -9,6 +9,7 @@ import AddProgress from "@/pages/add-progress";
 import AddTask from "@/pages/add-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
+import TaskBoard from "@/pages/task-board";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/add-task" component={AddTask} />
       <Route path="/tasks/:id" component={TaskDetails} />
       <Route path="/goal-tasks/:id" component={GoalTasks} />
+      <Route path="/task-board" component={TaskBoard} />
       <Route component={NotFound} />
     </Switch>
   );
