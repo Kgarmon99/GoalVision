@@ -14,7 +14,7 @@ export async function apiRequest(
 ): Promise<Response> {
   let method = "GET";
   let bodyData = undefined;
-  
+
   if (typeof methodOrData === "string") {
     method = methodOrData;
     bodyData = data;
@@ -22,9 +22,9 @@ export async function apiRequest(
     method = "POST";
     bodyData = methodOrData;
   }
-  
+
   const res = await fetch(url, {
-    method,
+    method: method, // Explicitly set the method
     headers: bodyData ? { "Content-Type": "application/json" } : {},
     body: bodyData ? JSON.stringify(bodyData) : undefined,
     credentials: "include",
