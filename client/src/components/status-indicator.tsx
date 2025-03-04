@@ -51,13 +51,13 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
   
   return (
     <Card className="h-full bg-gray-900 border border-green-600">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
         <CardTitle className="text-lg font-semibold text-green-400">Goal Status</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
         {statuses.map((status) => (
-          <div key={status.id} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-0">
-            <div className="flex items-center">
+          <div key={status.id} className="flex flex-col xs:flex-row xs:items-center xs:justify-between py-2 sm:py-3 border-b border-gray-800 last:border-0">
+            <div className="flex items-center mb-2 xs:mb-0">
               <div className="flex-shrink-0">
                 <span className={`w-3 h-3 ${getDotColor(status.status)} rounded-full inline-block`}></span>
               </div>
@@ -65,7 +65,7 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
                 <span className="text-sm font-medium text-white">{status.goalName}</span>
               </div>
             </div>
-            <div className="text-sm">
+            <div className="text-sm ml-6 xs:ml-0">
               <Badge 
                 variant={getBadgeVariant(status.status)}
                 className={`${
