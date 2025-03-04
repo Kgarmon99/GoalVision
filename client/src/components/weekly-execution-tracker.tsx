@@ -189,14 +189,20 @@ const WeeklyExecutionTracker = ({
                             {getFirstCharacter(task.owner)}
                           </div>
                         )}
-                        <span>{task.owner}</span>
+                        <span>{getStringOrFallback(task.owner)}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {getCategoryBadge(task.goalCategory, task.categoryColor)}
                     </TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      {task.dueDate}
+                      <div className="flex flex-col">
+                        <span>{task.dueDate}</span>
+                        <span className={`text-xs ${getUrgencyLevel(task.dueDate) === 'high' ? 'text-red-400' : 
+                          getUrgencyLevel(task.dueDate) === 'medium' ? 'text-yellow-400' : 'text-green-400'}`}>
+                          {getDaysUntilDescription(task.dueDate)}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(task.status)}
@@ -242,16 +248,22 @@ const WeeklyExecutionTracker = ({
                           />
                         ) : (
                           <div className="h-4 w-4 rounded-full bg-green-900 mr-1 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                            {task.owner && task.owner.charAt(0) || "U"}
+                            {getFirstCharacter(task.owner)}
                           </div>
                         )}
-                        <span>{task.owner}</span>
+                        <span>{getStringOrFallback(task.owner)}</span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center text-xs text-gray-300">
-                      <span className="text-green-400 mr-1">Due:</span>
-                      {task.dueDate}
+                    <div className="flex flex-col text-xs text-gray-300">
+                      <div className="flex items-center">
+                        <span className="text-green-400 mr-1">Due:</span>
+                        {task.dueDate}
+                      </div>
+                      <div className={`ml-6 mt-1 ${getUrgencyLevel(task.dueDate) === 'high' ? 'text-red-400' : 
+                          getUrgencyLevel(task.dueDate) === 'medium' ? 'text-yellow-400' : 'text-green-400'}`}>
+                        {getDaysUntilDescription(task.dueDate)}
+                      </div>
                     </div>
                     
                     <div className="col-span-2 flex items-center text-xs text-gray-300 mt-1">
