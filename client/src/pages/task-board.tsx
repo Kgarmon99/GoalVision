@@ -18,7 +18,10 @@ import {
   List,
   Calendar,
   Target,
-  Rocket
+  Rocket,
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import { ExecutionTask, Goal, Week } from "@shared/schema";
 
