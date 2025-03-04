@@ -53,6 +53,7 @@ const taskFormSchema = z.object({
     required_error: "Please select a status"
   }),
   weekId: z.string({ required_error: "Please select a week" }),
+  dependencies: z.array(z.string()).optional(), // Added dependencies field
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -61,28 +62,29 @@ const AddTask = () => {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Fetch weeks
-  const { data: weeks = [], isLoading } = useQuery<Week[]>({
+  const { data: weeks = [], isLoading } = useQuery({
     queryKey: ['/api/weeks'],
   });
-  
+
+  // Fetch tasks for dependency selection
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['/api/tasks'],
+  });
+
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (taskData: any) => {
       return apiRequest("POST", "/api/tasks", taskData);
     },
     onSuccess: () => {
-      // Invalidate tasks cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      
       toast({
         title: "Task created",
         description: "New task has been added successfully.",
         variant: "default",
       });
-      
-      // Navigate back to dashboard
       navigate("/");
     },
     onError: (error) => {
@@ -93,7 +95,7 @@ const AddTask = () => {
       });
     }
   });
-  
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
@@ -104,36 +106,37 @@ const AddTask = () => {
       categoryColor: "blue",
       status: "in-progress",
       weekId: weeks.length > 0 ? weeks[0].id.toString() : "",
+      dependencies: [], // Initialize dependencies
     }
   });
-  
+
   const onSubmit = async (data: TaskFormValues) => {
     setIsSubmitting(true);
-    
+
     try {
       const formattedData = {
         ...data,
         weekId: parseInt(data.weekId),
         dueDate: format(data.dueDate, "MMMM d, yyyy")
       };
-      
+
       await createTaskMutation.mutateAsync(formattedData);
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const goalCategories = [
     { name: "Funding", color: "blue" },
     { name: "Revenue", color: "purple" },
     { name: "User Growth", color: "green" },
     { name: "School Expansion", color: "indigo" }
   ];
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-1 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
@@ -142,7 +145,7 @@ const AddTask = () => {
               Create a new task for the weekly execution tracker.
             </p>
           </div>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Task Details</CardTitle>
@@ -154,180 +157,36 @@ const AddTask = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <div className="space-y-6">
+                    {/* ...existing form fields... */}
+
                     <FormField
                       control={form.control}
-                      name="task"
+                      name="dependencies"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Task Description</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter task description" />
-                          </FormControl>
-                          <FormDescription>
-                            Provide a clear description of the task.
-                          </FormDescription>
+                          <FormLabel>Dependencies</FormLabel>
+                          <Select multiple onChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select dependencies" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {tasks.map(task => (
+                                <SelectItem key={task.id} value={task.id.toString()}>
+                                  {task.task}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="owner"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Task Owner</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Enter owner name" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="ownerAvatar"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Avatar URL (Optional)</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Enter avatar URL" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="goalCategory"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Goal Category</FormLabel>
-                            <Select 
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                // Update the category color based on selected category
-                                const category = goalCategories.find(cat => cat.name === value);
-                                if (category) {
-                                  form.setValue("categoryColor", category.color);
-                                }
-                              }} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {goalCategories.map(category => (
-                                  <SelectItem key={category.name} value={category.name}>
-                                    {category.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a status" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="done">✅ Done</SelectItem>
-                                <SelectItem value="in-progress">🔄 In Progress</SelectItem>
-                                <SelectItem value="missed">❌ Missed</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="dueDate"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel>Due Date</FormLabel>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full pl-3 text-left font-normal",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, "PPP")
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="weekId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Week</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a week" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {weeks.map(week => (
-                                  <SelectItem key={week.id} value={week.id.toString()}>
-                                    Week {week.number} ({week.dateRange})
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+
+                    {/* ...rest of the form fields... */}
                   </div>
-                  
+
                   <div className="mt-8 flex justify-end">
                     <Button
                       type="button"
@@ -337,10 +196,7 @@ const AddTask = () => {
                     >
                       Cancel
                     </Button>
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                    >
+                    <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? "Creating..." : "Create Task"}
                     </Button>
                   </div>
@@ -350,7 +206,7 @@ const AddTask = () => {
           </Card>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

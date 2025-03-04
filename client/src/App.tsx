@@ -8,6 +8,7 @@ import AddGoal from "@/pages/add-goal";
 import AddProgress from "@/pages/add-progress";
 import AddTask from "@/pages/add-task";
 import TaskDetails from "@/pages/task-details";
+import GoalDependencies from "./pages/goal-dependencies";
 
 function Router() {
   return (
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/add-progress" component={AddProgress} />
       <Route path="/add-task" component={AddTask} />
       <Route path="/tasks/:id" component={TaskDetails} />
+      <Route path="/goal-dependencies" component={GoalDependencies} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -73,6 +73,9 @@ export const executionTasks = pgTable("execution_tasks", {
   dueDate: text("due_date").notNull(),
   status: text("status").notNull(), // "done", "in-progress", "missed"
   weekId: integer("week_id").notNull(),
+  dependsOn: text("depends_on").default(""), // Comma-separated list of task IDs
+  duration: integer("duration").default(1), // Duration in days
+  isCriticalPath: boolean("is_critical_path").default(false),
 });
 
 export const executionTasksRelations = relations(executionTasks, ({ one }) => ({
@@ -91,6 +94,9 @@ export const insertExecutionTaskSchema = createInsertSchema(executionTasks).pick
   dueDate: true,
   status: true,
   weekId: true,
+  dependsOn: true,
+  duration: true,
+  isCriticalPath: true,
 });
 
 export const weeks = pgTable("weeks", {
