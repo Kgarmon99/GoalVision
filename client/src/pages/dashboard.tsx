@@ -12,6 +12,9 @@ import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";
+import { ChartBarIcon, PlusIcon, SparklesIcon } from "@heroicons/react/24/outline"; // Added SparklesIcon import
+import Link from 'next/link'; // Assuming Next.js Link component is used
+
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -172,6 +175,13 @@ const Dashboard = () => {
     isLoadingTasks ||
     isLoadingWeeks;
 
+  const buttonVariants = ({ variant }: { variant?: 'outline' | 'default' }) => {
+    return `
+      inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${variant === 'outline' ? 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50' : ''}
+    `;
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <Header />
@@ -262,6 +272,55 @@ const Dashboard = () => {
               />
             )}
           </section>
+          <div className="mt-8">
+            <div className="sm:flex sm:items-center">
+              <div className="sm:flex-auto">
+                <h2 className="text-base font-semibold leading-6 text-gray-900">This Week's Execution</h2>
+                <p className="mt-2 text-sm text-gray-500">A list of all tasks for this week grouped by goal category.</p>
+              </div>
+              <div className="mt-4 sm:ml-16 sm:mt-0 flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/goals/custom', { method: 'POST' });
+                      toast({
+                        title: "Success",
+                        description: "Your custom goals have been added!",
+                      });
+                      // Refresh the data
+                      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+                      queryClient.invalidateQueries({ queryKey: ['/api/goal-statuses'] });
+                      queryClient.invalidateQueries({ queryKey: ['/api/tasks/week'] });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to add custom goals. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className={buttonVariants({ variant: "default" })}
+                >
+                  <SparklesIcon className="h-4 w-4 mr-1" />
+                  Add My Goals
+                </button>
+                <Link
+                  to="/add-task"
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  <PlusIcon className="h-4 w-4 mr-1" />
+                  Add Task
+                </Link>
+                <Link
+                  to="/add-metric"
+                  className={buttonVariants()}
+                >
+                  <ChartBarIcon className="h-4 w-4 mr-1" />
+                  Add Metric
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 

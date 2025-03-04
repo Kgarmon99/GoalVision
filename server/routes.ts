@@ -268,6 +268,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error adding goals", error: String(error) });
     }
   });
+  
+  // Add custom user goals
+  app.post("/api/goals/custom", async (req, res) => {
+    try {
+      // Create custom user goals
+      const customGoals: InsertGoal[] = [
+        { name: "Finish Coding Project", current: 25, target: 100, unit: "%", color: "blue" },
+        { name: "Learn New Framework", current: 10, target: 100, unit: "%", color: "green" },
+        { name: "Launch Startup", current: 5, target: 100, unit: "%", color: "purple" },
+        { name: "Fitness Goal", current: 30, target: 100, unit: "%", color: "amber" },
+        { name: "Reading Goal", current: 15, target: 50, unit: "books", color: "red" }
+      ];
+      
+      // Add the goals
+      const createdGoals = await Promise.all(customGoals.map(goal => storage.createGoal(goal)));
+      
+      // Add goal statuses
+      const goalStatuses: InsertGoalStatus[] = customGoals.map((goal, index) => ({
+        goalId: createdGoals[index].id,
+        goalName: goal.name,
+        status: "in-progress"
+      }));
+      
+      await Promise.all(goalStatuses.map(status => storage.createGoalStatus(status)));
+      
+      // Add initial tasks for the goals
+      const weeks = await storage.getAllWeeks();
+      if (weeks.length > 0) {
+        const weekId = weeks[0].id;
+        
+        const initialTasks: InsertExecutionTask[] = [
+          { 
+            task: "Complete frontend development", 
+            owner: "Me", 
+            ownerAvatar: "", 
+            goalCategory: "Finish Coding Project", 
+            categoryColor: "blue", 
+            dueDate: "Jul 30, 2025", 
+            status: "in-progress",
+            weekId: weekId
+          },
+          { 
+            task: "Complete React/Next.js course", 
+            owner: "Me", 
+            ownerAvatar: "", 
+            goalCategory: "Learn New Framework", 
+            categoryColor: "green", 
+            dueDate: "Aug 15, 2025", 
+            status: "not-started",
+            weekId: weekId
+          },
+          { 
+            task: "Finalize business plan and financial model", 
+            owner: "Me", 
+            ownerAvatar: "", 
+            goalCategory: "Launch Startup", 
+            categoryColor: "purple", 
+            dueDate: "Sep 1, 2025", 
+            status: "not-started",
+            weekId: weekId
+          },
+          { 
+            task: "Complete 10 gym sessions this month", 
+            owner: "Me", 
+            ownerAvatar: "", 
+            goalCategory: "Fitness Goal", 
+            categoryColor: "amber", 
+            dueDate: "Jul 31, 2025", 
+            status: "in-progress",
+            weekId: weekId
+          },
+          { 
+            task: "Finish current book", 
+            owner: "Me", 
+            ownerAvatar: "", 
+            goalCategory: "Reading Goal", 
+            categoryColor: "red", 
+            dueDate: "Jul 25, 2025", 
+            status: "in-progress",
+            weekId: weekId
+          }
+        ];
+        
+        await Promise.all(initialTasks.map(task => storage.createExecutionTask(task)));
+      }
+      
+      res.status(201).json({ 
+        message: "Custom goals added successfully", 
+        goals: createdGoals 
+      });
+    } catch (error) {
+      console.error("Error adding custom goals:", error);
+      res.status(500).json({ message: "Error adding goals", error: String(error) });
+    }
+  });
 
   // Create a goal
   app.post("/api/goals", async (req, res) => {
