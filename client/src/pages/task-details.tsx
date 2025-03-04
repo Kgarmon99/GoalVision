@@ -72,11 +72,14 @@ const TaskDetails = () => {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/tasks/${id}`, undefined);
+      return apiRequest(`/api/tasks/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks/week'] });
       
       toast({
         title: "Task deleted",
@@ -90,7 +93,7 @@ const TaskDetails = () => {
     onError: (error) => {
       toast({
         title: "Error deleting task",
-        description: error.message || "There was a problem deleting the task.",
+        description: error instanceof Error ? error.message : "There was a problem deleting the task.",
         variant: "destructive",
       });
     }
