@@ -10,6 +10,7 @@ import AddTask from "@/pages/add-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
+import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 
 function Router() {
   return (
@@ -29,8 +30,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <GoalCelebrationProvider>
+        <Router />
+        <Toaster />
+      </GoalCelebrationProvider>
     </QueryClientProvider>
   );
 }

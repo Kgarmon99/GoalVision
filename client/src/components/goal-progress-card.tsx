@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Goal } from "@shared/schema";
 import { Link } from "wouter";
 import { PlusCircle, TrendingUp, ArrowUpRight, Target, Award, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useGoalCelebrationContext } from "../context/goal-celebration-context";
 
 interface GoalProgressCardProps {
   goal: Goal;
