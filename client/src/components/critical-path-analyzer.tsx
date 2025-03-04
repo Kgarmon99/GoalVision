@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ExecutionTask } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ class TaskNode {
   latestFinish: number;
   slack: number;
   isCritical: boolean;
-  
+
   constructor(task: ExecutionTask) {
     this.id = task.id;
     this.task = task.task;
@@ -44,19 +43,19 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
   const [isCalculating, setIsCalculating] = useState(false);
   const [hasDependencyIssue, setHasDependencyIssue] = useState(false);
   const [projectDuration, setProjectDuration] = useState(0);
-  
+
   const calculateCriticalPath = () => {
     setIsCalculating(true);
     setTimeout(() => {
       try {
         // Convert tasks to task nodes
         const taskNodes = tasks.map(task => new TaskNode(task));
-        
+
         // Check for circular dependencies
         const checkCircularDependencies = (nodeId: number, visited: Set<number>, path: Set<number>): boolean => {
           visited.add(nodeId);
           path.add(nodeId);
-          
+
           const node = taskNodes.find(n => n.id === nodeId);
           if (node) {
             for (const depId of node.dependsOn) {
@@ -69,11 +68,11 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
               }
             }
           }
-          
+
           path.delete(nodeId);
           return false;
         };
-        
+
         let hasCircular = false;
         const visited = new Set<number>();
         for (const node of taskNodes) {
@@ -84,47 +83,47 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
             }
           }
         }
-        
+
         if (hasCircular) {
           setHasDependencyIssue(true);
           setIsCalculating(false);
           return;
         }
-        
+
         // Forward pass - calculate earliest start and finish times
         let maxFinish = 0;
         const calculateEarliestTimes = (nodeId: number, earliestStart: number): void => {
           const node = taskNodes.find(n => n.id === nodeId);
           if (!node) return;
-          
+
           node.earliestStart = Math.max(node.earliestStart, earliestStart);
           node.earliestFinish = node.earliestStart + node.duration;
-          
+
           maxFinish = Math.max(maxFinish, node.earliestFinish);
-          
+
           // Process dependent tasks
           const dependentTasks = taskNodes.filter(n => n.dependsOn.includes(nodeId));
           for (const depTask of dependentTasks) {
             calculateEarliestTimes(depTask.id, node.earliestFinish);
           }
         };
-        
+
         // Start with tasks that have no dependencies
         const startTasks = taskNodes.filter(node => node.dependsOn.length === 0);
         for (const startTask of startTasks) {
           calculateEarliestTimes(startTask.id, 0);
         }
-        
+
         // Backward pass - calculate latest start and finish times
         const calculateLatestTimes = (nodeId: number, latestFinish: number): void => {
           const node = taskNodes.find(n => n.id === nodeId);
           if (!node) return;
-          
+
           node.latestFinish = Math.min(latestFinish, node.latestFinish === 0 ? latestFinish : node.latestFinish);
           node.latestStart = node.latestFinish - node.duration;
           node.slack = node.latestStart - node.earliestStart;
           node.isCritical = node.slack === 0;
-          
+
           // Process dependencies
           for (const depId of node.dependsOn) {
             const depNode = taskNodes.find(n => n.id === depId);
@@ -133,30 +132,30 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
             }
           }
         };
-        
+
         // Initialize latest finish times
         for (const node of taskNodes) {
           node.latestFinish = maxFinish;
         }
-        
+
         // Find end tasks (those that no other task depends on)
         const allDependencies = new Set(taskNodes.flatMap(node => node.dependsOn));
         const endTasks = taskNodes.filter(node => !allDependencies.has(node.id));
-        
+
         for (const endTask of endTasks) {
           calculateLatestTimes(endTask.id, maxFinish);
         }
-        
+
         // Identify critical path
         const criticalPathNodes = taskNodes.filter(node => node.isCritical);
-        
+
         // Sort by earliest start to get the sequence
         criticalPathNodes.sort((a, b) => a.earliestStart - b.earliestStart);
-        
+
         setCriticalPath(criticalPathNodes);
         setProjectDuration(maxFinish);
         setHasDependencyIssue(false);
-        
+
         // Notify parent component
         const criticalPathTasks = criticalPathNodes.map(node => 
           tasks.find(task => task.id === node.id)
@@ -170,7 +169,7 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
       }
     }, 1000); // Simulate calculation time
   };
-  
+
   return (
     <div>
       <div className="mb-6">
@@ -192,7 +191,7 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
           )}
         </Button>
       </div>
-      
+
       {hasDependencyIssue && (
         <Alert className="bg-red-900/30 border-red-700 mb-6">
           <AlertTriangle className="h-4 w-4 text-red-400" />
@@ -201,7 +200,7 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
           </AlertDescription>
         </Alert>
       )}
-      
+
       {criticalPath.length > 0 && !hasDependencyIssue && (
         <div className="space-y-4">
           <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-purple-700">
@@ -214,9 +213,9 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
               {projectDuration} days
             </Badge>
           </div>
-          
+
           <h3 className="text-lg font-semibold text-purple-400 mt-6 mb-3">Critical Path Tasks</h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             {criticalPath.map((node, index) => {
               const task = tasks.find(t => t.id === node.id);
@@ -247,7 +246,7 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
                       </div>
                       <Badge className="bg-red-600">Critical</Badge>
                     </div>
-                    
+
                     {/* Dependencies visualization */}
                     {node.dependsOn.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-gray-700">
@@ -271,7 +270,7 @@ const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCr
           </div>
         </div>
       )}
-      
+
       {tasks.length === 0 && (
         <Alert className="bg-gray-800 border-gray-700">
           <AlertDescription>
