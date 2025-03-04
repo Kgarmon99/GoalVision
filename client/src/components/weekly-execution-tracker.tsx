@@ -176,6 +176,12 @@ const WeeklyExecutionTracker = ({
                             src={task.ownerAvatar} 
                             alt={task.owner} 
                           />
+                        ) : task.owner === "Kahlil Garmon" ? (
+                          <img 
+                            className="h-6 w-6 rounded-full mr-2 border border-green-500" 
+                            src="/images/profiles/kahlil-avatar.svg" 
+                            alt={task.owner} 
+                          />
                         ) : (
                           <div className="h-6 w-6 rounded-full bg-green-900 mr-2 flex items-center justify-center text-xs font-medium text-white border border-green-500">
                             {task.owner.charAt(0)}
@@ -224,6 +230,12 @@ const WeeklyExecutionTracker = ({
                           <img 
                             className="h-4 w-4 rounded-full mr-1 border border-green-500" 
                             src={task.ownerAvatar} 
+                            alt={task.owner} 
+                          />
+                        ) : task.owner === "Kahlil Garmon" ? (
+                          <img 
+                            className="h-4 w-4 rounded-full mr-1 border border-green-500" 
+                            src="/images/profiles/kahlil-avatar.svg" 
                             alt={task.owner} 
                           />
                         ) : (

@@ -1,236 +1,81 @@
-/* Glow effects for the dashboard */
+/* Glow Effects CSS */
+
+/* Primary gradient glow card */
 .glow-card {
   position: relative;
+  border-radius: 0.75rem;
   overflow: hidden;
   isolation: isolate;
-  transition: all 0.3s ease;
 }
 
 .glow-card::before {
   content: '';
   position: absolute;
-  width: 150%;
-  height: 150%;
-  background: radial-gradient(
-    circle at center,
-    rgba(74, 222, 128, 0.5) 0%,
-    rgba(22, 163, 74, 0.2) 25%,
-    rgba(0, 0, 0, 0) 70%
-  );
-  opacity: 0;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: opacity 0.5s ease;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.glow-card:hover::before {
-  opacity: 0.8;
-}
-
-.glow-text {
-  text-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
-}
-
-.progress-glow {
-  position: relative;
-}
-
-.progress-glow::after {
-  content: '';
-  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.6), transparent);
-  filter: blur(8px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.progress-glow:hover::after {
-  opacity: 1;
-}
-
-.stat-card {
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 25px rgba(74, 222, 128, 0.4);
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    135deg,
-    rgba(24, 24, 27, 0.9) 0%,
-    rgba(39, 39, 42, 0.8) 100%
-  );
-  border-radius: inherit;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  z-index: -2;
-  background: linear-gradient(
-    135deg,
-    rgba(74, 222, 128, 0.3) 0%,
-    rgba(74, 222, 128, 0.1) 50%,
-    transparent 100%
-  );
-  border-radius: inherit;
-  transition: opacity 0.3s ease;
-  opacity: 0.5;
-}
-
-.stat-card:hover::before {
-  opacity: 1;
-}
-
-.pulse-animation {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.gradient-border {
-  position: relative;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    to right,
-    rgba(74, 222, 128, 0.7),
-    rgba(22, 163, 74, 0.7)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  border-radius: 0.75rem;
+  padding: 1.5px;
+  background: linear-gradient(45deg, #4ade8050, #10b98150);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Animated progress bar */
-.animated-progress-bar {
-  position: relative;
+/* Stronger glow for active cards */
+.glow-card-active::before {
+  background: linear-gradient(45deg, #4ade80, #10b981);
+  animation: border-glow 3s ease-in-out infinite alternate;
 }
 
-.animated-progress-bar::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(74, 222, 128, 0.4),
-    transparent
-  );
-  width: 50%;
-  animation: progressPulse 2s infinite;
+/* Subtle hover effect for cards */
+.glow-card:hover::before {
+  background: linear-gradient(45deg, #4ade8070, #10b98170);
 }
 
-@keyframes progressPulse {
+/* Glow for progress bars and elements */
+.glow-element {
+  box-shadow: 0 0 15px 0 rgba(74, 222, 128, 0.3);
+}
+
+/* Text glow effect */
+.text-glow {
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+
+/* Custom glow for avatar borders */
+.avatar-glow {
+  box-shadow: 0 0 8px 0 rgba(74, 222, 128, 0.5);
+}
+
+/* Pulsing animation for important elements */
+.pulse-glow {
+  animation: pulse-glow 3s infinite;
+}
+
+/* Animations */
+@keyframes border-glow {
   0% {
-    transform: translateX(-100%);
+    opacity: 0.7;
   }
   100% {
-    transform: translateX(200%);
+    opacity: 1;
   }
 }
 
-/* Dashboard grid layout */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px 0 rgba(74, 222, 128, 0.3);
   }
-}
-
-/* Metric value animations */
-.metric-value {
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.metric-value:hover {
-  transform: scale(1.05);
-}
-
-/* Stats wrapper */
-.stats-wrapper {
-  position: relative;
-}
-
-.stats-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  background: radial-gradient(
-    circle at center,
-    rgba(74, 222, 128, 0.2) 0%,
-    rgba(0, 0, 0, 0) 70%
-  );
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-  border-radius: 20px;
-}
-
-.stats-wrapper:hover::before {
-  opacity: 0.8;
+  50% {
+    box-shadow: 0 0 15px 0 rgba(74, 222, 128, 0.7);
+  }
 }
