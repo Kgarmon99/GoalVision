@@ -26,22 +26,24 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   
   return (
     <Card className="bg-gray-900 border border-green-600">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
           <div>
             <p className="text-sm font-medium text-green-400">{goal.name}</p>
-            <p className="mt-1 text-2xl font-bold text-white">
-              {formatValue(goal.current, goal.unit)}
-            </p>
-            <p className="text-sm text-green-400">
-              of {formatValue(goal.target, goal.unit)} target
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="mt-1 text-xl sm:text-2xl font-bold text-white">
+                {formatValue(goal.current, goal.unit)}
+              </p>
+              <p className="text-xs sm:text-sm text-green-400">
+                of {formatValue(goal.target, goal.unit)}
+              </p>
+            </div>
           </div>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-400 border border-green-500">
+          <span className="inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-400 border border-green-500">
             {percentComplete}% complete
           </span>
         </div>
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <Progress value={percentComplete} className="h-2.5 bg-gray-800" />
           <div className="flex items-center justify-between text-xs mt-1">
             <span className="text-green-400">0%</span>
@@ -52,7 +54,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           <Link href={`/add-progress?goalId=${goal.id}`}>
             <Button variant="outline" size="sm" className="text-xs border-green-500 text-green-400 hover:bg-gray-800">
               <PlusCircle className="h-3 w-3 mr-1" />
-              Update Progress
+              <span className="hidden xs:inline">Update</span> Progress
             </Button>
           </Link>
         </div>
