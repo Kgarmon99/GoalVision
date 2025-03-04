@@ -11,7 +11,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   const percentComplete = Math.round((goal.current / goal.target) * 100);
   
   // Format values with units
-  const formatValue = (value: number, unit: string) => {
+  const formatValue = (value: number, unit: string | null) => {
     if (unit === "M") {
       return `$${value}M`;
     } else if (unit === "K") {

@@ -36,7 +36,7 @@ const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
                   ) : (
                     <MinusIcon className="h-3 w-3 mr-0.5" />
                   )}
-                  {Math.abs(metric.trend)}%
+                  {Math.abs(metric.trend || 0)}%
                 </span>
               )}
             </div>
