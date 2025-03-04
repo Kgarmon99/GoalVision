@@ -26,6 +26,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getFirstCharacter, getStringOrFallback } from "../utils/string-utils";
+import { getDaysUntilDescription, getUrgencyLevel } from "../utils/date-utils";
 import { ExecutionTask, Week } from "@shared/schema";
 
 interface WeeklyExecutionTrackerProps {
@@ -184,7 +186,7 @@ const WeeklyExecutionTracker = ({
                           />
                         ) : (
                           <div className="h-6 w-6 rounded-full bg-green-900 mr-2 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                            {task.owner && task.owner.charAt(0) || "U"}
+                            {getFirstCharacter(task.owner)}
                           </div>
                         )}
                         <span>{task.owner}</span>
