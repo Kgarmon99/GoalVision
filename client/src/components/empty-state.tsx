@@ -66,8 +66,10 @@ export function NoDataEmptyState() {
           goals, metrics, and weekly tasks to start tracking your 2025 goals.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Button className="bg-green-600 hover:bg-green-700">
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Your First Goal
+          <Button className="bg-green-600 hover:bg-green-700" asChild>
+            <Link href="/add-goal">
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Your First Goal
+            </Link>
           </Button>
           <Button variant="outline" className="border-green-600 text-green-400">
             View Documentation <ArrowRight className="ml-2 h-4 w-4" />

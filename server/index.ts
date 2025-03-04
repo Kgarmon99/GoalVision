@@ -58,14 +58,14 @@ app.use((req, res, next) => {
 
   // Try to serve on port 5000, with fallback options
   const tryPorts = [5000, 5001, 5002, 5003];
-  
+
   const startServer = (portIndex = 0) => {
     if (portIndex >= tryPorts.length) {
       log(`Failed to start server: All ports are in use`);
       process.exit(1);
       return;
     }
-    
+
     const port = tryPorts[portIndex];
     server.listen({
       port,
@@ -83,6 +83,6 @@ app.use((req, res, next) => {
       }
     });
   };
-  
+
   startServer();
 })();
