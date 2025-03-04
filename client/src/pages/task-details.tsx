@@ -62,7 +62,8 @@ import {
   CheckSquare,
   Square,
   Flag,
-  Link
+  Link,
+  PlusCircle
 } from "lucide-react";
 
 const TaskDetails = () => {
@@ -212,7 +213,7 @@ const TaskDetails = () => {
   };
   
   // Function to get category badge styling
-  const getCategoryBadge = (category: string, color: string) => {
+  const getCategoryBadge = (category: string, color: string = "") => {
     const colorMap: Record<string, string> = {
       "blue": "bg-blue-900 text-blue-400 border-blue-500",
       "indigo": "bg-indigo-900 text-indigo-400 border-indigo-500",
