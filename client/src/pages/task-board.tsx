@@ -29,8 +29,8 @@ export default function TaskBoard() {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"board" | "progress">("board");
   const [sortBy, setSortBy] = useState<"dueDate" | "goalCategory">("dueDate");
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
-  const [filterGoal, setFilterGoal] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string | undefined>(undefined);
+  const [filterGoal, setFilterGoal] = useState<string | undefined>(undefined);
   
   // Fetch all tasks
   const { 
@@ -145,7 +145,7 @@ export default function TaskBoard() {
               <select 
                 className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-8 px-2"
                 value={filterStatus || ""}
-                onChange={(e) => setFilterStatus(e.target.value || null)}
+                onChange={(e) => setFilterStatus(e.target.value === "" ? undefined : e.target.value)}
               >
                 <option value="">All Statuses</option>
                 <option value="in-progress">In Progress</option>
@@ -156,7 +156,7 @@ export default function TaskBoard() {
               <select 
                 className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-8 px-2"
                 value={filterGoal || ""}
-                onChange={(e) => setFilterGoal(e.target.value || null)}
+                onChange={(e) => setFilterGoal(e.target.value === "" ? undefined : e.target.value)}
               >
                 <option value="">All Goals</option>
                 {goals.map(goal => (
