@@ -239,7 +239,7 @@ const Dashboard = () => {
               <div className="mb-8 bg-gray-900/80 rounded-lg border border-green-600 p-4 gradient-border flex flex-wrap gap-4 justify-between items-center">
                 <div className="flex items-center">
                   <Target className="h-6 w-6 mr-2 text-green-400" />
-                  <h2 className="text-lg font-semibold text-green-400 glow-text">2025 Goals Tracker</h2>
+                  <h2 className="text-lg font-semibold text-green-400 text-glow">2025 Goals Tracker</h2>
                 </div>
                 <div className="flex gap-3 flex-wrap">
                   <Link href="/add-progress">
@@ -266,7 +266,7 @@ const Dashboard = () => {
               {/* Main Goals Progress */}
               <section className="mb-8">
                 <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
-                  <h2 className="text-xl font-semibold text-green-400 glow-text flex items-center">
+                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2" />
                     Main Goals Progress
                   </h2>
@@ -432,32 +432,32 @@ const Dashboard = () => {
               {/* Quick Stats Cards */}
               {!isLoading && goals.length > 0 && (
                 <section className="mb-8">
-                  <h2 className="text-xl font-semibold text-green-400 glow-text flex items-center mb-4">
+                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
                     <Award className="h-5 w-5 mr-2" />
                     Achievement Stats
                   </h2>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
                           <Target className="h-6 w-6 text-green-400" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Total Goals</p>
-                          <p className="text-2xl font-bold text-white metric-value">{goals.length}</p>
+                          <p className="text-2xl font-bold text-white">{goals.length}</p>
                         </div>
                       </CardContent>
                     </Card>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
                           <TrendingUp className="h-6 w-6 text-green-400" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Avg Completion</p>
-                          <p className="text-2xl font-bold text-white metric-value">
+                          <p className="text-2xl font-bold text-white">
                             {Math.round(goals.reduce((acc, goal) => 
                               acc + Math.min(Math.round((goal.current / goal.target) * 100), 100), 0) / goals.length)}%
                           </p>
@@ -465,28 +465,28 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
                           <CheckCircle className="h-6 w-6 text-green-400" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">On Track Goals</p>
-                          <p className="text-2xl font-bold text-white metric-value">
+                          <p className="text-2xl font-bold text-white">
                             {goalStatuses.filter(status => status.status === "on-track").length}
                           </p>
                         </div>
                       </CardContent>
                     </Card>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
                           <Users className="h-6 w-6 text-green-400" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-400">Weekly Tasks</p>
-                          <p className="text-2xl font-bold text-white metric-value">
+                          <p className="text-2xl font-bold text-white">
                             {weekTasks.length}
                           </p>
                         </div>
@@ -501,39 +501,39 @@ const Dashboard = () => {
           {/* Getting Started Resources */}
           {!isLoading && !hasAnyData && (
             <section className="mt-12">
-              <h2 className="text-lg font-semibold text-green-400 mb-4">Getting Started Resources</h2>
+              <h2 className="text-lg font-semibold text-green-400 text-glow mb-4">Getting Started Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5">
-                  <h3 className="text-green-400 font-medium mb-2">Add Your First Goal</h3>
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 glow-card">
+                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Add Your First Goal</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Define your 2025 targets with measurable goals to track progress over time.
                   </p>
                   <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400">
+                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
                       Start <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5">
-                  <h3 className="text-green-400 font-medium mb-2">Track Key Metrics</h3>
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 glow-card">
+                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Track Key Metrics</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Monitor important KPIs related to growth, revenue, and performance.
                   </p>
                   <Link href="/add-metric">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400">
+                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
                       View Metrics <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
-                  <h3 className="text-green-400 font-medium mb-2">Plan Weekly Tasks</h3>
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1 glow-card">
+                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Plan Weekly Tasks</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Break down your goals into actionable weekly tasks for execution tracking.
                   </p>
                   <Link href="/add-task">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400">
+                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
                       Add Tasks <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
