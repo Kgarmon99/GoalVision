@@ -114,22 +114,10 @@ const AddTask = () => {
       const formattedData = {
         ...data,
         weekId: parseInt(data.weekId),
-        dueDate: typeof data.dueDate === 'string' ? data.dueDate : format(data.dueDate, "MMMM d, yyyy"),
-        status: data.status.toLowerCase().replace(' ', '-')
+        dueDate: format(data.dueDate, "MMMM d, yyyy")
       };
       
       await createTaskMutation.mutateAsync(formattedData);
-      toast({
-        title: "Success",
-        description: "Task created successfully",
-      });
-    } catch (error) {
-      console.error("Error creating task:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create task. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsSubmitting(false);
     }

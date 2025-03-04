@@ -42,13 +42,11 @@ export interface IStorage {
   getMetricsByCategory(category: string): Promise<Metric[]>;
   createMetric(metric: InsertMetric): Promise<Metric>;
   updateMetric(id: number, metric: Partial<InsertMetric>): Promise<Metric | undefined>;
-  deleteMetric(id: number): Promise<boolean>;
   
   // Goal Status methods
   getAllGoalStatuses(): Promise<GoalStatus[]>;
   updateGoalStatus(id: number, status: Partial<InsertGoalStatus>): Promise<GoalStatus | undefined>;
   createGoalStatus(status: InsertGoalStatus): Promise<GoalStatus>;
-  deleteGoalStatus(id: number): Promise<boolean>;
   
   // Execution Task methods
   getTasksByWeek(weekId: number): Promise<ExecutionTask[]>;
@@ -63,7 +61,6 @@ export interface IStorage {
   getWeek(id: number): Promise<Week | undefined>;
   createWeek(week: InsertWeek): Promise<Week>;
   updateWeek(id: number, week: Partial<InsertWeek>): Promise<Week | undefined>;
-  deleteWeek(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -266,10 +263,6 @@ export class MemStorage implements IStorage {
     return updatedMetric;
   }
   
-  async deleteMetric(id: number): Promise<boolean> {
-    return this.metricsData.delete(id);
-  }
-  
   // Goal Status methods
   async getAllGoalStatuses(): Promise<GoalStatus[]> {
     return Array.from(this.goalStatusData.values());
@@ -289,10 +282,6 @@ export class MemStorage implements IStorage {
     const status: GoalStatus = { ...insertStatus, id };
     this.goalStatusData.set(id, status);
     return status;
-  }
-  
-  async deleteGoalStatus(id: number): Promise<boolean> {
-    return this.goalStatusData.delete(id);
   }
   
   // Execution Task methods
@@ -351,10 +340,6 @@ export class MemStorage implements IStorage {
     const updatedWeek = { ...existingWeek, ...week };
     this.weeksData.set(id, updatedWeek);
     return updatedWeek;
-  }
-  
-  async deleteWeek(id: number): Promise<boolean> {
-    return this.weeksData.delete(id);
   }
 }
 
@@ -427,11 +412,6 @@ export class DatabaseStorage implements IStorage {
     return updatedMetric;
   }
   
-  async deleteMetric(id: number): Promise<boolean> {
-    const result = await db.delete(metrics).where(eq(metrics.id, id));
-    return !!result;
-  }
-  
   // Goal Status methods
   async getAllGoalStatuses(): Promise<GoalStatus[]> {
     return await db.select().from(goalStatus);
@@ -449,11 +429,6 @@ export class DatabaseStorage implements IStorage {
   async createGoalStatus(insertStatus: InsertGoalStatus): Promise<GoalStatus> {
     const [status] = await db.insert(goalStatus).values(insertStatus).returning();
     return status;
-  }
-  
-  async deleteGoalStatus(id: number): Promise<boolean> {
-    const result = await db.delete(goalStatus).where(eq(goalStatus.id, id));
-    return !!result;
   }
   
   // Execution Task methods
@@ -520,11 +495,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(weeks.id, id))
       .returning();
     return updatedWeek;
-  }
-  
-  async deleteWeek(id: number): Promise<boolean> {
-    const result = await db.delete(weeks).where(eq(weeks.id, id));
-    return !!result;
   }
 
   // Initialize database with sample data
