@@ -1,311 +1,286 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { 
-  GitBranch, 
-  GitMerge, 
-  ArrowRight, 
-  Clock, 
-  RefreshCw, 
-  AlertTriangle, 
-  CheckCircle 
-} from "lucide-react";
 import { ExecutionTask } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertTriangle, GitMerge, Calendar, Clock } from "lucide-react";
 
 interface CriticalPathAnalyzerProps {
   tasks: ExecutionTask[];
-  onCriticalPathCalculated?: (criticalPathTasks: ExecutionTask[]) => void;
+  onCriticalPathCalculated: (criticalPathTasks: ExecutionTask[]) => void;
 }
 
-export function CriticalPathAnalyzer({ tasks, onCriticalPathCalculated }: CriticalPathAnalyzerProps) {
-  const [selectedTaskId, setSelectedTaskId] = useState<string>("");
-  const [taskGraph, setTaskGraph] = useState<Map<number, number[]>>(new Map());
-  const [criticalPath, setCriticalPath] = useState<number[]>([]);
-  const [calculating, setCalculating] = useState(false);
-  const [earliestFinish, setEarliestFinish] = useState<Map<number, number>>(new Map());
-  const { toast } = useToast();
+// Helper classes for the critical path algorithm
+class TaskNode {
+  id: number;
+  task: string;
+  duration: number;
+  dependsOn: number[];
+  earliestStart: number;
+  earliestFinish: number;
+  latestStart: number;
+  latestFinish: number;
+  slack: number;
+  isCritical: boolean;
+  
+  constructor(task: ExecutionTask) {
+    this.id = task.id;
+    this.task = task.task;
+    this.duration = task.duration;
+    this.dependsOn = task.dependsOn ? task.dependsOn.split(',').map(id => parseInt(id.trim())) : [];
+    this.earliestStart = 0;
+    this.earliestFinish = 0;
+    this.latestStart = 0;
+    this.latestFinish = 0;
+    this.slack = 0;
+    this.isCritical = false;
+  }
+}
 
-  // Build dependency graph when tasks change
-  useEffect(() => {
-    buildTaskGraph();
-  }, [tasks]);
-
-  // Build graph of task dependencies
-  const buildTaskGraph = () => {
-    const graph = new Map<number, number[]>();
-    
-    // Initialize graph with empty dependencies for each task
-    tasks.forEach(task => {
-      graph.set(task.id, []);
-    });
-    
-    // Add dependencies to graph
-    tasks.forEach(task => {
-      if (task.dependsOn) {
-        const dependencies = task.dependsOn.split(',').map(id => parseInt(id.trim()));
-        dependencies.forEach(depId => {
-          const dependents = graph.get(depId) || [];
-          if (!dependents.includes(task.id)) {
-            dependents.push(task.id);
-            graph.set(depId, dependents);
-          }
-        });
-      }
-    });
-    
-    setTaskGraph(graph);
-  };
-
-  // Calculate critical path from start task to all reachable tasks
-  const calculateCriticalPath = async () => {
-    if (!selectedTaskId) {
-      toast({
-        title: "No starting task selected",
-        description: "Please select a task to calculate the critical path from.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setCalculating(true);
-    
-    try {
-      const startTaskId = parseInt(selectedTaskId);
-      const distances = new Map<number, number>();
-      const previous = new Map<number, number>();
-      const durations = new Map<number, number>();
-      const earliestFinish = new Map<number, number>();
-      
-      // Initialize maps
-      tasks.forEach(task => {
-        distances.set(task.id, 0);
-        durations.set(task.id, task.duration || 1);
-      });
-      
-      // Topological sort (simplified for our directed acyclic graph)
-      const visited = new Set<number>();
-      const topoSort: number[] = [];
-      
-      const dfs = (nodeId: number) => {
-        if (visited.has(nodeId)) return;
-        visited.add(nodeId);
+const CriticalPathAnalyzer: React.FC<CriticalPathAnalyzerProps> = ({ tasks, onCriticalPathCalculated }) => {
+  const [criticalPath, setCriticalPath] = useState<TaskNode[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [hasDependencyIssue, setHasDependencyIssue] = useState(false);
+  const [projectDuration, setProjectDuration] = useState(0);
+  
+  const calculateCriticalPath = () => {
+    setIsCalculating(true);
+    setTimeout(() => {
+      try {
+        // Convert tasks to task nodes
+        const taskNodes = tasks.map(task => new TaskNode(task));
         
-        const neighbors = taskGraph.get(nodeId) || [];
-        for (const neighbor of neighbors) {
-          dfs(neighbor);
-        }
-        
-        topoSort.unshift(nodeId);
-      };
-      
-      dfs(startTaskId);
-      
-      // Initialize start node
-      distances.set(startTaskId, durations.get(startTaskId) || 1);
-      earliestFinish.set(startTaskId, durations.get(startTaskId) || 1);
-      
-      // Process nodes in topological order
-      for (const node of topoSort) {
-        const neighbors = taskGraph.get(node) || [];
-        const currentDist = distances.get(node) || 0;
-        
-        for (const neighbor of neighbors) {
-          const neighborDuration = durations.get(neighbor) || 1;
-          const newDist = currentDist + neighborDuration;
+        // Check for circular dependencies
+        const checkCircularDependencies = (nodeId: number, visited: Set<number>, path: Set<number>): boolean => {
+          visited.add(nodeId);
+          path.add(nodeId);
           
-          if (newDist > (distances.get(neighbor) || 0)) {
-            distances.set(neighbor, newDist);
-            previous.set(neighbor, node);
-            earliestFinish.set(neighbor, newDist);
+          const node = taskNodes.find(n => n.id === nodeId);
+          if (node) {
+            for (const depId of node.dependsOn) {
+              if (!visited.has(depId)) {
+                if (checkCircularDependencies(depId, visited, path)) {
+                  return true;
+                }
+              } else if (path.has(depId)) {
+                return true;
+              }
+            }
+          }
+          
+          path.delete(nodeId);
+          return false;
+        };
+        
+        let hasCircular = false;
+        const visited = new Set<number>();
+        for (const node of taskNodes) {
+          if (!visited.has(node.id)) {
+            if (checkCircularDependencies(node.id, new Set(), new Set())) {
+              hasCircular = true;
+              break;
+            }
           }
         }
-      }
-      
-      // Find the node with the maximum distance (critical path end)
-      let maxDist = 0;
-      let endNode = startTaskId;
-      
-      tasks.forEach(task => {
-        const dist = distances.get(task.id) || 0;
-        if (dist > maxDist) {
-          maxDist = dist;
-          endNode = task.id;
+        
+        if (hasCircular) {
+          setHasDependencyIssue(true);
+          setIsCalculating(false);
+          return;
         }
-      });
-      
-      // Reconstruct the critical path
-      const path: number[] = [];
-      let current = endNode;
-      
-      while (current !== undefined) {
-        path.unshift(current);
-        current = previous.get(current) as number;
-      }
-      
-      setCriticalPath(path);
-      setEarliestFinish(earliestFinish);
-      
-      // Update tasks with critical path information
-      await updateCriticalPathTasks(path);
-      
-      if (onCriticalPathCalculated) {
-        const criticalPathTasks = tasks.filter(task => path.includes(task.id));
+        
+        // Forward pass - calculate earliest start and finish times
+        let maxFinish = 0;
+        const calculateEarliestTimes = (nodeId: number, earliestStart: number): void => {
+          const node = taskNodes.find(n => n.id === nodeId);
+          if (!node) return;
+          
+          node.earliestStart = Math.max(node.earliestStart, earliestStart);
+          node.earliestFinish = node.earliestStart + node.duration;
+          
+          maxFinish = Math.max(maxFinish, node.earliestFinish);
+          
+          // Process dependent tasks
+          const dependentTasks = taskNodes.filter(n => n.dependsOn.includes(nodeId));
+          for (const depTask of dependentTasks) {
+            calculateEarliestTimes(depTask.id, node.earliestFinish);
+          }
+        };
+        
+        // Start with tasks that have no dependencies
+        const startTasks = taskNodes.filter(node => node.dependsOn.length === 0);
+        for (const startTask of startTasks) {
+          calculateEarliestTimes(startTask.id, 0);
+        }
+        
+        // Backward pass - calculate latest start and finish times
+        const calculateLatestTimes = (nodeId: number, latestFinish: number): void => {
+          const node = taskNodes.find(n => n.id === nodeId);
+          if (!node) return;
+          
+          node.latestFinish = Math.min(latestFinish, node.latestFinish === 0 ? latestFinish : node.latestFinish);
+          node.latestStart = node.latestFinish - node.duration;
+          node.slack = node.latestStart - node.earliestStart;
+          node.isCritical = node.slack === 0;
+          
+          // Process dependencies
+          for (const depId of node.dependsOn) {
+            const depNode = taskNodes.find(n => n.id === depId);
+            if (depNode) {
+              calculateLatestTimes(depId, node.latestStart);
+            }
+          }
+        };
+        
+        // Initialize latest finish times
+        for (const node of taskNodes) {
+          node.latestFinish = maxFinish;
+        }
+        
+        // Find end tasks (those that no other task depends on)
+        const allDependencies = new Set(taskNodes.flatMap(node => node.dependsOn));
+        const endTasks = taskNodes.filter(node => !allDependencies.has(node.id));
+        
+        for (const endTask of endTasks) {
+          calculateLatestTimes(endTask.id, maxFinish);
+        }
+        
+        // Identify critical path
+        const criticalPathNodes = taskNodes.filter(node => node.isCritical);
+        
+        // Sort by earliest start to get the sequence
+        criticalPathNodes.sort((a, b) => a.earliestStart - b.earliestStart);
+        
+        setCriticalPath(criticalPathNodes);
+        setProjectDuration(maxFinish);
+        setHasDependencyIssue(false);
+        
+        // Notify parent component
+        const criticalPathTasks = criticalPathNodes.map(node => 
+          tasks.find(task => task.id === node.id)
+        ).filter(Boolean) as ExecutionTask[];
         onCriticalPathCalculated(criticalPathTasks);
+      } catch (error) {
+        console.error("Error calculating critical path:", error);
+        setHasDependencyIssue(true);
+      } finally {
+        setIsCalculating(false);
       }
-      
-      toast({
-        title: "Critical path calculated",
-        description: `Found ${path.length} tasks in the critical path.`,
-        variant: "default"
-      });
-    } catch (error) {
-      console.error("Error calculating critical path:", error);
-      toast({
-        title: "Error calculating critical path",
-        description: String(error),
-        variant: "destructive"
-      });
-    } finally {
-      setCalculating(false);
-    }
-  };
-  
-  // Update tasks to mark those on critical path
-  const updateCriticalPathTasks = async (criticalPathIds: number[]) => {
-    try {
-      // First, clear all critical path flags
-      await Promise.all(tasks.map(task => {
-        return apiRequest(`/api/tasks/${task.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ isCriticalPath: false })
-        });
-      }));
-      
-      // Then, set critical path flags for tasks on the path
-      await Promise.all(criticalPathIds.map(taskId => {
-        return apiRequest(`/api/tasks/${taskId}`, {
-          method: "PATCH",
-          body: JSON.stringify({ isCriticalPath: true })
-        });
-      }));
-    } catch (error) {
-      console.error("Error updating critical path tasks:", error);
-    }
-  };
-  
-  // Get a task by ID
-  const getTask = (id: number) => {
-    return tasks.find(task => task.id === id);
-  };
-  
-  // Get estimated completion time
-  const getCompletionTime = () => {
-    let maxTime = 0;
-    criticalPath.forEach(taskId => {
-      maxTime = Math.max(maxTime, earliestFinish.get(taskId) || 0);
-    });
-    return maxTime;
+    }, 1000); // Simulate calculation time
   };
   
   return (
-    <Card className="bg-gray-900 border border-purple-600 glow-card">
-      <CardHeader className="pb-2 px-6 pt-6">
-        <CardTitle className="text-lg font-semibold text-purple-400 text-glow flex items-center">
-          <GitMerge className="h-5 w-5 mr-2" />
-          Critical Path Analysis
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-6 pb-6">
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm text-gray-400">Select starting task:</label>
-            <Select value={selectedTaskId} onValueChange={setSelectedTaskId}>
-              <SelectTrigger className="bg-gray-800 border-gray-700">
-                <SelectValue placeholder="Select a task" />
-              </SelectTrigger>
-              <SelectContent>
-                {tasks.map((task) => (
-                  <SelectItem key={task.id} value={String(task.id)}>
-                    {task.task}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              className="border-purple-500 text-purple-400 hover:bg-purple-900/50"
-              onClick={calculateCriticalPath}
-              disabled={calculating || !selectedTaskId}
-            >
-              {calculating ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Calculating...
-                </>
-              ) : (
-                <>
-                  <GitBranch className="h-4 w-4 mr-2" />
-                  Calculate Critical Path
-                </>
-              )}
-            </Button>
-          </div>
-          
-          {criticalPath.length > 0 && (
+    <div>
+      <div className="mb-6">
+        <Button
+          onClick={calculateCriticalPath}
+          disabled={isCalculating || tasks.length === 0}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
+          {isCalculating ? (
             <>
-              <Separator className="bg-gray-700 my-2" />
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-medium text-purple-400">Critical Path</h3>
-                  <Badge variant="outline" className="border-purple-500 text-purple-300">
-                    <Clock className="h-3 w-3 mr-1" />
-                    Estimated: {getCompletionTime()} days
-                  </Badge>
-                </div>
-                
-                <div className="p-3 bg-gray-800 rounded-md">
-                  <div className="flex flex-col space-y-2">
-                    {criticalPath.map((taskId, index) => {
-                      const task = getTask(taskId);
-                      return task ? (
-                        <div key={taskId} className="flex items-center">
-                          <Badge className={task.status === "done" ? "bg-green-600" : "bg-blue-600"}>
-                            {task.status === "done" ? (
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                            ) : (
-                              <Clock className="h-3 w-3 mr-1" />
-                            )}
-                            {task.duration || 1} days
-                          </Badge>
-                          <span className="mx-2 text-gray-400">{task.task}</span>
-                          {index < criticalPath.length - 1 && (
-                            <ArrowRight className="h-4 w-4 text-gray-500" />
-                          )}
-                        </div>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-                
-                <div className="flex items-center text-xs text-yellow-400">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                  <span>Any delay in these tasks will affect your overall timeline</span>
-                </div>
-              </div>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Calculating...
+            </>
+          ) : (
+            <>
+              <GitMerge className="h-4 w-4 mr-2" />
+              Calculate Critical Path
             </>
           )}
+        </Button>
+      </div>
+      
+      {hasDependencyIssue && (
+        <Alert className="bg-red-900/30 border-red-700 mb-6">
+          <AlertTriangle className="h-4 w-4 text-red-400" />
+          <AlertDescription>
+            Dependency issue detected. Please check for circular dependencies or missing tasks.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {criticalPath.length > 0 && !hasDependencyIssue && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg border border-purple-700">
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 mr-2 text-purple-400" />
+              <span className="text-sm text-gray-300">Estimated Project Duration:</span>
+            </div>
+            <Badge className="bg-purple-600 ml-2">
+              <Clock className="h-3 w-3 mr-1" />
+              {projectDuration} days
+            </Badge>
+          </div>
+          
+          <h3 className="text-lg font-semibold text-purple-400 mt-6 mb-3">Critical Path Tasks</h3>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {criticalPath.map((node, index) => {
+              const task = tasks.find(t => t.id === node.id);
+              return task ? (
+                <Card key={node.id} className="bg-gray-800 border border-purple-700">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center">
+                          <Badge className="bg-purple-600 mr-2">Task {index + 1}</Badge>
+                          <h4 className="text-md font-medium">{task.task}</h4>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-1">{task.goalCategory}</p>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <div className="text-xs text-gray-400">
+                            <span className="font-medium">Start:</span> Day {node.earliestStart}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            <span className="font-medium">Finish:</span> Day {node.earliestFinish}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            <span className="font-medium">Duration:</span> {task.duration} days
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            <span className="font-medium">Slack:</span> {node.slack} days
+                          </div>
+                        </div>
+                      </div>
+                      <Badge className="bg-red-600">Critical</Badge>
+                    </div>
+                    
+                    {/* Dependencies visualization */}
+                    {node.dependsOn.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-700">
+                        <div className="text-xs text-gray-400 mb-1">Depends on:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {node.dependsOn.map(depId => {
+                            const depTask = tasks.find(t => t.id === depId);
+                            return depTask ? (
+                              <Badge key={depId} className="bg-gray-700 text-gray-300 text-xs">
+                                {depTask.task}
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : null;
+            })}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+      
+      {tasks.length === 0 && (
+        <Alert className="bg-gray-800 border-gray-700">
+          <AlertDescription>
+            No tasks available. Add tasks with dependencies to calculate the critical path.
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
   );
-}
+};
+
+export default CriticalPathAnalyzer;
