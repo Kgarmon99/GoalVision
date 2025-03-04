@@ -216,26 +216,28 @@ const Dashboard = () => {
             <>
               {/* Main Goals Progress */}
               <section className="mb-8">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
                   <h2 className="text-lg font-semibold text-green-400">Main Goals Progress</h2>
                   <div className="flex gap-2">
-                    <Link href="/add-progress">
-                      <Button variant="outline" size="sm" className="border-green-600 text-green-400">
-                        <PlusCircle className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Update Progress</span>
+                    <Link href="/add-progress" className="flex-1 xs:flex-initial">
+                      <Button variant="outline" size="sm" className="border-green-600 text-green-400 w-full xs:w-auto">
+                        <PlusCircle className="h-4 w-4 xs:mr-1" />
+                        <span className="ml-1 xs:ml-0 xs:hidden">Progress</span>
+                        <span className="hidden xs:inline">Update Progress</span>
                       </Button>
                     </Link>
-                    <Link href="/add-goal">
-                      <Button variant="outline" size="sm" className="border-green-600 text-green-400">
-                        <Plus className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Add Goal</span>
+                    <Link href="/add-goal" className="flex-1 xs:flex-initial">
+                      <Button variant="outline" size="sm" className="border-green-600 text-green-400 w-full xs:w-auto">
+                        <Plus className="h-4 w-4 xs:mr-1" />
+                        <span className="ml-1 xs:ml-0 xs:hidden">Goal</span>
+                        <span className="hidden xs:inline">Add Goal</span>
                       </Button>
                     </Link>
                   </div>
                 </div>
                 
                 {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {[1, 2, 3, 4].map((_, index) => (
                       <div key={index} className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-32 animate-pulse">
                         <div className="h-4 bg-gray-800 rounded w-1/4 mb-2"></div>
@@ -246,7 +248,7 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : goals.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {goals.map(goal => (
                       <GoalProgressCard key={goal.id} goal={goal} />
                     ))}
@@ -263,15 +265,15 @@ const Dashboard = () => {
               </section>
               
               {/* Metrics Dashboard */}
-              <section className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <section className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Growth Metrics */}
                 <div className="col-span-1">
                   {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-64 animate-pulse">
+                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
                       <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
                       <div className="space-y-3">
                         {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-10 bg-gray-800 rounded w-full"></div>
+                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
                         ))}
                       </div>
                     </div>
@@ -290,11 +292,11 @@ const Dashboard = () => {
                 {/* Revenue Metrics */}
                 <div className="col-span-1">
                   {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-64 animate-pulse">
+                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
                       <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
                       <div className="space-y-3">
                         {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-10 bg-gray-800 rounded w-full"></div>
+                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
                         ))}
                       </div>
                     </div>
@@ -311,13 +313,13 @@ const Dashboard = () => {
                 </div>
                 
                 {/* Status Indicators */}
-                <div className="col-span-1">
+                <div className="col-span-1 md:col-span-2 lg:col-span-1">
                   {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-64 animate-pulse">
+                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
                       <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
                       <div className="space-y-3">
                         {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-10 bg-gray-800 rounded w-full"></div>
+                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
                         ))}
                       </div>
                     </div>
@@ -381,8 +383,8 @@ const Dashboard = () => {
           {!isLoading && !hasAnyData && (
             <section className="mt-12">
               <h2 className="text-lg font-semibold text-green-400 mb-4">Getting Started Resources</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5">
                   <h3 className="text-green-400 font-medium mb-2">Add Your First Goal</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Define your 2025 targets with measurable goals to track progress over time.
@@ -394,7 +396,7 @@ const Dashboard = () => {
                   </Link>
                 </div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-5">
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5">
                   <h3 className="text-green-400 font-medium mb-2">Track Key Metrics</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Monitor important KPIs related to growth, revenue, and performance.
@@ -406,7 +408,7 @@ const Dashboard = () => {
                   </Link>
                 </div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-5">
+                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1">
                   <h3 className="text-green-400 font-medium mb-2">Plan Weekly Tasks</h3>
                   <p className="text-gray-400 text-sm mb-4">
                     Break down your goals into actionable weekly tasks for execution tracking.
