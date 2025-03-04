@@ -181,17 +181,21 @@ const Dashboard = () => {
   const hasAnyData = goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0;
   
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white">
+    <div className="min-h-screen flex flex-col bg-black text-white relative">
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
       <Header />
       
-      <main className="flex-1 py-6">
+      <main className="flex-1 py-6 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-              <h1 className="text-2xl font-bold text-white">2025 Goals Dashboard</h1>
+              <div className="flex items-center">
+                <Rocket className="h-8 w-8 mr-3 text-green-400 animate-float" />
+                <h1 className="text-3xl font-bold text-white glow-text">2025 Goals Dashboard</h1>
+              </div>
               <div className="flex items-center space-x-3">
-                <div className="bg-gray-900 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block">
+                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border">
                   <span className="text-sm text-green-400">Last updated:</span>
                   <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
                 </div>
@@ -199,7 +203,7 @@ const Dashboard = () => {
                   variant="outline"
                   onClick={handleRefreshData} 
                   disabled={isRefreshing}
-                  className="border-green-500 text-green-400 hover:bg-gray-800"
+                  className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 transition-colors"
                 >
                   {isRefreshing ? (
                     <>
@@ -231,26 +235,41 @@ const Dashboard = () => {
           {/* Main Dashboard Content */}
           {(isLoading || hasAnyData) && (
             <>
+              {/* Action Bar */}
+              <div className="mb-8 bg-gray-900/80 rounded-lg border border-green-600 p-4 gradient-border flex flex-wrap gap-4 justify-between items-center">
+                <div className="flex items-center">
+                  <Target className="h-6 w-6 mr-2 text-green-400" />
+                  <h2 className="text-lg font-semibold text-green-400 glow-text">2025 Goals Tracker</h2>
+                </div>
+                <div className="flex gap-3 flex-wrap">
+                  <Link href="/add-progress">
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
+                      <PlusCircle className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
+                      <span>Update Progress</span>
+                    </Button>
+                  </Link>
+                  <Link href="/add-goal">
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
+                      <Plus className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
+                      <span>Add Goal</span>
+                    </Button>
+                  </Link>
+                  <Link href="/add-task">
+                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
+                      <Rocket className="h-4 w-4 mr-2" />
+                      <span>Track Execution</span>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
               {/* Main Goals Progress */}
               <section className="mb-8">
                 <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
-                  <h2 className="text-lg font-semibold text-green-400">Main Goals Progress</h2>
-                  <div className="flex gap-2">
-                    <Link href="/add-progress" className="flex-1 xs:flex-initial">
-                      <Button variant="outline" size="sm" className="border-green-600 text-green-400 w-full xs:w-auto">
-                        <PlusCircle className="h-4 w-4 xs:mr-1" />
-                        <span className="ml-1 xs:ml-0 xs:hidden">Progress</span>
-                        <span className="hidden xs:inline">Update Progress</span>
-                      </Button>
-                    </Link>
-                    <Link href="/add-goal" className="flex-1 xs:flex-initial">
-                      <Button variant="outline" size="sm" className="border-green-600 text-green-400 w-full xs:w-auto">
-                        <Plus className="h-4 w-4 xs:mr-1" />
-                        <span className="ml-1 xs:ml-0 xs:hidden">Goal</span>
-                        <span className="hidden xs:inline">Add Goal</span>
-                      </Button>
-                    </Link>
-                  </div>
+                  <h2 className="text-xl font-semibold text-green-400 glow-text flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2" />
+                    Main Goals Progress
+                  </h2>
                 </div>
                 
                 {isLoading ? (
@@ -281,118 +300,201 @@ const Dashboard = () => {
                 )}
               </section>
               
-              {/* Metrics Dashboard */}
-              <section className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {/* Growth Metrics */}
-                <div className="col-span-1">
-                  {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
-                      <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
-                      <div className="space-y-3">
-                        {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : growthMetrics.length > 0 ? (
-                    <MetricsCard title="Growth Metrics" metrics={growthMetrics} />
-                  ) : (
-                    <EmptyState 
-                      title="No Growth Metrics" 
-                      description="Add metrics to track growth KPIs"
-                      icon="chart"
-                      className="h-full"
-                    />
-                  )}
-                </div>
+              {/* Dashboard Tabs - Metrics and Execution */}
+              <Tabs defaultValue="metrics" className="w-full mb-8">
+                <TabsList className="w-full justify-start mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1">
+                  <TabsTrigger value="metrics" className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Metrics Dashboard
+                  </TabsTrigger>
+                  <TabsTrigger value="execution" className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Execution Tracker
+                  </TabsTrigger>
+                </TabsList>
                 
-                {/* Revenue Metrics */}
-                <div className="col-span-1">
-                  {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
-                      <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
-                      <div className="space-y-3">
-                        {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
-                        ))}
-                      </div>
+                {/* Metrics Tab Content */}
+                <TabsContent value="metrics" className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {/* Growth Metrics */}
+                    <div className="col-span-1">
+                      {isLoading ? (
+                        <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
+                          <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((_, i) => (
+                              <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : growthMetrics.length > 0 ? (
+                        <MetricsCard title="Growth Metrics" metrics={growthMetrics} />
+                      ) : (
+                        <EmptyState 
+                          title="No Growth Metrics" 
+                          description="Add metrics to track growth KPIs"
+                          icon="chart"
+                          className="h-full"
+                        />
+                      )}
                     </div>
-                  ) : revenueMetrics.length > 0 ? (
-                    <MetricsCard title="Revenue Metrics" metrics={revenueMetrics} />
-                  ) : (
-                    <EmptyState 
-                      title="No Revenue Metrics" 
-                      description="Add metrics to track revenue KPIs"
-                      icon="chart"
-                      className="h-full"
-                    />
-                  )}
-                </div>
+                    
+                    {/* Revenue Metrics */}
+                    <div className="col-span-1">
+                      {isLoading ? (
+                        <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
+                          <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((_, i) => (
+                              <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : revenueMetrics.length > 0 ? (
+                        <MetricsCard title="Revenue Metrics" metrics={revenueMetrics} />
+                      ) : (
+                        <EmptyState 
+                          title="No Revenue Metrics" 
+                          description="Add metrics to track revenue KPIs"
+                          icon="chart"
+                          className="h-full"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Status Indicators */}
+                    <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                      {isLoading ? (
+                        <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
+                          <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((_, i) => (
+                              <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : goalStatuses.length > 0 ? (
+                        <StatusIndicator statuses={goalStatuses} />
+                      ) : (
+                        <EmptyState 
+                          title="No Goal Statuses" 
+                          description="Goal statuses will appear here when you add goals"
+                          icon="chart"
+                          className="h-full"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
                 
-                {/* Status Indicators */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                {/* Execution Tab Content */}
+                <TabsContent value="execution" className="mt-0">
                   {isLoading ? (
-                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
+                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-96 animate-pulse">
                       <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                      <div className="flex justify-between mb-6">
+                        <div className="h-8 bg-gray-800 rounded w-1/4"></div>
+                        <div className="h-8 bg-gray-800 rounded w-1/4"></div>
+                      </div>
                       <div className="space-y-3">
-                        {[1, 2, 3].map((_, i) => (
-                          <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
+                        {[1, 2, 3, 4].map((_, i) => (
+                          <div key={i} className="h-14 bg-gray-800 rounded w-full"></div>
                         ))}
                       </div>
                     </div>
-                  ) : goalStatuses.length > 0 ? (
-                    <StatusIndicator statuses={goalStatuses} />
+                  ) : currentWeek ? (
+                    <WeeklyExecutionTracker 
+                      tasks={weekTasks} 
+                      week={currentWeek}
+                      onPreviousWeek={handlePreviousWeek}
+                      onNextWeek={handleNextWeek}
+                    />
+                  ) : weeks.length > 0 ? (
+                    <div className="bg-gray-950 border border-green-800 rounded-lg p-6">
+                      <h2 className="text-lg font-semibold text-green-400 mb-4">Weekly Execution Tracker</h2>
+                      <p className="text-gray-400 mb-4">Error loading the current week's data. Please try refreshing the page.</p>
+                      <Button onClick={handleRefreshData} variant="outline" className="border-green-600 text-green-400">
+                        <RefreshCcw className="h-4 w-4 mr-2" /> Refresh Data
+                      </Button>
+                    </div>
                   ) : (
                     <EmptyState 
-                      title="No Goal Statuses" 
-                      description="Goal statuses will appear here when you add goals"
+                      title="No Weekly Planning" 
+                      description="Add your first week and tasks to track weekly execution"
                       icon="chart"
-                      className="h-full"
+                      addLink="/add-task"
+                      addText="Add Weekly Planning"
                     />
                   )}
-                </div>
-              </section>
+                </TabsContent>
+              </Tabs>
               
-              {/* Weekly Execution Tracker */}
-              <section className="mb-8">
-                {isLoading ? (
-                  <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-96 animate-pulse">
-                    <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
-                    <div className="flex justify-between mb-6">
-                      <div className="h-8 bg-gray-800 rounded w-1/4"></div>
-                      <div className="h-8 bg-gray-800 rounded w-1/4"></div>
-                    </div>
-                    <div className="space-y-3">
-                      {[1, 2, 3, 4].map((_, i) => (
-                        <div key={i} className="h-14 bg-gray-800 rounded w-full"></div>
-                      ))}
-                    </div>
+              {/* Quick Stats Cards */}
+              {!isLoading && goals.length > 0 && (
+                <section className="mb-8">
+                  <h2 className="text-xl font-semibold text-green-400 glow-text flex items-center mb-4">
+                    <Award className="h-5 w-5 mr-2" />
+                    Achievement Stats
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                      <CardContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Target className="h-6 w-6 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">Total Goals</p>
+                          <p className="text-2xl font-bold text-white metric-value">{goals.length}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                      <CardContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <TrendingUp className="h-6 w-6 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">Avg Completion</p>
+                          <p className="text-2xl font-bold text-white metric-value">
+                            {Math.round(goals.reduce((acc, goal) => 
+                              acc + Math.min(Math.round((goal.current / goal.target) * 100), 100), 0) / goals.length)}%
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                      <CardContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <CheckCircle className="h-6 w-6 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">On Track Goals</p>
+                          <p className="text-2xl font-bold text-white metric-value">
+                            {goalStatuses.filter(status => status.status === "on-track").length}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-gray-900/70 border border-green-600 stat-card">
+                      <CardContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Users className="h-6 w-6 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-400">Weekly Tasks</p>
+                          <p className="text-2xl font-bold text-white metric-value">
+                            {weekTasks.length}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                ) : currentWeek ? (
-                  <WeeklyExecutionTracker 
-                    tasks={weekTasks} 
-                    week={currentWeek}
-                    onPreviousWeek={handlePreviousWeek}
-                    onNextWeek={handleNextWeek}
-                  />
-                ) : weeks.length > 0 ? (
-                  <div className="bg-gray-950 border border-green-800 rounded-lg p-6">
-                    <h2 className="text-lg font-semibold text-green-400 mb-4">Weekly Execution Tracker</h2>
-                    <p className="text-gray-400 mb-4">Error loading the current week's data. Please try refreshing the page.</p>
-                    <Button onClick={handleRefreshData} variant="outline" className="border-green-600 text-green-400">
-                      <RefreshCcw className="h-4 w-4 mr-2" /> Refresh Data
-                    </Button>
-                  </div>
-                ) : (
-                  <EmptyState 
-                    title="No Weekly Planning" 
-                    description="Add your first week and tasks to track weekly execution"
-                    icon="chart"
-                    addLink="/add-task"
-                    addText="Add Weekly Planning"
-                  />
-                )}
-              </section>
+                </section>
+              )}
             </>
           )}
           
