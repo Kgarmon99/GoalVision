@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Link as WouterLink } from "wouter";
 import { ExecutionTask } from "@shared/schema";
 import { format, isAfter, isBefore, parseISO, differenceInDays, addDays } from "date-fns";
+import { getFirstCharacter, getStringOrFallback } from "../utils/string-utils";
+import { getDaysUntilDescription, getUrgencyLevel, isDatePast } from "../utils/date-utils";
 import { 
   CheckCircle2, 
   Clock, 
@@ -46,41 +48,13 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
   
   // Calculate if a date is urgent (within 2 days)
   const isUrgent = (dateString: string) => {
-    try {
-      const today = new Date();
-      // Try to parse as ISO first
-      let dueDate;
-      try {
-        dueDate = parseISO(dateString);
-      } catch (e) {
-        // Fall back to manual parsing for "March 10, 2025" format
-        dueDate = new Date(dateString);
-      }
-      
-      // Check if due date is within 2 days
-      return differenceInDays(dueDate, today) <= 2 && differenceInDays(dueDate, today) >= 0;
-    } catch (e) {
-      return false;
-    }
+    const urgencyLevel = getUrgencyLevel(dateString);
+    return urgencyLevel === 'medium';
   };
 
   // Calculate if a date is overdue
   const isOverdue = (dateString: string) => {
-    try {
-      const today = new Date();
-      // Try to parse as ISO first
-      let dueDate;
-      try {
-        dueDate = parseISO(dateString);
-      } catch (e) {
-        // Fall back to manual parsing for "March 10, 2025" format
-        dueDate = new Date(dateString);
-      }
-      
-      return isBefore(dueDate, today);
-    } catch (e) {
-      return false;
-    }
+    return isDatePast(dateString);
   };
   
   // Format date to be more readable and show urgency
@@ -89,61 +63,51 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
       return <span className="text-xs text-gray-400">{dateString}</span>;
     }
     
-    try {
-      let dueDate;
-      try {
-        dueDate = parseISO(dateString);
-      } catch (e) {
-        dueDate = new Date(dateString);
-      }
-      
-      const today = new Date();
-      const tomorrow = addDays(today, 1);
-      
-      // If date is today
-      if (format(dueDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
-        return (
-          <span className="text-xs flex items-center text-amber-400 font-medium">
-            <Timer className="h-3 w-3 mr-1" />
-            Today!
-          </span>
-        );
-      }
-      
-      // If date is tomorrow
-      if (format(dueDate, 'yyyy-MM-dd') === format(tomorrow, 'yyyy-MM-dd')) {
-        return (
-          <span className="text-xs flex items-center text-amber-400 font-medium">
-            <Clock className="h-3 w-3 mr-1" />
-            Tomorrow
-          </span>
-        );
-      }
-      
-      // If date is overdue
-      if (isBefore(dueDate, today)) {
-        return (
-          <span className="text-xs flex items-center text-red-400 font-medium">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Overdue!
-          </span>
-        );
-      }
-      
-      // Within 2 days
-      if (differenceInDays(dueDate, today) <= 2) {
-        return (
-          <span className="text-xs flex items-center text-amber-400">
-            <Flag className="h-3 w-3 mr-1" />
-            {dateString}
-          </span>
-        );
-      }
-      
-      return <span className="text-xs text-gray-400">{dateString}</span>;
-    } catch (e) {
-      return <span className="text-xs text-gray-400">{dateString}</span>;
+    const urgencyLevel = getUrgencyLevel(dateString);
+    const daysDescription = getDaysUntilDescription(dateString);
+    
+    // If date is overdue
+    if (urgencyLevel === 'high' && isDatePast(dateString)) {
+      return (
+        <span className="text-xs flex items-center text-red-400 font-medium">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Overdue!
+        </span>
+      );
     }
+    
+    // If date is today
+    if (daysDescription === "Today") {
+      return (
+        <span className="text-xs flex items-center text-amber-400 font-medium">
+          <Timer className="h-3 w-3 mr-1" />
+          Today!
+        </span>
+      );
+    }
+    
+    // If date is tomorrow
+    if (daysDescription === "Tomorrow") {
+      return (
+        <span className="text-xs flex items-center text-amber-400 font-medium">
+          <Clock className="h-3 w-3 mr-1" />
+          Tomorrow
+        </span>
+      );
+    }
+    
+    // Within 2-7 days (medium urgency)
+    if (urgencyLevel === 'medium') {
+      return (
+        <span className="text-xs flex items-center text-amber-400">
+          <Flag className="h-3 w-3 mr-1" />
+          {daysDescription}
+        </span>
+      );
+    }
+    
+    // Low urgency (more than 7 days)
+    return <span className="text-xs text-gray-400">{dateString}</span>;
   };
   
   // Get priority indicator badge
@@ -398,9 +362,9 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
                                 <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-700">
                                   <div className="flex items-center">
                                     <div className="h-5 w-5 rounded-full bg-green-900 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                                      {task.owner && task.owner.charAt(0) || "U"}
+                                      {getFirstCharacter(task.owner)}
                                     </div>
-                                    <span className="text-xs text-gray-400 ml-1">{task.owner}</span>
+                                    <span className="text-xs text-gray-400 ml-1">{getStringOrFallback(task.owner)}</span>
                                   </div>
                                   <Button 
                                     variant="ghost" 
