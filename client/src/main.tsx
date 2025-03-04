@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./styles/mobile.css";
 import "@/components/ui/glow-effects.css";
 
 // Improved Vite HMR connection handling
