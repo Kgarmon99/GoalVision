@@ -249,20 +249,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a goal
+  // Disable goal deletion (prevent data loss)
   app.delete("/api/goals/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteGoal(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Goal not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting goal" });
-    }
+    res.status(403).json({ 
+      message: "Deletion is not allowed. Please use edit functionality instead.",
+      hint: "This application is designed to preserve historical data. Use PATCH /api/goals/:id to update records."
+    });
   });
   
   // Get all metrics
@@ -320,20 +312,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a metric
+  // Disable metric deletion (prevent data loss)
   app.delete("/api/metrics/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteMetric(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Metric not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting metric" });
-    }
+    res.status(403).json({ 
+      message: "Deletion is not allowed. Please use edit functionality instead.",
+      hint: "This application is designed to preserve historical data. Use PATCH /api/metrics/:id to update records."
+    });
   });
   
   // Get all goal statuses
@@ -380,20 +364,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a goal status
+  // Disable goal status deletion (prevent data loss)
   app.delete("/api/goal-statuses/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteGoalStatus(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Goal status not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting goal status" });
-    }
+    res.status(403).json({ 
+      message: "Deletion is not allowed. Please use edit functionality instead.",
+      hint: "This application is designed to preserve historical data. Use PATCH /api/goal-statuses/:id to update records."
+    });
   });
   
   // Get tasks by week with specific weekId

@@ -1,202 +1,219 @@
-import { useState } from "react";
-import { useLocation, useParams } from "wouter";
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import { ExecutionTask, Week, insertExecutionTaskSchema } from "@shared/schema";
 import {
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeftIcon, Edit2Icon, UserIcon, CalendarIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogClose
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { ExecutionTask, Week } from "@shared/schema";
-import { CalendarIcon, UserIcon, TargetIcon, CalendarDaysIcon, CheckIcon, AlertCircleIcon, ClockIcon, ArrowLeftIcon, Edit2Icon, Trash2Icon } from "lucide-react";
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+
+// Extend schema with validations
+const editTaskSchema = insertExecutionTaskSchema.extend({
+  task: z.string().min(1, "Task name is required"),
+  owner: z.string().min(1, "Owner name is required"),
+  goalCategory: z.string().min(1, "Goal category is required"),
+  dueDate: z.string().min(1, "Due date is required"),
+  status: z.string().min(1, "Status is required"),
+});
+
+type EditTaskFormValues = z.infer<typeof editTaskSchema>;
 
 const TaskDetails = () => {
-  const params = useParams<{ id: string }>();
-  const [, navigate] = useLocation();
+  const { id } = useParams();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Get task ID from URL
-  const taskId = parseInt(params.id);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   
   // Fetch task details
-  const { 
-    data: task, 
-    isLoading,
-    isError,
-    error 
-  } = useQuery<ExecutionTask>({
-    queryKey: ['/api/tasks', taskId],
-    enabled: !isNaN(taskId),
+  const { data: task, isLoading } = useQuery({
+    queryKey: [`/api/tasks/${id}`],
+    queryFn: async ({ queryKey }) => {
+      const res = await fetch(queryKey[0], {
+        credentials: "include",
+      });
+      const data = await res.json();
+      return data as ExecutionTask;
+    },
+    enabled: !!id,
   });
   
-  // Fetch week info
-  const { 
-    data: week,
-    isLoading: isLoadingWeek 
-  } = useQuery<Week>({
-    queryKey: ['/api/weeks', task?.weekId],
+  // Fetch week information
+  const { data: week } = useQuery({
+    queryKey: [`/api/weeks/${task?.weekId}`],
+    queryFn: async ({ queryKey }) => {
+      const res = await fetch(queryKey[0], {
+        credentials: "include",
+      });
+      const data = await res.json();
+      return data as Week;
+    },
     enabled: !!task?.weekId,
   });
   
-  // Delete task mutation
-  const deleteTaskMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/tasks/${id}`, "DELETE");
+  // Initialize form
+  const form = useForm<EditTaskFormValues>({
+    resolver: zodResolver(editTaskSchema),
+    defaultValues: {
+      task: task?.task || "",
+      owner: task?.owner || "",
+      ownerAvatar: task?.ownerAvatar || null,
+      goalCategory: task?.goalCategory || "",
+      categoryColor: task?.categoryColor || null,
+      dueDate: task?.dueDate || "",
+      status: task?.status || "Not Started",
+      weekId: task?.weekId || 0,
+    },
+  });
+  
+  // Update form values when task data is loaded
+  useEffect(() => {
+    if (task) {
+      form.reset({
+        task: task.task,
+        owner: task.owner,
+        ownerAvatar: task.ownerAvatar,
+        goalCategory: task.goalCategory,
+        categoryColor: task.categoryColor,
+        dueDate: task.dueDate,
+        status: task.status,
+        weekId: task.weekId,
+      });
+      
+      try {
+        // Try to parse the due date from the task
+        const dateParts = task.dueDate.split('/');
+        if (dateParts.length === 3) {
+          const month = parseInt(dateParts[0], 10) - 1; // JS months are 0-indexed
+          const day = parseInt(dateParts[1], 10);
+          const year = parseInt(dateParts[2], 10);
+          setSelectedDate(new Date(year, month, day));
+        }
+      } catch (e) {
+        // If parsing fails, just don't set a date
+        console.error("Failed to parse date:", e);
+      }
+    }
+  }, [task, form]);
+  
+  // Update task mutation
+  const updateTaskMutation = useMutation({
+    mutationFn: async (data: EditTaskFormValues) => {
+      return apiRequest(`/api/tasks/${id}`, "PATCH", data);
     },
     onSuccess: () => {
-      // Invalidate tasks cache to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks/${id}`] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks/week'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       
       toast({
-        title: "Task deleted",
-        description: "Task has been deleted successfully.",
+        title: "Task updated",
+        description: "The task has been updated successfully.",
         variant: "default",
       });
       
-      // Navigate back to dashboard
-      navigate("/");
+      setIsEditDialogOpen(false);
     },
     onError: (error) => {
       toast({
-        title: "Error deleting task",
-        description: error instanceof Error ? error.message : "There was a problem deleting the task.",
+        title: "Error updating task",
+        description: error instanceof Error ? error.message : "There was a problem updating the task.",
         variant: "destructive",
       });
     }
   });
   
-  const handleDeleteTask = async () => {
-    if (!task) return;
-    
-    setIsDeleting(true);
-    try {
-      await deleteTaskMutation.mutateAsync(task.id);
-    } finally {
-      setIsDeleting(false);
-    }
+  // Handle form submission
+  const onSubmit = async (data: EditTaskFormValues) => {
+    await updateTaskMutation.mutateAsync(data);
   };
   
-  // Function to get status badge styling
+  // Helper function to render status badge
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "done":
-        return (
-          <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-            <CheckIcon className="h-3 w-3 mr-1" />
-            Done
-          </Badge>
-        );
-      case "in-progress":
-        return (
-          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            <ClockIcon className="h-3 w-3 mr-1" />
-            In Progress
-          </Badge>
-        );
-      case "missed":
-        return (
-          <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
-            <AlertCircleIcon className="h-3 w-3 mr-1" />
-            Missed
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-  
-  // Function to get category badge styling
-  const getCategoryBadge = (category: string, color: string | null) => {
-    const colorMap: Record<string, string> = {
-      "blue": "bg-blue-100 text-blue-800",
-      "indigo": "bg-indigo-100 text-indigo-800",
-      "purple": "bg-purple-100 text-purple-800",
-      "green": "bg-green-100 text-green-800",
-      "red": "bg-red-100 text-red-800",
-      "yellow": "bg-yellow-100 text-yellow-800"
+    const statusMap: Record<string, { color: string; bgColor: string }> = {
+      "Completed": { color: "text-green-700", bgColor: "bg-green-100" },
+      "In Progress": { color: "text-blue-700", bgColor: "bg-blue-100" },
+      "Not Started": { color: "text-gray-700", bgColor: "bg-gray-100" },
+      "Blocked": { color: "text-red-700", bgColor: "bg-red-100" },
+      "Deferred": { color: "text-yellow-700", bgColor: "bg-yellow-100" },
     };
     
-    const badgeColor = color && colorMap[color] ? colorMap[color] : "bg-gray-100 text-gray-800";
+    const { color, bgColor } = statusMap[status] || statusMap["Not Started"];
     
     return (
-      <Badge variant="outline" className={badgeColor}>
-        <TargetIcon className="h-3 w-3 mr-1" />
+      <Badge className={`${bgColor} ${color} rounded-full px-3 py-1 font-medium text-xs`}>
+        {status}
+      </Badge>
+    );
+  };
+  
+  // Helper function to render category badge
+  const getCategoryBadge = (category: string, color: string | null) => {
+    return (
+      <Badge className="rounded-full px-3 py-1 font-medium text-xs" style={{ backgroundColor: color || "#4CAF50", color: "#fff" }}>
         {category}
       </Badge>
     );
   };
   
-  if (isError) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        
-        <main className="flex-1 py-8">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center justify-center py-12">
-                  <AlertCircleIcon className="h-12 w-12 text-red-500 mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Task</h2>
-                  <p className="text-gray-600 mb-4">
-                    {error instanceof Error ? error.message : "There was a problem loading the task details."}
-                  </p>
-                  <Button onClick={() => navigate("/")}>
-                    <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                    Return to Dashboard
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-        
-        <Footer />
-      </div>
-    );
-  }
-  
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <Header />
       
       <main className="flex-1 py-8">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <Button variant="ghost" onClick={() => navigate("/")} className="mr-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setLocation("/")}
+                className="mr-4"
+              >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Back
               </Button>
@@ -204,50 +221,14 @@ const TaskDetails = () => {
             </div>
             
             <div className="flex items-center">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="mr-2">
-                    <Edit2Icon className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Task</DialogTitle>
-                    <DialogDescription>
-                      This feature is not available in the current version.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button>Close</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    <Trash2Icon className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Task</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this task? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDeleteTask} disabled={isDeleting}>
-                      {isDeleting ? "Deleting..." : "Delete"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button 
+                variant="outline" 
+                className="mr-2"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                <Edit2Icon className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
             </div>
           </div>
           
@@ -343,6 +324,151 @@ const TaskDetails = () => {
           ) : null}
         </div>
       </main>
+      
+      {/* Edit Task Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[525px] bg-gray-900 border border-green-600 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Task</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Make changes to the task details below.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="task"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-green-400">Task Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="bg-gray-800 border-green-600 text-white" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="owner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-green-400">Owner</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-gray-800 border-green-600 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="goalCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-green-400">Goal Category</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-gray-800 border-green-600 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="text-green-400">Due Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className="pl-3 text-left font-normal bg-gray-800 border-green-600 text-white"
+                            >
+                              {field.value ? (
+                                field.value
+                              ) : (
+                                <span className="text-gray-500">
+                                  Select a date
+                                </span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-gray-900 border border-green-600" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={(date) => {
+                              setSelectedDate(date);
+                              if (date) {
+                                const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+                                field.onChange(formattedDate);
+                              }
+                            }}
+                            initialFocus
+                            className="bg-gray-900 text-white"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-green-400">Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-gray-800 border-green-600 text-white">
+                            <SelectValue placeholder="Select a status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-gray-900 border-green-600 text-white">
+                          <SelectItem value="Not Started">Not Started</SelectItem>
+                          <SelectItem value="In Progress">In Progress</SelectItem>
+                          <SelectItem value="Completed">Completed</SelectItem>
+                          <SelectItem value="Blocked">Blocked</SelectItem>
+                          <SelectItem value="Deferred">Deferred</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={updateTaskMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {updateTaskMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
