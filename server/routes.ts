@@ -81,6 +81,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get goal with dependencies
+  app.get("/api/goals/:id/dependencies", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const goalWithDependencies = await storage.getGoalWithDependencies(id);
+      res.json(goalWithDependencies);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching goal dependencies" });
+    }
+  });
+  
+  // Create goal dependency
+  app.post("/api/goal-dependencies", async (req, res) => {
+    try {
+      const dependencyData = insertGoalDependencySchema.parse(req.body);
+      const dependency = await storage.createGoalDependency(dependencyData);
+      res.status(201).json(dependency);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid dependency data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating goal dependency" });
+    }
+  });
+  
+  // Update goal dependency
+  app.patch("/api/goal-dependencies/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const dependencyData = insertGoalDependencySchema.partial().parse(req.body);
+      const updatedDependency = await storage.updateGoalDependency(id, dependencyData);
+      
+      if (!updatedDependency) {
+        return res.status(404).json({ message: "Goal dependency not found" });
+      }
+      
+      res.json(updatedDependency);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid dependency data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating goal dependency" });
+    }
+  });
+  
+  // Delete goal dependency
+  app.delete("/api/goal-dependencies/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGoalDependency(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Goal dependency not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting goal dependency" });
+    }
+  });
+  
   // Get all metrics
   app.get("/api/metrics", async (req, res) => {
     try {

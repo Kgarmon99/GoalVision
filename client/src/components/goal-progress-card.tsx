@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Goal } from "@shared/schema";
 import { Link } from "wouter";
-import { PlusCircle, TrendingUp, ArrowUpRight } from "lucide-react";
+import { PlusCircle, TrendingUp, ArrowUpRight, Link2 } from "lucide-react";
 
 interface GoalProgressCardProps {
   goal: Goal;
@@ -12,7 +12,7 @@ interface GoalProgressCardProps {
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   // Calculate percentage complete
   const percentComplete = Math.min(Math.round((goal.current / goal.target) * 100), 100);
-  
+
   // Format values with units
   const formatValue = (value: number, unit: string | null) => {
     if (unit === "M") {
@@ -31,7 +31,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
     if (percent >= 25) return "bg-green-700";
     return "bg-green-800";
   };
-  
+
   return (
     <Card className="glow-card bg-gray-900 border border-green-600 hover:shadow-xl transition-all duration-300">
       <CardContent className="p-3 sm:p-4">
@@ -73,6 +73,25 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Button>
           </Link>
+        </div>
+        <div className="flex justify-between items-center mt-4">
+          <Link href={`/add-progress?goalId=${goal.id}`}>
+            <Button variant="outline" size="sm">
+              <PlusCircle className="mr-1 h-4 w-4" /> Add Progress
+            </Button>
+          </Link>
+          <div className="flex space-x-2">
+            <Link href={`/goal-dependencies/${goal.id}`}>
+              <Button variant="ghost" size="sm">
+                <Link2 className="mr-1 h-4 w-4" /> Dependencies
+              </Button>
+            </Link>
+            <Link href={`/goal-details/${goal.id}`}>
+              <Button variant="ghost" size="sm">
+                <ArrowUpRight className="mr-1 h-4 w-4" /> Details
+              </Button>
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>
