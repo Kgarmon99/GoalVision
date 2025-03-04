@@ -50,19 +50,19 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
   };
   
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-gray-900 border border-green-600">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold text-gray-900">Goal Status</CardTitle>
+        <CardTitle className="text-lg font-semibold text-green-400">Goal Status</CardTitle>
       </CardHeader>
       <CardContent>
         {statuses.map((status) => (
-          <div key={status.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+          <div key={status.id} className="flex items-center justify-between py-3 border-b border-gray-800 last:border-0">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <span className={`w-3 h-3 ${getDotColor(status.status)} rounded-full inline-block`}></span>
               </div>
               <div className="ml-3">
-                <span className="text-sm font-medium text-gray-900">{status.goalName}</span>
+                <span className="text-sm font-medium text-white">{status.goalName}</span>
               </div>
             </div>
             <div className="text-sm">
@@ -70,11 +70,11 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
                 variant={getBadgeVariant(status.status)}
                 className={`${
                   status.status === "on-track" 
-                    ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                    ? "bg-green-900 text-green-400 border border-green-500 hover:bg-green-800" 
                     : status.status === "needs-attention" 
-                      ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" 
+                      ? "bg-yellow-900 text-yellow-400 border border-yellow-500 hover:bg-yellow-800" 
                       : status.status === "off-track" 
-                        ? "bg-red-100 text-red-800 hover:bg-red-200"
+                        ? "bg-red-900 text-red-400 border border-red-500 hover:bg-red-800"
                         : ""
                 }`}
               >

@@ -9,24 +9,24 @@ interface MetricsCardProps {
 
 const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-gray-900 border border-green-600">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
+        <CardTitle className="text-lg font-semibold text-green-400">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {metrics.map((metric) => (
-          <div key={metric.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-            <span className="text-sm font-medium text-gray-500">{metric.name}</span>
+          <div key={metric.id} className="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
+            <span className="text-sm font-medium text-green-400">{metric.name}</span>
             <div className="flex items-center">
-              <span className="font-semibold text-gray-900">{metric.value}</span>
+              <span className="font-semibold text-white">{metric.value}</span>
               {metric.trend !== 0 && (
                 <span 
                   className={`ml-2 text-xs font-medium flex items-center ${
                     metric.trendDirection === "up" 
-                      ? "text-green-600" 
+                      ? "text-green-400" 
                       : metric.trendDirection === "down" 
-                        ? metric.name === "Churn Rate" ? "text-green-600" : "text-yellow-600"
-                        : "text-gray-600"
+                        ? metric.name === "Churn Rate" ? "text-green-400" : "text-yellow-400"
+                        : "text-gray-400"
                   }`}
                 >
                   {metric.trendDirection === "up" ? (
