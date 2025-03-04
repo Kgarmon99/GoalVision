@@ -97,11 +97,11 @@ const TaskDetails = () => {
   });
   
   const handleDeleteTask = async () => {
-    if (!task) return;
+    if (!task || !taskId) return;
     
     setIsDeleting(true);
     try {
-      await deleteTaskMutation.mutateAsync(task.id);
+      await deleteTaskMutation.mutateAsync(taskId);
     } finally {
       setIsDeleting(false);
     }
