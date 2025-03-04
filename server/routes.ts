@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get tasks by week
+  // Get tasks by week with specific weekId
   app.get("/api/tasks/week/:weekId", async (req, res) => {
     try {
       const weekId = parseInt(req.params.weekId);
@@ -165,6 +165,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(tasks);
     } catch (error) {
       res.status(500).json({ message: "Error fetching tasks by week" });
+    }
+  });
+  
+  // Get tasks by week (default to the first week if no id specified)
+  app.get("/api/tasks/week", async (req, res) => {
+    try {
+      // Get the first week from the database, or default to week with ID 1
+      const weeks = await storage.getAllWeeks();
+      
+      if (weeks.length === 0) {
+        return res.status(404).json({ message: "No weeks found" });
+      }
+      
+      const firstWeek = weeks[0];
+      const tasks = await storage.getTasksByWeek(firstWeek.id);
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching task" });
     }
   });
   

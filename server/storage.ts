@@ -127,10 +127,10 @@ export class MemStorage implements IStorage {
     
     // Goal Statuses
     const statuses: InsertGoalStatus[] = [
-      { goalName: "User Growth", status: "on-track" },
-      { goalName: "Revenue", status: "needs-attention" },
-      { goalName: "Funding", status: "on-track" },
-      { goalName: "School Expansion", status: "off-track" },
+      { goalId: 3, goalName: "User Growth", status: "on-track" },
+      { goalId: 2, goalName: "Revenue", status: "needs-attention" },
+      { goalId: 1, goalName: "Funding", status: "on-track" },
+      { goalId: 4, goalName: "School Expansion", status: "off-track" },
     ];
     
     statuses.forEach(status => this.createGoalStatus(status));
