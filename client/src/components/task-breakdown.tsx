@@ -271,9 +271,9 @@ export function TaskBreakdown({ goals, selectedGoalId }: TaskBreakdownProps) {
                                     </div>
                                     <div className="flex items-center">
                                       <div className="h-5 w-5 rounded-full bg-green-900 mr-1 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                                        {task.owner.charAt(0)}
+                                        {task.owner && task.owner.charAt(0) || "U"}
                                       </div>
-                                      <span>{task.owner}</span>
+                                      <span>{task.owner || "Unassigned"}</span>
                                     </div>
                                   </div>
                                   
