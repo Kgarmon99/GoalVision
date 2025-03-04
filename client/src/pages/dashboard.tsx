@@ -10,7 +10,24 @@ import { ResetDataDialog } from "@/components/reset-data-dialog";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Plus, ChevronRight, PlusCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  RefreshCcw, 
+  Plus, 
+  ChevronRight, 
+  PlusCircle, 
+  TrendingUp, 
+  DollarSign, 
+  BarChart3, 
+  Target, 
+  Rocket,
+  ArrowUpRight,
+  Users,
+  Award,
+  CheckCircle
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";

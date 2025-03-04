@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "@/components/ui/glow-effects.css";
 
 // Improved Vite HMR connection handling
 if (import.meta.hot) {
@@ -55,7 +56,7 @@ window.addEventListener('load', () => {
     sessionStorage.setItem('app_first_load', 'complete');
     // Force a clean reload after brief delay
     setTimeout(() => {
-      window.location.reload(true);
+      window.location.reload();
     }, 500);
   }
 });
