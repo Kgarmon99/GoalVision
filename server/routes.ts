@@ -7,12 +7,35 @@ import {
   insertMetricSchema, 
   insertGoalStatusSchema, 
   insertExecutionTaskSchema, 
-  insertWeekSchema 
+  insertWeekSchema,
+  goals,
+  metrics,
+  goalStatus,
+  executionTasks,
+  weeks
 } from "@shared/schema";
+import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
   // All routes are prefixed with /api
+  
+  // Clear all sample data
+  app.post("/api/reset-data", async (req, res) => {
+    try {
+      // Clear all tables
+      await db.delete(executionTasks);
+      await db.delete(goalStatus);
+      await db.delete(metrics);
+      await db.delete(goals);
+      await db.delete(weeks);
+      
+      res.status(200).json({ message: "All sample data cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing sample data:", error);
+      res.status(500).json({ message: "Error clearing data", error: String(error) });
+    }
+  });
   
   // Get all goals
   app.get("/api/goals", async (req, res) => {

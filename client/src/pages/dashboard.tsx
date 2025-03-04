@@ -6,6 +6,7 @@ import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
+import { ResetDataDialog } from "@/components/reset-data-dialog";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
@@ -172,6 +173,7 @@ const Dashboard = () => {
                     </>
                   )}
                 </Button>
+                <ResetDataDialog />
               </div>
             </div>
           </div>
