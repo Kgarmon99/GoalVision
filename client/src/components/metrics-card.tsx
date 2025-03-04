@@ -93,7 +93,7 @@ const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
       category: editingMetric?.category || "",
       previousValue: editingMetric?.previousValue || null,
       trend: editingMetric?.trend || null,
-      trendDirection: editingMetric?.trendDirection || "stable",
+      trendDirection: (editingMetric?.trendDirection as "up" | "down" | "stable" | null) || "stable",
     },
   });
   
@@ -106,7 +106,7 @@ const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
       category: metric.category,
       previousValue: metric.previousValue,
       trend: metric.trend,
-      trendDirection: metric.trendDirection,
+      trendDirection: metric.trendDirection as "up" | "down" | "stable" | null,
     });
     setIsDialogOpen(true);
   };

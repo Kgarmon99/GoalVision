@@ -461,20 +461,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a task
+  // Disable task deletion (prevent data loss)
   app.delete("/api/tasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteTask(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting task" });
-    }
+    res.status(403).json({ 
+      message: "Deletion is not allowed. Please use edit functionality instead.",
+      hint: "This application is designed to preserve historical data. Use PATCH /api/tasks/:id to update records."
+    });
   });
   
   // Get all weeks
@@ -537,20 +529,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a week
+  // Disable week deletion (prevent data loss)
   app.delete("/api/weeks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteWeek(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Week not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting week" });
-    }
+    res.status(403).json({ 
+      message: "Deletion is not allowed. Please use edit functionality instead.",
+      hint: "This application is designed to preserve historical data. Use PATCH /api/weeks/:id to update records."
+    });
   });
 
   const httpServer = createServer(app);
