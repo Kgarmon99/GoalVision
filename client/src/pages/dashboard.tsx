@@ -192,7 +192,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
                 <Rocket className="h-8 w-8 mr-3 text-green-400 animate-float" />
-                <h1 className="text-3xl font-bold text-white glow-text">2025 Goals Dashboard</h1>
+                <h1 className="text-3xl font-bold text-white text-glow">2025 Goals Dashboard</h1>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border">

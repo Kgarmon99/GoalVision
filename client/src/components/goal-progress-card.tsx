@@ -38,11 +38,11 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
           <div>
             <div className="flex items-center">
-              <p className="text-sm font-medium text-green-400 glow-text">{goal.name}</p>
+              <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
               <TrendingUp className="h-3 w-3 ml-1 text-green-400" />
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="mt-1 text-xl sm:text-2xl font-bold text-white metric-value">
+              <p className="mt-1 text-xl sm:text-2xl font-bold text-white">
                 {formatValue(goal.current, goal.unit)}
               </p>
               <p className="text-xs sm:text-sm text-green-400">
@@ -50,14 +50,14 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-400 border border-green-500 gradient-border pulse-animation">
+          <span className="inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-400 border border-green-500 pulse-glow">
             {percentComplete}% complete
           </span>
         </div>
-        <div className="mt-3 sm:mt-4 progress-glow">
+        <div className="mt-3 sm:mt-4">
           <Progress 
             value={percentComplete} 
-            className={`h-2.5 bg-gray-800 animated-progress-bar`} 
+            className={`h-2.5 bg-gray-800 glow-element`} 
             indicatorClassName={getProgressColorClass(percentComplete)}
           />
           <div className="flex items-center justify-between text-xs mt-1">

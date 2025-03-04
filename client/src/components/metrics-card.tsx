@@ -31,9 +31,9 @@ const getMetricIcon = (metricName: string) => {
 
 const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
   return (
-    <Card className="h-full bg-gray-900 border border-green-600 glow-card stat-card">
+    <Card className="h-full bg-gray-900 border border-green-600 glow-card">
       <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-        <CardTitle className="text-lg font-semibold text-green-400 glow-text flex items-center">
+        <CardTitle className="text-lg font-semibold text-green-400 text-glow flex items-center">
           <TrendingUp className="h-5 w-5 mr-2" />
           {title}
         </CardTitle>
@@ -49,21 +49,21 @@ const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
               <span className="text-sm font-medium text-green-400 ml-2">{metric.name}</span>
             </div>
             <div className="flex items-center">
-              <span className="font-semibold text-white metric-value">{metric.value}</span>
+              <span className="font-semibold text-white">{metric.value}</span>
               {metric.trend !== 0 && (
                 <span 
                   className={`ml-2 text-xs font-medium flex items-center ${
                     metric.trendDirection === "up" 
-                      ? metric.name === "Churn Rate" ? "text-yellow-400" : "text-green-400" 
+                      ? metric.name === "Churn Rate" ? "text-yellow-400" : "text-green-400 text-glow" 
                       : metric.trendDirection === "down" 
-                        ? metric.name === "Churn Rate" ? "text-green-400" : "text-yellow-400"
+                        ? metric.name === "Churn Rate" ? "text-green-400 text-glow" : "text-yellow-400"
                         : "text-gray-400"
                   }`}
                 >
                   {metric.trendDirection === "up" ? (
-                    <ArrowUpIcon className="h-3 w-3 mr-0.5 animate-pulse" />
+                    <ArrowUpIcon className="h-3 w-3 mr-0.5 pulse-glow" />
                   ) : metric.trendDirection === "down" ? (
-                    <ArrowDownIcon className="h-3 w-3 mr-0.5 animate-pulse" />
+                    <ArrowDownIcon className="h-3 w-3 mr-0.5 pulse-glow" />
                   ) : (
                     <MinusIcon className="h-3 w-3 mr-0.5" />
                   )}
