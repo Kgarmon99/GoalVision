@@ -235,6 +235,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Add all predefined 2025 goals
+  app.post("/api/goals/presets", async (req, res) => {
+    try {
+      // Create Kahlil's 2025 goals from attached document
+      const personalGoals: InsertGoal[] = [
+        { name: "Revenue", current: 0, target: 100, unit: "M", color: "blue" },
+        { name: "Funding", current: 0, target: 10, unit: "M", color: "green" },
+        { name: "User Growth", current: 0, target: 100, unit: "M", color: "purple" },
+        { name: "School Expansion", current: 0, target: 10000, unit: "", color: "amber" },
+        { name: "Personal - SF Move", current: 0, target: 100, unit: "%", color: "red" }
+      ];
+      
+      // Add the goals
+      const createdGoals = await Promise.all(personalGoals.map(goal => storage.createGoal(goal)));
+      
+      // Add goal statuses
+      const goalStatuses: InsertGoalStatus[] = personalGoals.map((goal, index) => ({
+        goalId: createdGoals[index].id,
+        goalName: goal.name,
+        status: "on-track"
+      }));
+      
+      await Promise.all(goalStatuses.map(status => storage.createGoalStatus(status)));
+      
+      res.status(201).json({ 
+        message: "All 2025 goals added successfully", 
+        goals: createdGoals 
+      });
+    } catch (error) {
+      console.error("Error adding predefined goals:", error);
+      res.status(500).json({ message: "Error adding goals", error: String(error) });
+    }
+  });
+
   // Create a goal
   app.post("/api/goals", async (req, res) => {
     try {

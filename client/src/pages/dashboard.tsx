@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -18,16 +18,18 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentWeekId, setCurrentWeekId] = useState(1);
-  
+
+  const queryClient = useQueryClient();
+
   // Fetch goals
   const { 
     data: goals = [], 
     isLoading: isLoadingGoals,
     refetch: refetchGoals
-  } = useQuery<Goal[]>({
+  } = useQuery({
     queryKey: ['/api/goals'],
   });
-  
+
   // Fetch growth metrics
   const { 
     data: growthMetrics = [], 
@@ -36,7 +38,7 @@ const Dashboard = () => {
   } = useQuery<Metric[]>({
     queryKey: ['/api/metrics/category/growth'],
   });
-  
+
   // Fetch revenue metrics
   const { 
     data: revenueMetrics = [], 
@@ -45,7 +47,7 @@ const Dashboard = () => {
   } = useQuery<Metric[]>({
     queryKey: ['/api/metrics/category/revenue'],
   });
-  
+
   // Fetch goal statuses
   const { 
     data: goalStatuses = [], 
@@ -54,7 +56,7 @@ const Dashboard = () => {
   } = useQuery<GoalStatus[]>({
     queryKey: ['/api/goal-statuses'],
   });
-  
+
   // Fetch current week
   const { 
     data: currentWeek,
@@ -63,7 +65,7 @@ const Dashboard = () => {
   } = useQuery<Week>({
     queryKey: ['/api/weeks', currentWeekId],
   });
-  
+
   // Fetch tasks for current week
   const { 
     data: weekTasks = [], 
@@ -73,7 +75,7 @@ const Dashboard = () => {
     queryKey: ['/api/tasks/week', currentWeekId],
     enabled: !!currentWeekId,
   });
-  
+
   // Fetch all weeks
   const { 
     data: weeks = [], 
@@ -81,10 +83,40 @@ const Dashboard = () => {
   } = useQuery<Week[]>({
     queryKey: ['/api/weeks'],
   });
-  
+
+  const addPresetGoalsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/goals/presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add goals");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
+      toast({
+        title: "Success",
+        description: "All 2025 goals added successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add goals",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRefreshData = async () => {
     setIsRefreshing(true);
-    
+
     try {
       await Promise.all([
         refetchGoals(), 
@@ -94,9 +126,9 @@ const Dashboard = () => {
         refetchWeek(),
         refetchTasks()
       ]);
-      
+
       setLastUpdated(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
-      
+
       toast({
         title: "Data refreshed",
         description: "Dashboard data has been updated successfully.",
@@ -112,7 +144,7 @@ const Dashboard = () => {
       setIsRefreshing(false);
     }
   };
-  
+
   const handlePreviousWeek = () => {
     if (weeks.length > 0) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
@@ -121,7 +153,7 @@ const Dashboard = () => {
       }
     }
   };
-  
+
   const handleNextWeek = () => {
     if (weeks.length > 0) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
@@ -130,7 +162,7 @@ const Dashboard = () => {
       }
     }
   };
-  
+
   const isLoading = 
     isLoadingGoals || 
     isLoadingGrowthMetrics || 
@@ -139,11 +171,11 @@ const Dashboard = () => {
     isLoadingWeek || 
     isLoadingTasks ||
     isLoadingWeeks;
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white">
       <Header />
-      
+
       <main className="flex-1 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
@@ -177,48 +209,48 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Main Goals Progress */}
           <section className="mb-8">
             <h2 className="text-lg font-semibold text-green-400 mb-4">Main Goals Progress</h2>
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((_, index) => (
-                  <div key={index} className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-32 animate-pulse">
-                    <div className="h-4 bg-gray-800 rounded w-1/4 mb-2"></div>
-                    <div className="h-8 bg-gray-800 rounded w-1/2 mb-1"></div>
-                    <div className="h-4 bg-gray-800 rounded w-1/3 mb-4"></div>
-                    <div className="h-2 bg-gray-800 rounded w-full"></div>
-                  </div>
-                ))}
+            {goals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                <h3 className="text-lg font-medium mb-2">No Goals Found</h3>
+                <p className="text-gray-500 mb-4 text-center">You haven't added any goals yet. Get started by adding your 2025 goals.</p>
+                <Button 
+                  onClick={() => addPresetGoalsMutation.mutate()} 
+                  disabled={addPresetGoalsMutation.isPending}
+                >
+                  {addPresetGoalsMutation.isPending ? "Adding Goals..." : "Add 2025 Goals"}
+                </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {goals.map(goal => (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {goals.map((goal) => (
                   <GoalProgressCard key={goal.id} goal={goal} />
                 ))}
               </div>
             )}
           </section>
-          
+
           {/* Metrics Dashboard */}
           <section className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Growth Metrics */}
             <div className="col-span-1">
               <MetricsCard title="Growth Metrics" metrics={growthMetrics} />
             </div>
-            
+
             {/* Revenue Metrics */}
             <div className="col-span-1">
               <MetricsCard title="Revenue Metrics" metrics={revenueMetrics} />
             </div>
-            
+
             {/* Status Indicators */}
             <div className="col-span-1">
               <StatusIndicator statuses={goalStatuses} />
             </div>
           </section>
-          
+
           {/* Weekly Execution Tracker */}
           <section className="mb-8">
             {currentWeek && (
@@ -232,7 +264,7 @@ const Dashboard = () => {
           </section>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
