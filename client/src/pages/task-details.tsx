@@ -66,7 +66,7 @@ import {
   PlusCircle
 } from "lucide-react";
 
-const TaskDetails = () => {
+export default function TaskDetails() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -213,8 +213,8 @@ const TaskDetails = () => {
   };
   
   // Function to get category badge styling
-  const getCategoryBadge = (category: string | undefined, color: string | undefined = "") => {
-    if (!category) return <></>;
+  const getCategoryBadge = (category: string | null | undefined, color: string | null | undefined = "") => {
+    if (!category) return null;
     
     const colorMap: Record<string, string> = {
       "blue": "bg-blue-900 text-blue-400 border-blue-500",
@@ -692,4 +692,3 @@ const TaskDetails = () => {
   );
 };
 
-export default TaskDetails;
