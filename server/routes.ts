@@ -249,6 +249,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete a goal
+  app.delete("/api/goals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGoal(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting goal" });
+    }
+  });
+  
   // Get all metrics
   app.get("/api/metrics", async (req, res) => {
     try {
@@ -304,6 +320,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete a metric
+  app.delete("/api/metrics/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteMetric(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Metric not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting metric" });
+    }
+  });
+  
   // Get all goal statuses
   app.get("/api/goal-statuses", async (req, res) => {
     try {
@@ -345,6 +377,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid goal status data", errors: error.errors });
       }
       res.status(500).json({ message: "Error creating goal status" });
+    }
+  });
+  
+  // Delete a goal status
+  app.delete("/api/goal-statuses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGoalStatus(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Goal status not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting goal status" });
     }
   });
   
@@ -510,6 +558,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid week data", errors: error.errors });
       }
       res.status(500).json({ message: "Error updating week" });
+    }
+  });
+  
+  // Delete a week
+  app.delete("/api/weeks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteWeek(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Week not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting week" });
     }
   });
 

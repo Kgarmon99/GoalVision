@@ -44,9 +44,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/goals/${id}`, {
-        method: "DELETE"
-      });
+      return apiRequest(`/api/goals/${id}`, "DELETE");
     },
     onSuccess: () => {
       // Invalidate queries to refresh data

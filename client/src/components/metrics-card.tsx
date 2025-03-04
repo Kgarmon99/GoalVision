@@ -30,9 +30,7 @@ const MetricsCard = ({ title, metrics }: MetricsCardProps) => {
   // Delete metric mutation
   const deleteMetricMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/metrics/${id}`, {
-        method: "DELETE"
-      });
+      return apiRequest(`/api/metrics/${id}`, "DELETE");
     },
     onSuccess: () => {
       // Invalidate queries to refresh data

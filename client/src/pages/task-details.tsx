@@ -72,9 +72,7 @@ const TaskDetails = () => {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/tasks/${id}`, {
-        method: "DELETE"
-      });
+      return apiRequest(`/api/tasks/${id}`, "DELETE");
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
