@@ -318,12 +318,6 @@ const Dashboard = () => {
                       <span>Track Execution</span>
                     </Button>
                   </Link>
-                  <Link href="/goal-dependencies">
-                    <Button size="sm" variant="outline" className="border-purple-600 text-purple-400 hover:bg-purple-900/30">
-                      <GitMerge className="h-4 w-4 mr-2" />
-                      <span>Dependencies</span>
-                    </Button>
-                  </Link>
                 </div>
               </div>
 
