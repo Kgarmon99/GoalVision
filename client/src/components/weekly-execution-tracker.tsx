@@ -184,7 +184,7 @@ const WeeklyExecutionTracker = ({
                           />
                         ) : (
                           <div className="h-6 w-6 rounded-full bg-green-900 mr-2 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                            {task.owner.charAt(0)}
+                            {task.owner && task.owner.charAt(0) || "U"}
                           </div>
                         )}
                         <span>{task.owner}</span>
@@ -240,7 +240,7 @@ const WeeklyExecutionTracker = ({
                           />
                         ) : (
                           <div className="h-4 w-4 rounded-full bg-green-900 mr-1 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                            {task.owner.charAt(0)}
+                            {task.owner && task.owner.charAt(0) || "U"}
                           </div>
                         )}
                         <span>{task.owner}</span>

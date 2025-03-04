@@ -442,7 +442,7 @@ export default function TaskDetails() {
                               />
                             ) : (
                               <div className="h-8 w-8 rounded-full bg-green-900 flex items-center justify-center text-white mr-2 border border-green-500">
-                                {task.owner.charAt(0)}
+                                {task.owner && task.owner.charAt(0) || "U"}
                               </div>
                             )}
                             <span className="text-white font-medium">{task.owner}</span>

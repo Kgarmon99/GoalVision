@@ -398,7 +398,7 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
                                 <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-700">
                                   <div className="flex items-center">
                                     <div className="h-5 w-5 rounded-full bg-green-900 flex items-center justify-center text-xs font-medium text-white border border-green-500">
-                                      {task.owner.charAt(0)}
+                                      {task.owner && task.owner.charAt(0) || "U"}
                                     </div>
                                     <span className="text-xs text-gray-400 ml-1">{task.owner}</span>
                                   </div>
