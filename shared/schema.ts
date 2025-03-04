@@ -14,40 +14,7 @@ export const goals = pgTable("goals", {
 
 export const goalsRelations = relations(goals, ({ many }) => ({
   statuses: many(goalStatus),
-  dependsOn: many(goalDependencies, { relationName: "dependsOn" }),
-  dependents: many(goalDependencies, { relationName: "dependents" }),
 }));
-
-export const goalDependencies = pgTable("goal_dependencies", {
-  id: serial("id").primaryKey(),
-  goalId: integer("goal_id").notNull().references(() => goals.id),
-  dependsOnGoalId: integer("depends_on_goal_id").notNull().references(() => goals.id),
-  impact: real("impact").default(0).notNull(), // Impact factor (0-10) of how much this dependency affects the main goal
-  description: text("description").default(""),
-});
-
-export const goalDependenciesRelations = relations(goalDependencies, ({ one }) => ({
-  goal: one(goals, {
-    fields: [goalDependencies.goalId],
-    references: [goals.id],
-    relationName: "dependents"
-  }),
-  dependsOn: one(goals, {
-    fields: [goalDependencies.dependsOnGoalId],
-    references: [goals.id],
-    relationName: "dependsOn"
-  }),
-}));
-
-export const insertGoalDependencySchema = createInsertSchema(goalDependencies).pick({
-  goalId: true,
-  dependsOnGoalId: true,
-  impact: true,
-  description: true,
-});
-
-export type InsertGoalDependency = z.infer<typeof insertGoalDependencySchema>;
-export type GoalDependency = typeof goalDependencies.$inferSelect;
 
 export const insertGoalSchema = createInsertSchema(goals).pick({
   name: true,
