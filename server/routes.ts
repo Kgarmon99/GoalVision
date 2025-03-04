@@ -30,7 +30,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.delete(goals);
       await db.delete(weeks);
       
-      res.status(200).json({ message: "All sample data cleared successfully" });
+      try {
+        // Create Kahlil's 2025 goals from attached document
+        const personalGoals: InsertGoal[] = [
+          { name: "Revenue", current: 0, target: 100, unit: "M", color: "blue" },
+          { name: "Funding", current: 0, target: 10, unit: "M", color: "green" },
+          { name: "User Growth", current: 0, target: 100, unit: "M", color: "purple" },
+          { name: "School Expansion", current: 0, target: 10000, unit: "", color: "amber" },
+          { name: "Personal - SF Move", current: 0, target: 100, unit: "%", color: "red" }
+        ];
+        
+        // Add the goals
+        const createdGoals = await Promise.all(personalGoals.map(goal => storage.createGoal(goal)));
+        
+        // Add growth metrics based on goals document
+        const growthMetrics: InsertMetric[] = [
+          { 
+            name: "Monthly Active Users", 
+            value: "0", 
+            previousValue: "0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "growth" 
+          },
+          { 
+            name: "User Retention Rate", 
+            value: "0%", 
+            previousValue: "0%", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "growth" 
+          },
+          { 
+            name: "Net Promoter Score", 
+            value: "0", 
+            previousValue: "0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "growth" 
+          },
+          { 
+            name: "School Onboarding Rate", 
+            value: "0/month", 
+            previousValue: "0/month", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "growth" 
+          }
+        ];
+        
+        // Add revenue metrics based on goals document
+        const revenueMetrics: InsertMetric[] = [
+          { 
+            name: "Monthly Recurring Revenue", 
+            value: "$0", 
+            previousValue: "$0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "revenue" 
+          },
+          { 
+            name: "Annual Recurring Revenue", 
+            value: "$0", 
+            previousValue: "$0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "revenue" 
+          },
+          { 
+            name: "Customer Acquisition Cost", 
+            value: "$0", 
+            previousValue: "$0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "revenue" 
+          },
+          { 
+            name: "Lifetime Value", 
+            value: "$0", 
+            previousValue: "$0", 
+            trend: 0, 
+            trendDirection: "stable", 
+            category: "revenue" 
+          }
+        ];
+        
+        // Add the metrics
+        await Promise.all([...growthMetrics, ...revenueMetrics].map(metric => storage.createMetric(metric)));
+        
+        // Add a week for task tracking
+        const week: InsertWeek = {
+          number: 1,
+          dateRange: "January 1 - 7, 2025",
+          completionRate: 0,
+        };
+        
+        const createdWeek = await storage.createWeek(week);
+        
+        // Add goal statuses
+        const goalMap = new Map(createdGoals.map(goal => [goal.name, goal.id]));
+        
+        const goalStatuses: InsertGoalStatus[] = personalGoals.map(goal => ({
+          goalId: goalMap.get(goal.name) || 0,
+          goalName: goal.name,
+          status: "on-track"
+        }));
+        
+        await Promise.all(goalStatuses.map(status => storage.createGoalStatus(status)));
+        
+        // Add initial tasks from the goals document
+        const initialTasks: InsertExecutionTask[] = [
+          { 
+            task: "Finalize pitch deck, financial projections, & business plan", 
+            owner: "Kahlil", 
+            ownerAvatar: "", 
+            goalCategory: "Funding", 
+            categoryColor: "green", 
+            dueDate: "Feb 1, 2025", 
+            status: "in-progress",
+            weekId: createdWeek.id
+          },
+          { 
+            task: "Apply for YC funding ($500K)", 
+            owner: "Kahlil", 
+            ownerAvatar: "", 
+            goalCategory: "Funding", 
+            categoryColor: "green", 
+            dueDate: "Feb 12, 2025", 
+            status: "not-started",
+            weekId: createdWeek.id
+          },
+          { 
+            task: "Build investor pipeline for A16Z ($2M target)", 
+            owner: "Kahlil", 
+            ownerAvatar: "", 
+            goalCategory: "Funding", 
+            categoryColor: "green", 
+            dueDate: "Mar 1, 2025", 
+            status: "not-started",
+            weekId: createdWeek.id
+          },
+          { 
+            task: "Launch revenue optimization A/B tests", 
+            owner: "Team", 
+            ownerAvatar: "", 
+            goalCategory: "Revenue", 
+            categoryColor: "blue", 
+            dueDate: "Feb 15, 2025", 
+            status: "not-started",
+            weekId: createdWeek.id
+          },
+          { 
+            task: "Select a place in SF", 
+            owner: "Kahlil", 
+            ownerAvatar: "", 
+            goalCategory: "Personal - SF Move", 
+            categoryColor: "red", 
+            dueDate: "Apr 1, 2025", 
+            status: "not-started",
+            weekId: createdWeek.id
+          }
+        ];
+        
+        await Promise.all(initialTasks.map(task => storage.createExecutionTask(task)));
+        
+        res.status(200).json({ message: "2025 goals added successfully" });
+      } catch (innerError) {
+        console.error("Error creating 2025 goals:", innerError);
+        res.status(200).json({ message: "All sample data cleared successfully" });
+      }
     } catch (error) {
       console.error("Error clearing sample data:", error);
       res.status(500).json({ message: "Error clearing data", error: String(error) });
