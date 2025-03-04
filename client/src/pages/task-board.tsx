@@ -7,6 +7,7 @@ import { DragDropTaskBoard } from "@/components/drag-drop-task-board";
 import { VisualProgressTracker } from "@/components/visual-progress-tracker";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import {
   Kanban,
@@ -21,7 +22,8 @@ import {
   Rocket,
   Clock,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
 import { ExecutionTask, Goal, Week } from "@shared/schema";
 
