@@ -91,10 +91,10 @@ export default function TaskBoard() {
               <div>
                 <h1 className="text-2xl font-bold text-white text-glow flex items-center">
                   <Kanban className="h-6 w-6 mr-2 text-green-400" />
-                  Task Board
+                  2025 Goal Execution Board
                 </h1>
-                <p className="text-gray-400 mt-1">
-                  Drag and drop tasks to update their status and track your progress
+                <p className="text-gray-400 mt-1 max-w-xl">
+                  Visualize and prioritize your critical tasks. Urgent items are highlighted - complete them first to stay on track with your 2025 goals.
                 </p>
               </div>
               
@@ -124,7 +124,7 @@ export default function TaskBoard() {
                   </Button>
                 </div>
                 
-                <Button asChild className="bg-green-600 text-white hover:bg-green-700">
+                <Button asChild className="bg-green-600 text-white hover:bg-green-700 animate-pulse">
                   <Link href="/add-task">
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Add Task
@@ -135,51 +135,125 @@ export default function TaskBoard() {
           </div>
           
           {/* Filters and Controls */}
-          <div className="mb-6 flex flex-wrap gap-2 bg-gray-900/80 p-3 rounded-lg border border-green-600 items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                <Filter className="text-green-400 h-4 w-4 mr-2" />
-                <span className="text-green-400 font-medium text-sm">Filter:</span>
+          <div className="mb-6 bg-gray-900/80 p-4 rounded-lg border border-green-600">
+            <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center">
+                  <Filter className="text-green-400 h-4 w-4 mr-2" />
+                  <span className="text-green-400 font-medium text-sm">Focus Your View</span>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <div className="relative">
+                    <select 
+                      className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-9 pl-8 pr-3 appearance-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      value={filterStatus || ""}
+                      onChange={(e) => setFilterStatus(e.target.value === "" ? undefined : e.target.value)}
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="in-progress">⏳ In Progress</option>
+                      <option value="done">✅ Completed</option>
+                      <option value="missed">⚠️ Missed</option>
+                    </select>
+                    <Clock className="absolute left-2.5 top-2.5 h-4 w-4 text-green-400 pointer-events-none" />
+                  </div>
+                  
+                  <div className="relative">
+                    <select 
+                      className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-9 pl-8 pr-3 appearance-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                      value={filterGoal || ""}
+                      onChange={(e) => setFilterGoal(e.target.value === "" ? undefined : e.target.value)}
+                    >
+                      <option value="">All Goal Categories</option>
+                      {goals.map(goal => (
+                        <option key={goal.id} value={goal.name}>🎯 {goal.name}</option>
+                      ))}
+                    </select>
+                    <Target className="absolute left-2.5 top-2.5 h-4 w-4 text-green-400 pointer-events-none" />
+                  </div>
+                </div>
               </div>
               
-              <select 
-                className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-8 px-2"
-                value={filterStatus || ""}
-                onChange={(e) => setFilterStatus(e.target.value === "" ? undefined : e.target.value)}
-              >
-                <option value="">All Statuses</option>
-                <option value="in-progress">In Progress</option>
-                <option value="done">Completed</option>
-                <option value="missed">Missed</option>
-              </select>
-              
-              <select 
-                className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-8 px-2"
-                value={filterGoal || ""}
-                onChange={(e) => setFilterGoal(e.target.value === "" ? undefined : e.target.value)}
-              >
-                <option value="">All Goals</option>
-                {goals.map(goal => (
-                  <option key={goal.id} value={goal.name}>{goal.name}</option>
-                ))}
-              </select>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center">
+                  <ArrowDownUp className="text-green-400 h-4 w-4 mr-2" />
+                  <span className="text-green-400 font-medium text-sm">Prioritize By</span>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                    className={`px-3 py-1.5 text-sm rounded-md flex items-center ${
+                      sortBy === "dueDate" 
+                        ? "bg-green-900/50 text-white border border-green-600" 
+                        : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSortBy("dueDate")}
+                  >
+                    <Clock className="h-3.5 w-3.5 mr-1.5" />
+                    Due Date First
+                  </button>
+                  <button 
+                    className={`px-3 py-1.5 text-sm rounded-md flex items-center ${
+                      sortBy === "goalCategory" 
+                        ? "bg-green-900/50 text-white border border-green-600" 
+                        : "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSortBy("goalCategory")}
+                  >
+                    <Target className="h-3.5 w-3.5 mr-1.5" />
+                    Group by Goal
+                  </button>
+                </div>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                <ArrowDownUp className="text-green-400 h-4 w-4 mr-2" />
-                <span className="text-green-400 font-medium text-sm">Sort:</span>
+            {/* Selected filters summary */}
+            {(filterStatus || filterGoal) && (
+              <div className="mt-3 flex items-center gap-2 border-t border-gray-700 pt-3">
+                <span className="text-xs text-gray-400">Active filters:</span>
+                {filterStatus && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-gray-800 text-gray-300 border-gray-600 flex items-center gap-1"
+                  >
+                    Status: {filterStatus}
+                    <button 
+                      className="ml-1 text-gray-400 hover:text-white" 
+                      onClick={() => setFilterStatus(undefined)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {filterGoal && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-gray-800 text-gray-300 border-gray-600 flex items-center gap-1"
+                  >
+                    Goal: {filterGoal}
+                    <button 
+                      className="ml-1 text-gray-400 hover:text-white" 
+                      onClick={() => setFilterGoal(undefined)}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {(filterStatus || filterGoal) && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs text-red-400 hover:text-red-300 px-1"
+                    onClick={() => {
+                      setFilterStatus(undefined);
+                      setFilterGoal(undefined);
+                    }}
+                  >
+                    Clear all
+                  </Button>
+                )}
               </div>
-              
-              <select 
-                className="bg-gray-800 text-white text-sm rounded-md border border-gray-700 h-8 px-2"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "dueDate" | "goalCategory")}
-              >
-                <option value="dueDate">Due Date</option>
-                <option value="goalCategory">Goal Category</option>
-              </select>
-            </div>
+            )}
           </div>
           
           {isLoading ? (

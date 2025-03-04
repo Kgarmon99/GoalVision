@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link as WouterLink } from "wouter";
 import { ExecutionTask } from "@shared/schema";
+import { format, isAfter, isBefore, parseISO, differenceInDays, addDays } from "date-fns";
 import { 
   CheckCircle2, 
   Clock, 
@@ -19,7 +20,11 @@ import {
   MoreVertical,
   Trash2,
   Eye,
-  PlusCircle
+  PlusCircle,
+  AlertTriangle,
+  Flag,
+  ArrowUpCircle,
+  Timer
 } from "lucide-react";
 
 interface DragDropTaskBoardProps {
@@ -38,6 +43,144 @@ type TaskColumn = {
 export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoardProps) {
   const { toast } = useToast();
   const [hoveredTask, setHoveredTask] = useState<number | null>(null);
+  
+  // Calculate if a date is urgent (within 2 days)
+  const isUrgent = (dateString: string) => {
+    try {
+      const today = new Date();
+      // Try to parse as ISO first
+      let dueDate;
+      try {
+        dueDate = parseISO(dateString);
+      } catch (e) {
+        // Fall back to manual parsing for "March 10, 2025" format
+        dueDate = new Date(dateString);
+      }
+      
+      // Check if due date is within 2 days
+      return differenceInDays(dueDate, today) <= 2 && differenceInDays(dueDate, today) >= 0;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Calculate if a date is overdue
+  const isOverdue = (dateString: string) => {
+    try {
+      const today = new Date();
+      // Try to parse as ISO first
+      let dueDate;
+      try {
+        dueDate = parseISO(dateString);
+      } catch (e) {
+        // Fall back to manual parsing for "March 10, 2025" format
+        dueDate = new Date(dateString);
+      }
+      
+      return isBefore(dueDate, today);
+    } catch (e) {
+      return false;
+    }
+  };
+  
+  // Format date to be more readable and show urgency
+  const formatDueDate = (dateString: string, status: string) => {
+    if (status === "done") {
+      return <span className="text-xs text-gray-400">{dateString}</span>;
+    }
+    
+    try {
+      let dueDate;
+      try {
+        dueDate = parseISO(dateString);
+      } catch (e) {
+        dueDate = new Date(dateString);
+      }
+      
+      const today = new Date();
+      const tomorrow = addDays(today, 1);
+      
+      // If date is today
+      if (format(dueDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
+        return (
+          <span className="text-xs flex items-center text-amber-400 font-medium">
+            <Timer className="h-3 w-3 mr-1" />
+            Today!
+          </span>
+        );
+      }
+      
+      // If date is tomorrow
+      if (format(dueDate, 'yyyy-MM-dd') === format(tomorrow, 'yyyy-MM-dd')) {
+        return (
+          <span className="text-xs flex items-center text-amber-400 font-medium">
+            <Clock className="h-3 w-3 mr-1" />
+            Tomorrow
+          </span>
+        );
+      }
+      
+      // If date is overdue
+      if (isBefore(dueDate, today)) {
+        return (
+          <span className="text-xs flex items-center text-red-400 font-medium">
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            Overdue!
+          </span>
+        );
+      }
+      
+      // Within 2 days
+      if (differenceInDays(dueDate, today) <= 2) {
+        return (
+          <span className="text-xs flex items-center text-amber-400">
+            <Flag className="h-3 w-3 mr-1" />
+            {dateString}
+          </span>
+        );
+      }
+      
+      return <span className="text-xs text-gray-400">{dateString}</span>;
+    } catch (e) {
+      return <span className="text-xs text-gray-400">{dateString}</span>;
+    }
+  };
+  
+  // Get priority indicator badge
+  const getPriorityBadge = (task: ExecutionTask) => {
+    // High priority if overdue
+    if (isOverdue(task.dueDate) && task.status !== "done") {
+      return (
+        <Badge variant="outline" className="text-xs bg-red-950 text-red-400 border-red-700 absolute -top-2 -right-2">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Urgent
+        </Badge>
+      );
+    }
+    
+    // Urgent if due within 2 days
+    if (isUrgent(task.dueDate) && task.status !== "done") {
+      return (
+        <Badge variant="outline" className="text-xs bg-amber-950 text-amber-400 border-amber-700 absolute -top-2 -right-2">
+          <Flag className="h-3 w-3 mr-1" />
+          Due Soon
+        </Badge>
+      );
+    }
+    
+    // High impact goals
+    if ((task.goalCategory === "Revenue" || task.goalCategory === "User Growth") && task.status !== "done") {
+      return (
+        <Badge variant="outline" className="text-xs bg-blue-950 text-blue-400 border-blue-700 absolute -top-2 -right-2">
+          <ArrowUpCircle className="h-3 w-3 mr-1" />
+          High Impact
+        </Badge>
+      );
+    }
+    
+    return null;
+  };
+  
   const [columns, setColumns] = useState<TaskColumn[]>([
     {
       id: "in-progress",
@@ -214,6 +357,9 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
                               onMouseEnter={() => setHoveredTask(task.id)}
                               onMouseLeave={() => setHoveredTask(null)}
                             >
+                              {/* Priority badge */}
+                              {getPriorityBadge(task)}
+                              
                               <div className="flex justify-between items-start">
                                 <div className="font-medium text-white text-sm mb-2">{task.task}</div>
                                 {hoveredTask === task.id && (
@@ -231,13 +377,18 @@ export function DragDropTaskBoard({ tasks, onTaskStatusChange }: DragDropTaskBoa
                               </div>
                               
                               <div className="flex justify-between items-center">
-                                <div className="flex items-center">
-                                  <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                                  <span className="text-xs text-gray-400">{task.dueDate}</span>
+                                <div className="flex">
+                                  {formatDueDate(task.dueDate, task.status)}
                                 </div>
                                 <Badge 
                                   variant="outline" 
-                                  className="text-xs bg-gray-700/80 text-gray-300 border-gray-600"
+                                  className={`text-xs ${
+                                    task.goalCategory === "Revenue" 
+                                      ? "bg-blue-900/40 text-blue-400 border-blue-700" 
+                                      : task.goalCategory === "User Growth"
+                                        ? "bg-purple-900/40 text-purple-400 border-purple-700"
+                                        : "bg-gray-700/80 text-gray-300 border-gray-600"
+                                  }`}
                                 >
                                   {task.goalCategory}
                                 </Badge>
