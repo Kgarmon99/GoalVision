@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, real, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const goals = pgTable("goals", {
   id: serial("id").primaryKey(),
@@ -10,6 +11,10 @@ export const goals = pgTable("goals", {
   unit: text("unit").default(""),
   color: text("color").default("primary"),
 });
+
+export const goalsRelations = relations(goals, ({ many }) => ({
+  statuses: many(goalStatus),
+}));
 
 export const insertGoalSchema = createInsertSchema(goals).pick({
   name: true,
@@ -40,11 +45,20 @@ export const insertMetricSchema = createInsertSchema(metrics).pick({
 
 export const goalStatus = pgTable("goal_status", {
   id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull(),
   goalName: text("goal_name").notNull(),
   status: text("status").notNull(), // "on-track", "needs-attention", "off-track"
 });
 
+export const goalStatusRelations = relations(goalStatus, ({ one }) => ({
+  goal: one(goals, {
+    fields: [goalStatus.goalId],
+    references: [goals.id]
+  })
+}));
+
 export const insertGoalStatusSchema = createInsertSchema(goalStatus).pick({
+  goalId: true,
   goalName: true,
   status: true,
 });
@@ -60,6 +74,13 @@ export const executionTasks = pgTable("execution_tasks", {
   status: text("status").notNull(), // "done", "in-progress", "missed"
   weekId: integer("week_id").notNull(),
 });
+
+export const executionTasksRelations = relations(executionTasks, ({ one }) => ({
+  week: one(weeks, {
+    fields: [executionTasks.weekId],
+    references: [weeks.id]
+  })
+}));
 
 export const insertExecutionTaskSchema = createInsertSchema(executionTasks).pick({
   task: true,
@@ -78,6 +99,10 @@ export const weeks = pgTable("weeks", {
   dateRange: text("date_range").notNull(),
   completionRate: real("completion_rate").default(0),
 });
+
+export const weeksRelations = relations(weeks, ({ many }) => ({
+  tasks: many(executionTasks)
+}));
 
 export const insertWeekSchema = createInsertSchema(weeks).pick({
   number: true,
