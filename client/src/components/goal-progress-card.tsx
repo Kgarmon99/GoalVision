@@ -14,9 +14,34 @@ interface GoalProgressCardProps {
 
 export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [prevPercent, setPrevPercent] = useState<number | null>(null);
+  const { triggerCelebration } = useGoalCelebrationContext();
   
   // Calculate percentage complete
   const percentComplete = Math.min(Math.round((goal.current / goal.target) * 100), 100);
+  
+  // Check for significant milestone achievements to trigger celebration
+  useEffect(() => {
+    // Only trigger for significant increases (25%, 50%, 75%, 100%)
+    const milestones = [25, 50, 75, 100];
+    
+    if (prevPercent !== null) {
+      // Find the highest milestone crossed in this update
+      const prevMilestone = milestones.filter(m => prevPercent < m).sort((a, b) => a - b)[0];
+      const currentMilestone = milestones.filter(m => percentComplete >= m).sort((a, b) => b - a)[0];
+      
+      if (currentMilestone && (!prevMilestone || currentMilestone > prevMilestone)) {
+        // Trigger celebration for the milestone achievement
+        triggerCelebration({
+          goalName: goal.name,
+          progressPercentage: percentComplete,
+          username: "Team" // Could be replaced with actual user data
+        });
+      }
+    }
+    
+    setPrevPercent(percentComplete);
+  }, [percentComplete, prevPercent, goal.name, triggerCelebration]);
   
   // Format values with units
   const formatValue = (value: number, unit: string | null) => {

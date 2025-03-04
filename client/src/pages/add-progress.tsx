@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useGoalCelebrationContext } from "../context/goal-celebration-context";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import {
@@ -66,6 +67,7 @@ const formatValue = (value: number, unit: string | null) => {
 const AddProgress = () => {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
+  const { triggerCelebration } = useGoalCelebrationContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -140,10 +142,41 @@ const AddProgress = () => {
     setIsSubmitting(true);
     
     try {
-      await updateGoalMutation.mutateAsync({
-        goalId: parseInt(data.goalId),
-        newValue: parseFloat(data.newValue)
-      });
+      // Get the selected goal for celebration check
+      const goalId = parseInt(data.goalId);
+      const newValue = parseFloat(data.newValue);
+      const currentGoal = goals.find(g => g.id === goalId);
+      
+      if (currentGoal) {
+        // Calculate current and new percentages
+        const currentPercentage = Math.min(Math.round((currentGoal.current / currentGoal.target) * 100), 100);
+        const newPercentage = Math.min(Math.round((newValue / currentGoal.target) * 100), 100);
+        
+        // Submit the update
+        await updateGoalMutation.mutateAsync({
+          goalId,
+          newValue
+        });
+        
+        // Check if we've crossed any significant threshold (25%, 50%, 75%, 100%)
+        const thresholds = [25, 50, 75, 100];
+        const crossedThreshold = thresholds.find(t => currentPercentage < t && newPercentage >= t);
+        
+        if (crossedThreshold) {
+          // Trigger celebration for significant milestone
+          triggerCelebration({
+            goalName: currentGoal.name,
+            progressPercentage: newPercentage,
+            username: "Team" // Could be replaced with actual user data
+          });
+        }
+      } else {
+        // No goal found, just submit the update
+        await updateGoalMutation.mutateAsync({
+          goalId,
+          newValue
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
