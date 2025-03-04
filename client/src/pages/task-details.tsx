@@ -138,7 +138,7 @@ const TaskDetails = () => {
   };
   
   // Function to get category badge styling
-  const getCategoryBadge = (category: string, color: string) => {
+  const getCategoryBadge = (category: string, color: string | null) => {
     const colorMap: Record<string, string> = {
       "blue": "bg-blue-100 text-blue-800",
       "indigo": "bg-indigo-100 text-indigo-800",
@@ -148,7 +148,7 @@ const TaskDetails = () => {
       "yellow": "bg-yellow-100 text-yellow-800"
     };
     
-    const badgeColor = colorMap[color] || "bg-gray-100 text-gray-800";
+    const badgeColor = color && colorMap[color] ? colorMap[color] : "bg-gray-100 text-gray-800";
     
     return (
       <Badge variant="outline" className={badgeColor}>
