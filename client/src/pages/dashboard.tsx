@@ -13,20 +13,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 import { 
   RefreshCcw, 
   Plus, 
   ChevronRight, 
   PlusCircle, 
+  Calendar,
+  ListCheck as ListTodo,
+  BarChart3,
+  Award,
+  CheckCircle,
   TrendingUp, 
   DollarSign, 
-  BarChart3, 
   Target, 
   Rocket,
   ArrowUpRight,
-  Users,
-  Award,
-  CheckCircle
+  Users
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
@@ -235,6 +238,61 @@ const Dashboard = () => {
           {/* Main Dashboard Content */}
           {(isLoading || hasAnyData) && (
             <>
+              {/* Stats Overview */}
+              <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <motion.div 
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                    <Target className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{goals.length}</h3>
+                  <p className="text-green-400 text-sm">Active Goals</p>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{(growthMetrics.length + revenueMetrics.length)}</h3>
+                  <p className="text-green-400 text-sm">Key Metrics</p>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                    <ListTodo className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{weekTasks.length}</h3>
+                  <p className="text-green-400 text-sm">Execution Tasks</p>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                >
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                    <Calendar className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{weeks.length}</h3>
+                  <p className="text-green-400 text-sm">Planning Weeks</p>
+                </motion.div>
+              </div>
+            
               {/* Action Bar */}
               <div className="mb-8 bg-gray-900/80 rounded-lg border border-green-600 p-4 gradient-border flex flex-wrap gap-4 justify-between items-center">
                 <div className="flex items-center">
