@@ -10,7 +10,7 @@ import { ResetDataDialog } from "@/components/reset-data-dialog";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Plus, ChevronRight } from "lucide-react";
+import { RefreshCcw, Plus, ChevronRight, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";
@@ -218,12 +218,20 @@ const Dashboard = () => {
               <section className="mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-semibold text-green-400">Main Goals Progress</h2>
-                  <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400">
-                      <Plus className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Add Goal</span>
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href="/add-progress">
+                      <Button variant="outline" size="sm" className="border-green-600 text-green-400">
+                        <PlusCircle className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Update Progress</span>
+                      </Button>
+                    </Link>
+                    <Link href="/add-goal">
+                      <Button variant="outline" size="sm" className="border-green-600 text-green-400">
+                        <Plus className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Add Goal</span>
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
                 
                 {isLoading ? (

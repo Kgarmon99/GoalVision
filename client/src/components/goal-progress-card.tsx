@@ -1,6 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Goal } from "@shared/schema";
+import { Link } from "wouter";
+import { PlusCircle } from "lucide-react";
 
 interface GoalProgressCardProps {
   goal: Goal;
@@ -44,6 +47,14 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
             <span className="text-green-400">0%</span>
             <span className="text-green-400">100%</span>
           </div>
+        </div>
+        <div className="mt-3 flex justify-end">
+          <Link href={`/add-progress?goalId=${goal.id}`}>
+            <Button variant="outline" size="sm" className="text-xs border-green-500 text-green-400 hover:bg-gray-800">
+              <PlusCircle className="h-3 w-3 mr-1" />
+              Update Progress
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>
