@@ -70,8 +70,8 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
     if (percentComplete >= 100) return "Achieved! 🏆";
     if (percentComplete >= 75) return "Almost there!";
     if (percentComplete >= 50) return "Halfway through";
-    if (percentComplete >= 25) return "Getting started";
-    return "Far from target!";
+    if (percentComplete >= 25) return "Behind schedule!";
+    return "Severely lagging! 💩";
   };
   
   // Get achievement status color
@@ -172,6 +172,12 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               className="mt-3 text-xs text-gray-400 border-t border-green-900 pt-3"
             >
               <div className="grid grid-cols-2 gap-2">
+                {percentComplete < 30 && (
+                  <div className="text-red-500 font-medium mt-3 mb-1 text-xs animate-pulse col-span-2 grid grid-cols-[20px_1fr] items-center gap-1">
+                    <span className="text-xl">⚠️</span>
+                    <span>This goal needs immediate attention! You're falling far behind target.</span>
+                  </div>
+                )}
                 <div>
                   <p className="text-green-400">Status:</p>
                   <p className={getAchievementStatusColor()}>{getAchievementStatusText()}</p>
@@ -179,6 +185,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
                 <div>
                   <p className="text-green-400">Remaining:</p>
                   <p className={percentComplete < 25 ? "text-red-500 font-semibold" : ""}>{formatValue(remaining, goal.unit)}</p>
+                  
                 </div>
               </div>
             </motion.div>

@@ -102,11 +102,24 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
               <Award className="h-4 w-4 mr-1" />
               Goal Health
             </span>
-            <span className="text-sm font-bold text-white">{onTrackPercentage}% on track</span>
+            <span className={`text-sm font-bold ${
+              onTrackPercentage >= 75 ? "text-green-400" :
+              onTrackPercentage >= 50 ? "text-yellow-400" :
+              onTrackPercentage >= 25 ? "text-orange-400" :
+              "text-red-500"
+            }`}>
+              {onTrackPercentage}% on track
+              {onTrackPercentage < 50 && <span className="ml-2 text-red-500 animate-pulse">⚠️ Poor progress!</span>}
+            </span>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2 glow-element">
             <div 
-              className="bg-green-500 h-2.5 rounded-full" 
+              className={`h-2.5 rounded-full ${
+                onTrackPercentage >= 75 ? "bg-green-500" :
+                onTrackPercentage >= 50 ? "bg-yellow-500" :
+                onTrackPercentage >= 25 ? "bg-orange-500" :
+                "bg-red-600"
+              }`} 
               style={{ width: `${onTrackPercentage}%` }}
             ></div>
           </div>
@@ -139,6 +152,12 @@ const StatusIndicator = ({ statuses }: StatusIndicatorProps) => {
                 </div>
                 <div className="ml-3">
                   <span className="text-sm font-medium text-white group-hover:text-green-300 transition-colors">{status.goalName}</span>
+                  {status.status === "off-track" && (
+                    <div className="text-xs text-red-400 animate-pulse mt-0.5">Falling behind! Take action immediately.</div>
+                  )}
+                  {status.status === "needs-attention" && (
+                    <div className="text-xs text-yellow-400 mt-0.5">Needs work to get back on track.</div>
+                  )}
                 </div>
               </div>
               <div className="text-sm ml-6 xs:ml-0">
