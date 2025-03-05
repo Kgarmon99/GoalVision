@@ -248,6 +248,23 @@ export function TaskBreakdown({ goals, selectedGoalId }: TaskBreakdownProps) {
                       <div className="text-xs text-gray-400">Missed</div>
                     </div>
                   </div>
+                  
+                  {/* Critical feedback based on completion percentage */}
+                  {completionPercentage < 50 && (
+                    <div className="mt-3 bg-red-900/30 border border-red-800 rounded-md p-3 text-sm">
+                      <div className="flex items-start">
+                        <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-red-400 mb-1">Poor Task Execution!</p>
+                          <p className="text-gray-300">
+                            {completionPercentage < 25 
+                              ? "Your task completion rate is abysmal. At this pace, you'll never reach your goals. Step up now or admit failure."
+                              : "You've completed less than half of your tasks. Mediocrity won't get you to your targets. Do better."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {Object.keys(tasksByWeek).length > 0 ? (
@@ -268,7 +285,16 @@ export function TaskBreakdown({ goals, selectedGoalId }: TaskBreakdownProps) {
                           <AccordionContent>
                             <div className="space-y-3 pt-1 pb-3">
                               {tasks.map(task => (
-                                <div key={task.id} className="bg-gray-800/50 rounded-md p-3 hover:bg-gray-800 transition-colors">
+                                <div 
+                                  key={task.id} 
+                                  className={`rounded-md p-3 hover:bg-gray-800 transition-colors ${
+                                    task.status === 'missed' 
+                                      ? 'bg-red-900/20 border border-red-900'
+                                      : task.status === 'in-progress'
+                                        ? 'bg-yellow-900/10 border border-yellow-900'
+                                        : 'bg-gray-800/50'
+                                  }`}
+                                >
                                   <div className="flex justify-between items-start mb-2">
                                     <div className="text-white font-medium">{task.task}</div>
                                     {getStatusBadge(task.status)}
@@ -287,6 +313,12 @@ export function TaskBreakdown({ goals, selectedGoalId }: TaskBreakdownProps) {
                                     </div>
                                   </div>
                                   
+                                  {task.status === 'missed' && (
+                                    <div className="mt-2 text-red-400 text-xs animate-pulse flex items-center">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      <span>You failed to complete this task on time. This is unacceptable.</span>
+                                    </div>
+                                  )}
                                   <div className="flex justify-end mt-2">
                                     <Button variant="link" asChild size="sm" className="text-green-400 hover:text-green-300 p-0 h-6">
                                       <Link href={`/tasks/${task.id}`}>

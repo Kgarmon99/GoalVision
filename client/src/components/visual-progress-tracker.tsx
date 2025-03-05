@@ -41,7 +41,7 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
           Visual Goal Tracker
         </CardTitle>
         <CardDescription className="text-gray-400">
-          Track your goals and their tasks in a visual way
+          Visually track where you're failing to meet your targets
         </CardDescription>
       </CardHeader>
       
@@ -131,6 +131,17 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                     />
                   </div>
                   
+                  {/* Warning message for low progress */}
+                  {progressPercentage < 30 && (
+                    <div className="bg-red-900/30 border border-red-800 rounded p-2 mb-2 flex items-start">
+                      <AlertCircle className="h-4 w-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-red-300">
+                        <span className="font-medium block text-red-400">Critical Underperformance!</span>
+                        Your progress is pathetic. At {Math.round(progressPercentage)}%, you're nowhere near your target. Shape up or give up.
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Task Completion Progress bar */}
                   <div>
                     <div className="flex justify-between items-center mb-1">
@@ -157,6 +168,12 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                       ></div>
                     </div>
                     
+                    {missedTasks > 0 && (
+                      <div className="mt-2 mb-1 text-xs text-red-400 flex items-center animate-pulse">
+                        <AlertCircle className="h-3 w-3 mr-1 text-red-500" />
+                        <span>{missedTasks} missed {missedTasks === 1 ? 'task' : 'tasks'}! This is unacceptable and reflects poor planning.</span>
+                      </div>
+                    )}
                     <div className="flex justify-between mt-2 text-xs">
                       <div className="flex items-center">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
