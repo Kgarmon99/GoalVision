@@ -6,7 +6,7 @@ import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
-import { ResetDataDialog } from "@/components/reset-data-dialog";
+
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
@@ -228,7 +228,6 @@ const Dashboard = () => {
                     </>
                   )}
                 </Button>
-                <ResetDataDialog />
               </div>
             </div>
           </div>
