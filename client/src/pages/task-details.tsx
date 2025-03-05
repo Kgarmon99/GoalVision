@@ -3,6 +3,16 @@ import { useLocation, useParams, Link as WouterLink } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  XPBar, 
+  StatusBar, 
+  RewardAnimation, 
+  QuestItem, 
+  Achievement, 
+  Celebration, 
+  PlayerStats, 
+  GameButton 
+} from "../components/game-elements";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -832,10 +842,92 @@ export default function TaskDetails() {
     );
   }
 
+  // Player/character stats
+  const [showReward, setShowReward] = useState(false);
+  const [showAchievement, setShowAchievement] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  
+  // Trigger reward animation when task status changes
+  const handleRewardAnimation = () => {
+    setShowReward(true);
+    setTimeout(() => setShowReward(false), 2000);
+    
+    // 30% chance to trigger achievement
+    if (Math.random() < 0.3) {
+      setTimeout(() => {
+        setShowAchievement(true);
+      }, 500);
+    }
+    
+    // If task is completed, show celebration
+    if (task?.status === 'done') {
+      setShowCelebration(true);
+    }
+  };
+
+  // Character stats - simulated game mechanics
+  const playerStats = {
+    name: task?.owner || "Player",
+    avatar: task?.ownerAvatar || "",
+    level: 5,
+    xp: 340,
+    nextLevelXp: 500,
+    health: 75,
+    maxHealth: 100,
+    mana: 50,
+    maxMana: 100,
+    gold: 1250,
+    achievements: 7
+  };
+
+  // Task difficulty determines health cost
+  const getTaskDifficulty = () => {
+    if (!task) return 'medium';
+    const subtaskCount = subtasks.length;
+    if (subtaskCount > 5) return 'high';
+    if (subtaskCount > 2) return 'medium';
+    return 'low';
+  };
+  
+  // Calculate rewards based on task
+  const calculateRewards = () => {
+    if (!task) return { xp: 0, gold: 0 };
+    const difficulty = getTaskDifficulty();
+    const baseXP = difficulty === 'high' ? 50 : difficulty === 'medium' ? 30 : 15;
+    const baseGold = difficulty === 'high' ? 100 : difficulty === 'medium' ? 60 : 30;
+    return {
+      xp: baseXP + (subtasks.length * 5),
+      gold: baseGold + (subtasks.length * 10)
+    };
+  };
+  
+  const rewards = calculateRewards();
+  
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white relative">
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
+    <div className="min-h-screen flex flex-col game-bg text-white relative">
+      <div className="absolute inset-0 z-0"></div>
       <Header />
+      
+      {/* Game reward animations */}
+      {showReward && (
+        <RewardAnimation 
+          amount={rewards.xp} 
+          type="xp" 
+          position={{ x: window.innerWidth / 2, y: window.innerHeight / 2 }} 
+        />
+      )}
+      
+      <Achievement 
+        title="Task Master" 
+        description="Complete a task with all subtasks"
+        isOpen={showAchievement}
+        onClose={() => setShowAchievement(false)}
+      />
+      
+      <Celebration 
+        isActive={showCelebration}
+        onComplete={() => setShowCelebration(false)}
+      />
       
       <main className="flex-1 py-8 relative z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

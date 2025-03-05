@@ -1,0 +1,402 @@
+/* Gamification Styles */
+:root {
+  --glow-primary: #00ff00;
+  --glow-secondary: #6600ff;
+  --xp-color: #ffcc00;
+  --health-color: #ff3333;
+  --mana-color: #3399ff;
+  --gold-color: #ffcc00;
+}
+
+/* Animated background for game-like feel */
+.game-bg {
+  background: linear-gradient(135deg, #000000 0%, #160b33 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(0, 255, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(102, 0, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 153, 255, 0.03) 0%, transparent 60%);
+  animation: pulse-bg 8s infinite alternate;
+  z-index: 0;
+}
+
+@keyframes pulse-bg {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Game card with glow effect */
+.game-card {
+  background: rgba(10, 10, 20, 0.8);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  border-radius: 10px;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 0, 0.2),
+    0 0 30px rgba(0, 255, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.game-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 0, 0.1),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 40px rgba(0, 255, 0, 0.2);
+}
+
+.game-card:hover::after {
+  left: 100%;
+}
+
+/* Game element styling */
+.xp-bar {
+  height: 6px;
+  background: rgba(255, 204, 0, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--xp-color);
+  border-radius: 3px;
+  box-shadow: 0 0 10px var(--xp-color);
+  transition: width 1s ease-in-out;
+}
+
+.health-bar {
+  height: 8px;
+  background: rgba(255, 51, 51, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.health-bar-fill {
+  height: 100%;
+  background: var(--health-color);
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--health-color);
+  transition: width 0.5s ease;
+}
+
+.mana-bar {
+  height: 8px;
+  background: rgba(51, 153, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.mana-bar-fill {
+  height: 100%;
+  background: var(--mana-color);
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--mana-color);
+  transition: width 0.5s ease;
+}
+
+.quest-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.quest-item {
+  background: rgba(20, 20, 40, 0.7);
+  border-left: 3px solid var(--glow-primary);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 0 8px 8px 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.quest-item:hover {
+  transform: translateX(5px);
+  background: rgba(30, 30, 60, 0.8);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.quest-item.completed {
+  border-left-color: var(--xp-color);
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.quest-item.high-priority {
+  border-left-color: var(--health-color);
+}
+
+.quest-item.medium-priority {
+  border-left-color: var(--mana-color);
+}
+
+/* Buttons with game-style */
+.game-button {
+  background: linear-gradient(180deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 102, 0, 0.3) 100%);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  border-radius: 5px;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+.game-button::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  transform: rotate(30deg);
+}
+
+.game-button:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.game-button:hover::before {
+  opacity: 1;
+}
+
+.game-button:active {
+  transform: translateY(2px);
+}
+
+/* Game badges and indicators */
+.level-badge {
+  background: linear-gradient(180deg, #333333 0%, #111111 100%);
+  border: 1px solid var(--xp-color);
+  color: var(--xp-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.status-badge.active {
+  background: linear-gradient(90deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 102, 0, 0.3) 100%);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  color: #00ff00;
+}
+
+.status-badge.completed {
+  background: linear-gradient(90deg, rgba(255, 204, 0, 0.2) 0%, rgba(204, 153, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 204, 0, 0.5);
+  color: #ffcc00;
+}
+
+.status-badge.failed {
+  background: linear-gradient(90deg, rgba(255, 51, 51, 0.2) 0%, rgba(204, 0, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 51, 51, 0.5);
+  color: #ff3333;
+}
+
+/* Avatar display */
+.player-avatar {
+  border-radius: 50%;
+  border: 2px solid var(--glow-primary);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.player-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Reward animations */
+@keyframes coins-reward {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.coins-reward {
+  color: var(--gold-color);
+  position: absolute;
+  font-weight: bold;
+  animation: coins-reward 1.5s ease-out forwards;
+}
+
+/* Floating indicators */
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+.floating-indicator {
+  position: absolute;
+  font-weight: bold;
+  animation: float-up 2s ease-out forwards;
+  pointer-events: none;
+}
+
+.floating-indicator.xp {
+  color: var(--xp-color);
+}
+
+.floating-indicator.health {
+  color: var(--health-color);
+}
+
+.floating-indicator.mana {
+  color: var(--mana-color);
+}
+
+/* Achievement notification */
+.achievement-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px;
+  background: rgba(10, 10, 20, 0.9);
+  border: 1px solid var(--glow-primary);
+  border-radius: 8px;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.1);
+  color: white;
+  z-index: 1000;
+  transform: translateX(100%);
+  animation: slide-in 0.5s forwards, slide-out 0.5s 4s forwards;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes slide-in {
+  100% { transform: translateX(0); }
+}
+
+@keyframes slide-out {
+  100% { transform: translateX(100%); }
+}
+
+.achievement-icon {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+/* Game-themed checkbox */
+.game-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--glow-primary);
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.game-checkbox:checked {
+  background: var(--glow-primary);
+  border-color: var(--glow-primary);
+}
+
+.game-checkbox:checked::before {
+  content: "✓";
+  position: absolute;
+  color: black;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.game-checkbox:hover {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}

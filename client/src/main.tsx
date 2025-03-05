@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import "./styles/mobile.css";
+import "./styles/gamification.css";
 import "@/components/ui/glow-effects.css";
 
 // Global error handling for unhandled promise rejections
