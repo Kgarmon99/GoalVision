@@ -257,13 +257,108 @@ export default function TaskDetails() {
     );
   };
   
-  // Dummy subtasks for demonstration
-  const subtasks = [
-    { id: 1, title: "Research potential investors", completed: true },
-    { id: 2, title: "Create investor pitch deck", completed: true },
-    { id: 3, title: "Schedule meetings with top 3 prospects", completed: false },
-    { id: 4, title: "Prepare financial projections", completed: false }
-  ];
+  // Form schemas for editing tasks and subtasks
+  const editTaskFormSchema = z.object({
+    task: z.string().min(3, "Task description must be at least 3 characters"),
+    owner: z.string().min(1, "Owner is required"),
+    ownerAvatar: z.string().optional(),
+    goalCategory: z.string().min(1, "Goal category is required"),
+    categoryColor: z.string().optional(),
+    dueDate: z.string().min(1, "Due date is required"),
+    status: z.string().min(1, "Status is required"),
+    weekId: z.number().int().positive()
+  });
+
+  const addSubtaskFormSchema = z.object({
+    description: z.string().min(3, "Description must be at least 3 characters"),
+    priority: z.string().default("medium")
+  });
+
+  // Fetch actual subtasks from API
+  const {
+    data: subtasks = [],
+    isLoading: isLoadingSubtasks,
+    refetch: refetchSubtasks
+  } = useQuery<Subtask[]>({
+    queryKey: ['/api/tasks', taskId, 'subtasks'],
+    queryFn: async () => {
+      if (!taskId) return [];
+      try {
+        const response = await apiRequest<Subtask[]>("GET", `/api/tasks/${taskId}/subtasks`);
+        return response || [];
+      } catch (error) {
+        console.error("Error fetching subtasks:", error);
+        return [];
+      }
+    },
+    enabled: !!taskId
+  });
+  
+  // Add subtask mutation
+  const addSubtaskMutation = useMutation({
+    mutationFn: async (subtaskData: { parentTaskId: number, description: string, priority: string }) => {
+      return apiRequest("POST", "/api/subtasks", subtaskData);
+    },
+    onSuccess: () => {
+      // Refetch subtasks to update the list
+      refetchSubtasks();
+      
+      toast({
+        title: "Subtask added",
+        description: "Subtask has been added successfully.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error adding subtask",
+        description: error.message || "There was a problem adding the subtask.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Toggle subtask completion mutation
+  const toggleSubtaskMutation = useMutation({
+    mutationFn: async ({ id, completed }: { id: number, completed: boolean }) => {
+      return apiRequest("PATCH", `/api/subtasks/${id}`, { completed });
+    },
+    onSuccess: () => {
+      // Refetch subtasks to update the list
+      refetchSubtasks();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating subtask",
+        description: error.message || "There was a problem updating the subtask.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Delete subtask mutation
+  const deleteSubtaskMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest("DELETE", `/api/subtasks/${id}`);
+    },
+    onSuccess: () => {
+      // Refetch subtasks to update the list
+      refetchSubtasks();
+      
+      toast({
+        title: "Subtask deleted",
+        description: "Subtask has been deleted successfully.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting subtask",
+        description: error.message || "There was a problem deleting the subtask.",
+        variant: "destructive",
+      });
+    }
+  });
   
   // Dummy notes for demonstration
   const notes = [
@@ -302,6 +397,362 @@ export default function TaskDetails() {
     );
   }
   
+  // Edit Task Form Component
+  interface EditTaskFormProps {
+    task: ExecutionTask;
+    goals: Goal[];
+    weeks: Week[];
+    onSuccess: () => void;
+  }
+
+  function EditTaskForm({ task, goals, weeks, onSuccess }: EditTaskFormProps) {
+    const { toast } = useToast();
+    
+    // Edit task mutation
+    const editTaskMutation = useMutation({
+      mutationFn: async (data: z.infer<typeof editTaskFormSchema>) => {
+        return apiRequest("PATCH", `/api/tasks/${task.id}`, data);
+      },
+      onSuccess: () => {
+        toast({
+          title: "Task updated",
+          description: "Task has been updated successfully.",
+          variant: "default",
+        });
+        onSuccess();
+        // Close dialog after successful submission
+        document.querySelector('[data-dialog-close]')?.click();
+      },
+      onError: (error) => {
+        toast({
+          title: "Error updating task",
+          description: error.message || "There was a problem updating the task.",
+          variant: "destructive",
+        });
+      }
+    });
+
+    const form = useForm<z.infer<typeof editTaskFormSchema>>({
+      resolver: zodResolver(editTaskFormSchema),
+      defaultValues: {
+        task: task.task,
+        owner: task.owner,
+        ownerAvatar: task.ownerAvatar,
+        goalCategory: task.goalCategory,
+        categoryColor: task.categoryColor,
+        dueDate: task.dueDate,
+        status: task.status,
+        weekId: task.weekId
+      }
+    });
+
+    function onSubmit(data: z.infer<typeof editTaskFormSchema>) {
+      editTaskMutation.mutate(data);
+    }
+
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="task"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Task Description</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="Enter task description" 
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="owner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Task Owner</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Enter owner name" 
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="ownerAvatar"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Owner Avatar URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Enter avatar URL (optional)" 
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="goalCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Goal Category</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                        <SelectValue placeholder="Select a goal category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                      {goals.map(goal => (
+                        <SelectItem key={goal.id} value={goal.name}>
+                          {goal.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="categoryColor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Category Color</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value || "blue"}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                        <SelectValue placeholder="Select a color" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                      <SelectItem value="blue">Blue</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                      <SelectItem value="purple">Purple</SelectItem>
+                      <SelectItem value="red">Red</SelectItem>
+                      <SelectItem value="yellow">Yellow</SelectItem>
+                      <SelectItem value="indigo">Indigo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="dueDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Due Date</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Enter due date (e.g., March 15, 2025)" 
+                      className="bg-gray-800 border-gray-700 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white">Status</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                      <SelectItem value="in-progress">In Progress</SelectItem>
+                      <SelectItem value="done">Done</SelectItem>
+                      <SelectItem value="missed">Missed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          
+          <FormField
+            control={form.control}
+            name="weekId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Week</FormLabel>
+                <Select 
+                  onValueChange={(value) => field.onChange(parseInt(value))} 
+                  defaultValue={field.value.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Select week" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    {weeks.map(week => (
+                      <SelectItem key={week.id} value={week.id.toString()}>
+                        Week {week.number} ({week.dateRange})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="flex justify-end pt-4">
+            <DialogClose asChild>
+              <Button variant="outline" className="mr-2 bg-gray-800 text-white border-gray-700">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              type="submit" 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={editTaskMutation.isPending}
+            >
+              {editTaskMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
+
+  // Add Subtask Form Component
+  interface AddSubtaskFormProps {
+    parentTaskId: number;
+    onSuccess?: () => void;
+  }
+
+  function AddSubtaskForm({ parentTaskId, onSuccess }: AddSubtaskFormProps) {
+    const form = useForm<z.infer<typeof addSubtaskFormSchema>>({
+      resolver: zodResolver(addSubtaskFormSchema),
+      defaultValues: {
+        description: "",
+        priority: "medium"
+      }
+    });
+
+    function onSubmit(data: z.infer<typeof addSubtaskFormSchema>) {
+      addSubtaskMutation.mutate({
+        parentTaskId,
+        description: data.description,
+        priority: data.priority
+      });
+      if (onSuccess) {
+        onSuccess();
+      }
+    }
+
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Description</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    placeholder="Enter subtask description" 
+                    className="bg-gray-800 border-gray-700 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="priority"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Priority</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectItem value="high">High Priority</SelectItem>
+                    <SelectItem value="medium">Medium Priority</SelectItem>
+                    <SelectItem value="low">Low Priority</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <div className="flex justify-end pt-4">
+            <DialogClose asChild>
+              <Button variant="outline" className="mr-2 bg-gray-800 text-white border-gray-700">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              type="submit" 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={addSubtaskMutation.isPending}
+            >
+              {addSubtaskMutation.isPending ? "Adding..." : "Add Subtask"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
@@ -521,33 +972,111 @@ export default function TaskDetails() {
                       
                       {/* Task Subtasks */}
                       <div className="mt-6">
-                        <h3 className="text-sm font-medium text-gray-400 mb-3 flex items-center">
-                          <ListChecks className="mr-2 h-4 w-4 text-green-400" />
-                          Subtasks
-                        </h3>
-                        <div className="space-y-2">
-                          {subtasks.map(subtask => (
-                            <div 
-                              key={subtask.id} 
-                              className={`flex items-start p-3 rounded-md ${
-                                subtask.completed ? 'bg-green-900/20 border border-green-800/50' : 'bg-gray-800/50 border border-gray-700/50'
-                              }`}
-                            >
-                              <div className="flex-shrink-0 mt-0.5">
-                                {subtask.completed ? (
-                                  <CheckSquare className="h-5 w-5 text-green-400" />
-                                ) : (
-                                  <Square className="h-5 w-5 text-gray-400" />
-                                )}
-                              </div>
-                              <div className="ml-3">
-                                <p className={`text-sm ${subtask.completed ? 'text-green-400' : 'text-white'}`}>
-                                  {subtask.title}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="text-sm font-medium text-gray-400 flex items-center">
+                            <ListChecks className="mr-2 h-4 w-4 text-green-400" />
+                            Subtasks
+                          </h3>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-8 border-green-500 text-green-400 hover:bg-gray-800">
+                                <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                                Add Subtask
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-gray-900 border border-green-600">
+                              <DialogHeader>
+                                <DialogTitle className="text-white">Add Subtask</DialogTitle>
+                                <DialogDescription className="text-gray-400">
+                                  Add a new subtask to break down this task.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <AddSubtaskForm 
+                                parentTaskId={taskId} 
+                                onSuccess={() => {
+                                  // Close dialog after successful submission
+                                  document.querySelector('[data-dialog-close]')?.click();
+                                }}
+                              />
+                            </DialogContent>
+                          </Dialog>
                         </div>
+                        
+                        {isLoadingSubtasks ? (
+                          <div className="space-y-2">
+                            <Skeleton className="h-10 w-full bg-gray-800" />
+                            <Skeleton className="h-10 w-full bg-gray-800" />
+                            <Skeleton className="h-10 w-full bg-gray-800" />
+                          </div>
+                        ) : subtasks.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-6 bg-gray-800/30 rounded-md border border-gray-700/50">
+                            <ListChecks className="h-8 w-8 text-gray-500 mb-2" />
+                            <p className="text-sm text-gray-400 mb-1">No subtasks yet</p>
+                            <p className="text-xs text-gray-500 mb-3 px-6 text-center">Break down this task into smaller steps for better tracking.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {subtasks.map(subtask => (
+                              <div 
+                                key={subtask.id} 
+                                className={`flex items-start justify-between p-3 rounded-md ${
+                                  subtask.completed ? 'bg-green-900/20 border border-green-800/50' : 'bg-gray-800/50 border border-gray-700/50'
+                                }`}
+                              >
+                                <div className="flex items-start">
+                                  <button 
+                                    className="flex-shrink-0 mt-0.5 focus:outline-none" 
+                                    onClick={() => toggleSubtaskMutation.mutate({ 
+                                      id: subtask.id, 
+                                      completed: !subtask.completed 
+                                    })}
+                                    disabled={toggleSubtaskMutation.isPending}
+                                  >
+                                    {subtask.completed ? (
+                                      <CheckSquare className="h-5 w-5 text-green-400" />
+                                    ) : (
+                                      <Square className="h-5 w-5 text-gray-400 hover:text-gray-300" />
+                                    )}
+                                  </button>
+                                  <div className="ml-3">
+                                    <p className={`text-sm ${subtask.completed ? 'text-green-400' : 'text-white'}`}>
+                                      {subtask.description}
+                                    </p>
+                                    <div className="flex items-center mt-1">
+                                      {subtask.priority === "high" && (
+                                        <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500 text-xs">
+                                          <Flag className="h-3 w-3 mr-1" />
+                                          High Priority
+                                        </Badge>
+                                      )}
+                                      {subtask.priority === "medium" && (
+                                        <Badge variant="outline" className="bg-yellow-900/30 text-yellow-400 border-yellow-500 text-xs">
+                                          <Flag className="h-3 w-3 mr-1" />
+                                          Medium Priority
+                                        </Badge>
+                                      )}
+                                      {subtask.priority === "low" && (
+                                        <Badge variant="outline" className="bg-blue-900/30 text-blue-400 border-blue-500 text-xs">
+                                          <Flag className="h-3 w-3 mr-1" />
+                                          Low Priority
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 rounded-full hover:bg-red-900/20 hover:text-red-400"
+                                  onClick={() => deleteSubtaskMutation.mutate(subtask.id)}
+                                  disabled={deleteSubtaskMutation.isPending}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
