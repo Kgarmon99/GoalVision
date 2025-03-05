@@ -620,7 +620,7 @@ const Dashboard = () => {
                     <p className="text-gray-300 text-sm mb-4">
                       Define your 2025 targets with measurable goals to track progress over time.
                     </p>
-                    <Link href="/add-goal">
+                    <Link to="/add-goal">
                       <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
                         Start <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
                       </Button>
@@ -644,7 +644,7 @@ const Dashboard = () => {
                     <p className="text-gray-300 text-sm mb-4">
                       Monitor important KPIs related to growth, revenue, and performance.
                     </p>
-                    <Link href="/add-metric">
+                    <Link to="/add-metric">
                       <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
                         View Metrics <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
                       </Button>
@@ -668,7 +668,7 @@ const Dashboard = () => {
                     <p className="text-gray-300 text-sm mb-4">
                       Break down your goals into actionable weekly tasks for execution tracking.
                     </p>
-                    <Link href="/add-task">
+                    <Link to="/add-task">
                       <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
                         Add Tasks <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
                       </Button>
