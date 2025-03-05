@@ -10,6 +10,7 @@ import { Check, Calendar as CalendarIcon, X, Award, Zap, Flame } from "lucide-re
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import Confetti from "react-confetti";
+import { motion } from "framer-motion";
 
 interface HabitStreakTrackerProps {
   goalId?: number;
@@ -263,10 +264,15 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
         <Badge 
           key={habit.id}
           variant={selectedHabit?.id === habit.id ? 'default' : 'outline'}
-          className={`cursor-pointer ${habit.color === 'primary' ? 'bg-primary' : habit.color === 'blue' ? 'bg-blue-500' : 
-            habit.color === 'green' ? 'bg-green-500' : 
-            habit.color === 'purple' ? 'bg-purple-500' : 
-            habit.color === 'indigo' ? 'bg-indigo-500' : 'bg-primary'}`}
+          className={`cursor-pointer ${
+            selectedHabit?.id === habit.id 
+              ? (habit.color === 'primary' ? 'bg-green-600 hover:bg-green-700' : 
+                 habit.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700' : 
+                 habit.color === 'green' ? 'bg-green-600 hover:bg-green-700' : 
+                 habit.color === 'purple' ? 'bg-purple-600 hover:bg-purple-700' : 
+                 'bg-indigo-600 hover:bg-indigo-700')
+              : 'hover:bg-gray-800 text-white border-gray-700'
+          }`}
           onClick={() => setSelectedHabit(habit)}
         >
           {habit.name}
@@ -281,14 +287,14 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
     return (
       <Calendar
         mode="default"
-        className="border rounded-md"
+        className="border border-gray-800 rounded-md bg-gray-900"
         modifiers={{
           completed: datesWithStatus.filter(d => d.completed).map(d => d.date),
           missed: datesWithStatus.filter(d => !d.completed).map(d => d.date),
         }}
         modifiersClassNames={{
-          completed: 'bg-green-100 text-green-800 font-bold rounded-full',
-          missed: 'bg-red-100 text-red-800 font-bold rounded-full',
+          completed: 'bg-green-900 text-green-300 font-bold rounded-full',
+          missed: 'bg-red-900 text-red-300 font-bold rounded-full',
         }}
       />
     );
@@ -296,10 +302,10 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
   
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-gray-900 border-gray-800">
         <CardContent className="pt-6">
           <div className="flex items-center justify-center p-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
           </div>
         </CardContent>
       </Card>
@@ -308,16 +314,16 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
   
   if (habits.length === 0) {
     return (
-      <Card>
+      <Card className="bg-gray-900 border-gray-800 gradient-border">
         <CardHeader>
-          <CardTitle>Habit Streak Tracker</CardTitle>
-          <CardDescription>Track your daily habits to build consistency</CardDescription>
+          <CardTitle className="text-white">Habit Streak Tracker</CardTitle>
+          <CardDescription className="text-gray-400">Track your daily habits to build consistency</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center p-6 text-center">
-            <CalendarIcon className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium">No habits found</h3>
-            <p className="text-sm text-muted-foreground mt-2">
+            <CalendarIcon className="h-12 w-12 text-gray-600 mb-4" />
+            <h3 className="text-lg font-medium text-white">No habits found</h3>
+            <p className="text-sm text-gray-400 mt-2">
               {goalId 
                 ? "This goal doesn't have any habits associated with it yet." 
                 : "You haven't created any habits yet."}
@@ -332,73 +338,87 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
     <>
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
       
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center">
+      <Card className="shadow-lg bg-gray-900 border-gray-800 hover:border-green-800 transition-all duration-300 gradient-border">
+        <CardHeader className="border-b border-gray-800">
+          <CardTitle className="flex items-center text-white">
             <Flame className="mr-2 h-6 w-6 text-orange-500" />
             Habit Streak Tracker
           </CardTitle>
-          <CardDescription>Build consistency with daily habits</CardDescription>
+          <CardDescription className="text-gray-400">Build consistency with daily habits</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           {renderHabitSelection()}
           
           {selectedHabit && (
             <>
-              <div className="bg-slate-50 p-4 rounded-lg">
+              <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">{selectedHabit.name}</h3>
-                  <Badge variant="outline" className="font-mono">
+                  <h3 className="text-lg font-semibold text-white">{selectedHabit.name}</h3>
+                  <Badge variant="outline" className="font-mono text-gray-300 border-gray-600">
                     {selectedHabit.frequency}
                   </Badge>
                 </div>
                 
-                <p className="text-sm text-muted-foreground mb-4">{selectedHabit.description}</p>
+                <p className="text-sm text-gray-400 mb-4">{selectedHabit.description}</p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="bg-white p-3 rounded-md border shadow-sm">
-                    <div className="text-sm text-muted-foreground mb-1">Current Streak</div>
-                    <div className="text-2xl font-bold flex items-center">
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="bg-gray-900 p-4 rounded-md border border-gray-800 shadow-md neon-glow">
+                    <div className="text-sm text-gray-400 mb-1">Current Streak</div>
+                    <div className="text-2xl font-bold flex items-center text-white">
                       {currentStreak} 
-                      <span className="text-sm ml-1 font-normal">days</span>
+                      <span className="text-sm ml-1 font-normal text-gray-400">days</span>
                       {currentStreak > 0 && (
                         <Flame className="ml-2 h-5 w-5 text-orange-500 animate-pulse" />
                       )}
                     </div>
                   </div>
                   
-                  <div className="bg-white p-3 rounded-md border shadow-sm">
-                    <div className="text-sm text-muted-foreground mb-1">Target Streak</div>
-                    <div className="text-2xl font-bold flex items-center">
+                  <div className="bg-gray-900 p-4 rounded-md border border-gray-800 shadow-md neon-glow">
+                    <div className="text-sm text-gray-400 mb-1">Target Streak</div>
+                    <div className="text-2xl font-bold flex items-center text-white">
                       {selectedHabit.targetStreakDays || 7}
-                      <span className="text-sm ml-1 font-normal">days</span>
+                      <span className="text-sm ml-1 font-normal text-gray-400">days</span>
                       <Award className="ml-2 h-5 w-5 text-yellow-500" />
                     </div>
                   </div>
                   
-                  <div className="bg-white p-3 rounded-md border shadow-sm">
-                    <div className="text-sm text-muted-foreground mb-1">Reminder Time</div>
-                    <div className="text-2xl font-bold">
+                  <div className="bg-gray-900 p-4 rounded-md border border-gray-800 shadow-md neon-glow">
+                    <div className="text-sm text-gray-400 mb-1">Reminder Time</div>
+                    <div className="text-2xl font-bold text-white">
                       {selectedHabit.reminderTime || "08:00 AM"}
                     </div>
                   </div>
-                </div>
+                </motion.div>
                 
-                <Separator className="my-4" />
+                <Separator className="my-4 bg-gray-700" />
                 
                 <div className="mb-4">
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium">Progress toward target</span>
-                    <span className="text-sm font-medium">{Math.round(getStreakProgress())}%</span>
+                    <span className="text-sm font-medium text-green-400">Progress toward target</span>
+                    <span className="text-sm font-medium text-green-400">{Math.round(getStreakProgress())}%</span>
                   </div>
-                  <Progress value={getStreakProgress()} className="h-2" />
+                  <Progress 
+                    value={getStreakProgress()} 
+                    className="h-2 bg-gray-800"
+                    indicatorClassName={
+                      getStreakProgress() >= 75 ? "bg-green-500" :
+                      getStreakProgress() >= 50 ? "bg-yellow-500" :
+                      getStreakProgress() >= 25 ? "bg-orange-500" :
+                      "bg-red-500"
+                    }
+                  />
                 </div>
                 
                 {!isTodayRegistered() ? (
                   <div className="flex justify-center gap-4">
                     <Button 
                       onClick={markHabitComplete}
-                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
                     >
                       <Check className="h-5 w-5" />
                       Completed Today
@@ -406,22 +426,22 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
                     <Button 
                       onClick={markHabitMissed}
                       variant="outline" 
-                      className="flex items-center gap-2 text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50"
+                      className="flex items-center gap-2 text-red-400 border-red-800 hover:border-red-700 hover:bg-red-900/30"
                     >
                       <X className="h-5 w-5" />
                       Missed Today
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center p-3 rounded-md border bg-gray-50">
-                    <div className="mb-2 font-medium">Today's status</div>
+                  <div className="text-center p-3 rounded-md border border-gray-700 bg-gray-800/50">
+                    <div className="mb-2 font-medium text-white">Today's status</div>
                     {isTodayCompleted() ? (
                       <Badge className="bg-green-600 hover:bg-green-700">
                         <Check className="mr-1 h-4 w-4" />
                         Completed
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-red-600 border-red-200">
+                      <Badge variant="outline" className="text-red-400 border-red-800">
                         <X className="mr-1 h-4 w-4" />
                         Missed
                       </Badge>
@@ -430,7 +450,7 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
                       <Button 
                         size="sm" 
                         variant="link" 
-                        className="text-xs"
+                        className="text-xs text-blue-400 hover:text-blue-300"
                         onClick={isTodayCompleted() ? markHabitMissed : markHabitComplete}
                       >
                         Change status
@@ -441,28 +461,33 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
               </div>
               
               <div className="mt-4">
-                <h3 className="text-md font-medium mb-2">Recent History</h3>
+                <h3 className="text-md font-medium mb-2 text-gray-300">Recent History</h3>
                 <StreakCalendar />
               </div>
               
               {currentStreak >= (selectedHabit.targetStreakDays || 7) && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4 text-center">
+                <motion.div 
+                  className="bg-green-900/30 border border-green-800 rounded-lg p-4 mt-4 text-center"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
                   <div className="flex justify-center mb-2">
                     <Award className="h-8 w-8 text-yellow-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-green-800">Target Reached!</h3>
-                  <p className="text-sm text-green-700">
+                  <h3 className="text-lg font-semibold text-green-300">Target Reached!</h3>
+                  <p className="text-sm text-green-400">
                     Congratulations! You've reached your target streak of {selectedHabit.targetStreakDays || 7} days.
                     Keep going to build this habit permanently!
                   </p>
-                </div>
+                </motion.div>
               )}
             </>
           )}
         </CardContent>
-        <CardFooter className="text-xs text-muted-foreground justify-center">
+        <CardFooter className="text-xs text-gray-500 justify-center border-t border-gray-800 pt-4">
           <div className="flex items-center gap-1">
-            <Zap className="h-3 w-3" />
+            <Zap className="h-3 w-3 text-yellow-600" />
             Building habits takes 66 days on average for new behaviors to become automatic
           </div>
         </CardFooter>
