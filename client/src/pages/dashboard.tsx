@@ -195,7 +195,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
                 <Rocket className="h-8 w-8 mr-3 text-green-400 animate-float" />
-                <h1 className="text-3xl font-bold text-white text-glow">2025 Goals Dashboard</h1>
+                <h1 className="text-3xl font-bold text-white neon-text">2025 Goals Dashboard</h1>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border">
@@ -241,54 +241,54 @@ const Dashboard = () => {
               {/* Stats Overview */}
               <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center glow-effect glow-green"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full aura-effect aura-green">
                     <Target className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{goals.length}</h3>
+                  <h3 className="text-xl font-bold text-white neon-text">{goals.length}</h3>
                   <p className="text-green-400 text-sm">Active Goals</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center glow-effect glow-blue"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full aura-effect aura-blue">
                     <BarChart3 className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{(growthMetrics.length + revenueMetrics.length)}</h3>
+                  <h3 className="text-xl font-bold text-white neon-text-blue">{(growthMetrics.length + revenueMetrics.length)}</h3>
                   <p className="text-green-400 text-sm">Key Metrics</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center glow-effect glow-purple"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.3 }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full aura-effect aura-purple">
                     <ListTodo className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{weekTasks.length}</h3>
+                  <h3 className="text-xl font-bold text-white neon-text-purple">{weekTasks.length}</h3>
                   <p className="text-green-400 text-sm">Execution Tasks</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center glow-effect glow-indigo"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full aura-effect aura-indigo">
                     <Calendar className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{weeks.length}</h3>
+                  <h3 className="text-xl font-bold text-white neon-text-blue">{weeks.length}</h3>
                   <p className="text-green-400 text-sm">Planning Weeks</p>
                 </motion.div>
               </div>
@@ -297,23 +297,23 @@ const Dashboard = () => {
               <div className="mb-8 bg-gray-900/80 rounded-lg border border-green-600 p-4 gradient-border flex flex-wrap gap-4 justify-between items-center">
                 <div className="flex items-center">
                   <Target className="h-6 w-6 mr-2 text-green-400" />
-                  <h2 className="text-lg font-semibold text-green-400 text-glow">2025 Goals Tracker</h2>
+                  <h2 className="text-lg font-semibold text-green-400 neon-text">2025 Goals Tracker</h2>
                 </div>
                 <div className="flex gap-3 flex-wrap">
                   <Link href="/add-progress">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group glow-effect glow-green">
                       <PlusCircle className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
                       <span>Update Progress</span>
                     </Button>
                   </Link>
                   <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group glow-effect glow-purple">
                       <Plus className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
                       <span>Add Goal</span>
                     </Button>
                   </Link>
                   <Link href="/add-task">
-                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
+                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 glow-effect glow-blue">
                       <Rocket className="h-4 w-4 mr-2" />
                       <span>Track Execution</span>
                     </Button>
@@ -324,7 +324,7 @@ const Dashboard = () => {
               {/* Main Goals Progress */}
               <section className="mb-8">
                 <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
-                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center">
+                  <h2 className="text-xl font-semibold text-green-400 neon-text flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2" />
                     Main Goals Progress
                   </h2>
