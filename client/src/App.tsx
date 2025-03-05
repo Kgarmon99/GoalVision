@@ -20,6 +20,7 @@ function Router() {
       <Route path="/add-goal" component={AddGoal} />
       <Route path="/add-progress" component={AddProgress} />
       <Route path="/add-task" component={AddTask} />
+      <Route path="/edit-task/:id" component={EditTask} />
       <Route path="/tasks/:id" component={TaskDetails} />
       <Route path="/goal-tasks/:id" component={GoalTasks} />
       <Route path="/task-board" component={TaskBoard} />

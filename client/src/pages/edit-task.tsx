@@ -47,7 +47,7 @@ import {
 const taskFormSchema = z.object({
   task: z.string().min(5, { message: "Task must be at least 5 characters" }),
   owner: z.string().min(2, { message: "Owner name is required" }),
-  ownerAvatar: z.string().url({ message: "Please enter a valid URL" }).optional(),
+  ownerAvatar: z.union([z.string().url({ message: "Please enter a valid URL" }), z.literal("")]).optional(),
   goalCategory: z.string().min(1, { message: "Please select a goal category" }),
   categoryColor: z.string().default("blue"),
   dueDate: z.date({ required_error: "Please select a due date" }),
@@ -142,12 +142,16 @@ export default function EditTask() {
         console.error("Error parsing date:", error);
       }
       
+      // Convert null ownerAvatar to empty string and ensure categoryColor has a value
+      const safeOwnerAvatar = task.ownerAvatar === null ? "" : task.ownerAvatar;
+      const safeCategoryColor = task.categoryColor || "blue";
+      
       form.reset({
         task: task.task,
         owner: task.owner,
-        ownerAvatar: task.ownerAvatar || "",
+        ownerAvatar: safeOwnerAvatar,
         goalCategory: task.goalCategory,
-        categoryColor: task.categoryColor,
+        categoryColor: safeCategoryColor,
         status: task.status as "done" | "in-progress" | "missed",
         weekId: task.weekId.toString(),
         dueDate: dueDate,
