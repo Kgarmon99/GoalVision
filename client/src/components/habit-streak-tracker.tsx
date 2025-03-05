@@ -30,9 +30,9 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
         setLoading(true);
         let response;
         if (goalId) {
-          response = await apiRequest(`/api/goals/${goalId}/habits`);
+          response = await apiRequest(`/api/goals/${goalId}/habits`, {});
         } else {
-          response = await apiRequest('/api/habits');
+          response = await apiRequest('/api/habits', {});
         }
         const data = await response.json();
         setHabits(data);
@@ -60,11 +60,11 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(today.getDate() - 30);
         
-        const streaksResponse = await apiRequest(`/api/habits/${selectedHabit.id}/streaks/range?startDate=${thirtyDaysAgo.toISOString()}&endDate=${today.toISOString()}`);
+        const streaksResponse = await apiRequest(`/api/habits/${selectedHabit.id}/streaks/range?startDate=${thirtyDaysAgo.toISOString()}&endDate=${today.toISOString()}`, {});
         const streaksData = await streaksResponse.json();
         setStreaks(streaksData);
         
-        const currentStreakResponse = await apiRequest(`/api/habits/${selectedHabit.id}/current-streak`);
+        const currentStreakResponse = await apiRequest(`/api/habits/${selectedHabit.id}/current-streak`, {});
         const currentStreakData = await currentStreakResponse.json();
         setCurrentStreak(currentStreakData.currentStreak);
       } catch (error) {

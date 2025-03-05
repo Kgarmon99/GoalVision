@@ -8,7 +8,8 @@ import {
   Kanban, 
   LayoutDashboard,
   Target,
-  TrendingUp 
+  TrendingUp,
+  Flame 
 } from "lucide-react";
 import MobileNav from "./mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,6 +50,15 @@ const Header = () => {
                 >
                   <Kanban className="h-4 w-4 mr-1" />
                   Task Board
+                </Button>
+              </Link>
+              <Link href="/habit-tracker">
+                <Button 
+                  variant="ghost" 
+                  className={`text-sm ${location === '/habit-tracker' ? 'text-green-400 bg-green-900/30' : 'text-gray-300 hover:text-white hover:bg-gray-900'}`}
+                >
+                  <Flame className="h-4 w-4 mr-1" />
+                  Habit Streaks
                 </Button>
               </Link>
             </nav>
