@@ -97,7 +97,8 @@ import {
   PlusCircle,
   X,
   Gift,
-  Star
+  Star,
+  Award
 } from "lucide-react";
 
 export default function TaskDetails() {
@@ -1199,7 +1200,10 @@ export default function TaskDetails() {
                                 parentTaskId={taskId} 
                                 onSuccess={() => {
                                   // Close dialog after successful submission
-                                  document.querySelector('[data-dialog-close]')?.click();
+                                  const closeButton = document.querySelector('[data-dialog-close]');
+                                  if (closeButton) {
+                                    closeButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                                  }
                                 }}
                               />
                             </DialogContent>
@@ -1243,18 +1247,18 @@ export default function TaskDetails() {
                               const reward = priorityRewards[subtask.priority as keyof typeof priorityRewards];
                               
                               return (
-                                <QuestItem
-                                  key={subtask.id}
-                                  title={subtask.description}
-                                  completed={subtask.completed}
-                                  priority={subtask.priority as 'low' | 'medium' | 'high'}
-                                  reward={reward}
-                                  onClick={() => toggleSubtaskMutation.mutate({ 
-                                    id: subtask.id, 
-                                    completed: !subtask.completed 
-                                  })}
-                                  className="relative group"
-                                >
+                                <div key={subtask.id} className="relative group">
+                                  <QuestItem
+                                    title={subtask.description}
+                                    completed={subtask.completed}
+                                    priority={subtask.priority as 'low' | 'medium' | 'high'}
+                                    reward={reward}
+                                    onClick={() => toggleSubtaskMutation.mutate({ 
+                                      id: subtask.id, 
+                                      completed: !subtask.completed 
+                                    })}
+                                    className="relative group"
+                                  />
                                   <Button 
                                     variant="ghost" 
                                     size="icon" 
@@ -1269,7 +1273,7 @@ export default function TaskDetails() {
                                   >
                                     <X className="h-4 w-4" />
                                   </Button>
-                                </QuestItem>
+                                </div>
                               );
                             })}
                           </div>

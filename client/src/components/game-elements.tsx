@@ -177,7 +177,7 @@ export const QuestItem: React.FC<QuestItemProps> = ({
       <div className="mr-3">
         <input 
           type="checkbox" 
-          checked={completed} 
+          checked={completed || false} 
           onChange={() => onClick && onClick()} 
           className="game-checkbox"
         />
