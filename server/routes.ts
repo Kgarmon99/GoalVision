@@ -348,6 +348,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subtask routes
+  // Get all subtasks
+  app.get("/api/subtasks", async (req, res) => {
+    try {
+      const subtasks = await storage.getAllSubtasks();
+      res.json(subtasks);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subtasks" });
+    }
+  });
+
+  // Get subtasks for a specific parent task
+  app.get("/api/tasks/:taskId/subtasks", async (req, res) => {
+    try {
+      const parentTaskId = parseInt(req.params.taskId);
+      const subtasks = await storage.getSubtasksByParentId(parentTaskId);
+      res.json(subtasks);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subtasks for task" });
+    }
+  });
+
+  // Get a specific subtask
+  app.get("/api/subtasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const subtask = await storage.getSubtask(id);
+      
+      if (!subtask) {
+        return res.status(404).json({ message: "Subtask not found" });
+      }
+      
+      res.json(subtask);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subtask" });
+    }
+  });
+
+  // Create a subtask
+  app.post("/api/subtasks", async (req, res) => {
+    try {
+      const subtaskData = insertSubtaskSchema.parse(req.body);
+      const subtask = await storage.createSubtask(subtaskData);
+      res.status(201).json(subtask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid subtask data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating subtask" });
+    }
+  });
+
+  // Update a subtask
+  app.patch("/api/subtasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const subtaskData = insertSubtaskSchema.partial().parse(req.body);
+      const updatedSubtask = await storage.updateSubtask(id, subtaskData);
+      
+      if (!updatedSubtask) {
+        return res.status(404).json({ message: "Subtask not found" });
+      }
+      
+      res.json(updatedSubtask);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid subtask data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating subtask" });
+    }
+  });
+
+  // Delete a subtask
+  app.delete("/api/subtasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteSubtask(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Subtask not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting subtask" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

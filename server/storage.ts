@@ -108,10 +108,11 @@ export class MemStorage implements IStorage {
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
     
-    this.initializeData();
+    // Call initializeData as async function
+    this.initializeData().catch(console.error);
   }
 
-  private initializeData() {
+  private async initializeData() {
     // Initialize with sample data
     // Goals
     const sampleGoals: InsertGoal[] = [
@@ -121,7 +122,10 @@ export class MemStorage implements IStorage {
       { name: "School Expansion", current: 2145, target: 10000, unit: "", color: "primary" },
     ];
     
-    sampleGoals.forEach(goal => this.createGoal(goal));
+    const createdGoals = [];
+    for (const goal of sampleGoals) {
+      createdGoals.push(await this.createGoal(goal));
+    }
     
     // Metrics
     const growthMetrics: InsertMetric[] = [
@@ -138,7 +142,9 @@ export class MemStorage implements IStorage {
       { name: "Churn Rate", value: "1.2%", previousValue: "1.5%", trend: 0.3, trendDirection: "up", category: "revenue" },
     ];
     
-    [...growthMetrics, ...revenueMetrics].forEach(metric => this.createMetric(metric));
+    for (const metric of [...growthMetrics, ...revenueMetrics]) {
+      await this.createMetric(metric);
+    }
     
     // Goal Statuses
     const statuses: InsertGoalStatus[] = [
@@ -148,7 +154,9 @@ export class MemStorage implements IStorage {
       { goalId: 4, goalName: "School Expansion", status: "off-track" },
     ];
     
-    statuses.forEach(status => this.createGoalStatus(status));
+    for (const status of statuses) {
+      await this.createGoalStatus(status);
+    }
     
     // Week
     const week: InsertWeek = {
@@ -157,7 +165,7 @@ export class MemStorage implements IStorage {
       completionRate: 78,
     };
     
-    const createdWeek = this.createWeek(week);
+    const createdWeek = await this.createWeek(week);
     
     // Tasks
     const tasks: InsertExecutionTask[] = [
@@ -203,7 +211,44 @@ export class MemStorage implements IStorage {
       },
     ];
     
-    tasks.forEach(task => this.createTask(task));
+    const createdTasks = [];
+    for (const task of tasks) {
+      createdTasks.push(await this.createTask(task));
+    }
+    
+    // Sample Subtasks for the first task
+    if (createdTasks.length > 0) {
+      const sampleSubtasks: InsertSubtask[] = [
+        { 
+          parentTaskId: createdTasks[0].id, 
+          description: "Create executive summary", 
+          completed: true, 
+          priority: "high" 
+        },
+        { 
+          parentTaskId: createdTasks[0].id, 
+          description: "Develop financial projections", 
+          completed: true, 
+          priority: "high" 
+        },
+        { 
+          parentTaskId: createdTasks[0].id, 
+          description: "Design slide deck", 
+          completed: true, 
+          priority: "medium" 
+        },
+        { 
+          parentTaskId: createdTasks[0].id, 
+          description: "Rehearse presentation", 
+          completed: false, 
+          priority: "medium" 
+        }
+      ];
+      
+      for (const subtask of sampleSubtasks) {
+        await this.createSubtask(subtask);
+      }
+    }
   }
 
   // User methods
@@ -235,7 +280,12 @@ export class MemStorage implements IStorage {
   
   async createGoal(insertGoal: InsertGoal): Promise<Goal> {
     const id = this.currentGoalId++;
-    const goal: Goal = { ...insertGoal, id };
+    const goal: Goal = { 
+      ...insertGoal, 
+      id,
+      unit: insertGoal.unit ?? null,
+      color: insertGoal.color ?? null
+    };
     this.goalsData.set(id, goal);
     return goal;
   }
@@ -264,7 +314,13 @@ export class MemStorage implements IStorage {
   
   async createMetric(insertMetric: InsertMetric): Promise<Metric> {
     const id = this.currentMetricId++;
-    const metric: Metric = { ...insertMetric, id };
+    const metric: Metric = { 
+      ...insertMetric, 
+      id,
+      previousValue: insertMetric.previousValue ?? null,
+      trend: insertMetric.trend ?? null,
+      trendDirection: insertMetric.trendDirection ?? null
+    };
     this.metricsData.set(id, metric);
     return metric;
   }
@@ -314,7 +370,12 @@ export class MemStorage implements IStorage {
   
   async createTask(insertTask: InsertExecutionTask): Promise<ExecutionTask> {
     const id = this.currentExecutionTaskId++;
-    const task: ExecutionTask = { ...insertTask, id };
+    const task: ExecutionTask = {
+      ...insertTask,
+      id,
+      ownerAvatar: insertTask.ownerAvatar ?? null,
+      categoryColor: insertTask.categoryColor ?? null
+    };
     this.executionTasksData.set(id, task);
     return task;
   }
@@ -347,7 +408,13 @@ export class MemStorage implements IStorage {
   
   async createSubtask(insertSubtask: InsertSubtask): Promise<Subtask> {
     const id = this.currentSubtaskId++;
-    const subtask: Subtask = { ...insertSubtask, id, createdAt: new Date() };
+    const subtask: Subtask = { 
+      ...insertSubtask, 
+      id, 
+      completed: insertSubtask.completed ?? false,
+      createdAt: new Date(),
+      priority: insertSubtask.priority ?? "medium"
+    };
     this.subtasksData.set(id, subtask);
     return subtask;
   }
@@ -376,7 +443,11 @@ export class MemStorage implements IStorage {
   
   async createWeek(insertWeek: InsertWeek): Promise<Week> {
     const id = this.currentWeekId++;
-    const week: Week = { ...insertWeek, id };
+    const week: Week = { 
+      ...insertWeek, 
+      id,
+      completionRate: insertWeek.completionRate ?? null 
+    };
     this.weeksData.set(id, week);
     return week;
   }
