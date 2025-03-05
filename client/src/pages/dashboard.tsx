@@ -14,6 +14,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { AnimatedComponent } from "@/components/ui/animated-component";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 import { 
   RefreshCcw, 
   Plus, 
@@ -319,22 +323,33 @@ const Dashboard = () => {
                 </div>
                 <div className="flex gap-3 flex-wrap">
                   <Link href="/add-progress">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover">
-                      <PlusCircle className="h-4 w-4 mr-2 group-hover:text-white transition-colors float-effect-fast" />
-                      <span>Update Progress</span>
-                    </Button>
+                    <AnimatedButton 
+                      animation="bounce" 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
+                      icon={<PlusCircle className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
+                      label="Update Progress"
+                    />
                   </Link>
                   <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover">
-                      <Plus className="h-4 w-4 mr-2 group-hover:text-white transition-colors float-effect-fast" />
-                      <span>Add Goal</span>
-                    </Button>
+                    <AnimatedButton 
+                      animation="shadow" 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
+                      icon={<Plus className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
+                      label="Add Goal"
+                    />
                   </Link>
                   <Link href="/add-task">
-                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 neon-glow">
-                      <Rocket className="h-4 w-4 mr-2 float-effect-fast" />
-                      <span>Track Execution</span>
-                    </Button>
+                    <AnimatedButton 
+                      animation="shine" 
+                      size="sm" 
+                      className="bg-green-600 text-white hover:bg-green-700 neon-glow"
+                      icon={<Rocket className="h-4 w-4 float-effect-fast" />}
+                      label="Track Execution"
+                    />
                   </Link>
                 </div>
               </motion.div>
