@@ -132,7 +132,15 @@ export default function TaskDetails() {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/tasks/${id}`, undefined);
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: "DELETE"
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete task: ${response.statusText}`);
+      }
+      
+      return true;
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
@@ -150,7 +158,7 @@ export default function TaskDetails() {
     onError: (error) => {
       toast({
         title: "Error deleting task",
-        description: error.message || "There was a problem deleting the task.",
+        description: error instanceof Error ? error.message : "There was a problem deleting the task.",
         variant: "destructive",
       });
     }
@@ -170,7 +178,19 @@ export default function TaskDetails() {
   // Toggle task status mutation
   const toggleStatusMutation = useMutation({
     mutationFn: async ({id, newStatus}: {id: number, newStatus: string}) => {
-      return apiRequest("PATCH", `/api/tasks/${id}`, {status: newStatus});
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({status: newStatus}),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update task status: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
@@ -186,7 +206,7 @@ export default function TaskDetails() {
     onError: (error) => {
       toast({
         title: "Error updating task",
-        description: error.message || "There was a problem updating the task status.",
+        description: error instanceof Error ? error.message : "There was a problem updating the task status.",
         variant: "destructive",
       });
     }
@@ -467,10 +487,17 @@ export default function TaskDetails() {
           variant: "default",
         });
         onSuccess();
-        // Close dialog after successful submission
-        const closeButton = document.querySelector('[data-state="open"] button.bg-gray-800.text-white.border-gray-700') as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.click();
+        // Try to find and click the Cancel button to close the dialog
+        try {
+          const dialogElement = document.querySelector('[data-state="open"]');
+          if (dialogElement) {
+            const closeButton = dialogElement.querySelector('button[type="button"].mr-2.bg-gray-800');
+            if (closeButton instanceof HTMLButtonElement) {
+              closeButton.click();
+            }
+          }
+        } catch (err) {
+          console.error("Failed to close dialog:", err);
         }
       },
       onError: (error) => {
@@ -487,9 +514,9 @@ export default function TaskDetails() {
       defaultValues: {
         task: task.task,
         owner: task.owner,
-        ownerAvatar: task.ownerAvatar,
+        ownerAvatar: task.ownerAvatar || "",
         goalCategory: task.goalCategory,
-        categoryColor: task.categoryColor,
+        categoryColor: task.categoryColor || "",
         dueDate: task.dueDate,
         status: task.status,
         weekId: task.weekId
