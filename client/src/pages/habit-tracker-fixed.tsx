@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HabitStreakTracker } from "@/components/habit-streak-tracker-fixed";
 import { Separator } from "@/components/ui/separator";
-import { Plus, MoreHorizontal, Trash2, Flame } from "lucide-react";
+import { Plus, MoreHorizontal, Trash2, Flame, Home, LayoutDashboard, ListTodo, BarChart3, ChevronRight, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Goal, Habit, insertHabitSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { Link, useLocation } from "wouter";
 
 // Create a schema for adding a habit
 const habitFormSchema = insertHabitSchema.extend({
@@ -146,7 +147,40 @@ export default function HabitTracker() {
   if (isLoading && habits.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
-        <div className="flex items-center justify-center p-12">
+        {/* Navigation Bar */}
+        <div className="sticky top-0 z-50 w-full bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between">
+              <div className="flex items-center">
+                <Link href="/" className="flex items-center text-green-500 font-semibold">
+                  <Home className="h-5 w-5 mr-2" />
+                  <span className="hidden sm:inline">Home</span>
+                </Link>
+              </div>
+              
+              <div className="flex items-center space-x-1 sm:space-x-4">
+                <div className="flex overflow-x-auto no-scrollbar space-x-1 sm:space-x-2 p-2">
+                  <Link href="/dashboard" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
+                    <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span>Dashboard</span>
+                  </Link>
+                  
+                  <Link href="/task-board" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
+                    <ListTodo className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span>Tasks</span>
+                  </Link>
+                  
+                  <Link href="/habit-tracker-fixed" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
+                    <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
+                    <span>Habits</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
         </div>
       </div>
@@ -161,6 +195,39 @@ export default function HabitTracker() {
       <div className="absolute left-[10%] top-[20%] w-40 h-40 rounded-full bg-gradient-to-r from-green-900/10 to-green-500/5 blur-2xl float-effect-slow"></div>
       <div className="absolute right-[15%] top-[30%] w-64 h-64 rounded-full bg-gradient-to-r from-blue-900/10 to-purple-500/5 blur-2xl float-effect"></div>
       <div className="absolute left-[25%] bottom-[15%] w-52 h-52 rounded-full bg-gradient-to-r from-purple-900/5 to-pink-500/5 blur-2xl float-effect-fast"></div>
+      
+      {/* Navigation Bar */}
+      <div className="sticky top-0 z-50 w-full bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center text-green-500 font-semibold">
+                <Home className="h-5 w-5 mr-2" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+            </div>
+            
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              <div className="flex overflow-x-auto no-scrollbar space-x-1 sm:space-x-2 p-2">
+                <Link href="/dashboard" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
+                  <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span>Dashboard</span>
+                </Link>
+                
+                <Link href="/task-board" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
+                  <ListTodo className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span>Tasks</span>
+                </Link>
+                
+                <Link href="/habit-tracker-fixed" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
+                  <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
+                  <span>Habits</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <main className="flex-1 py-6 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
