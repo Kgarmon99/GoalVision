@@ -75,11 +75,12 @@ export const executionTasks = pgTable("execution_tasks", {
   weekId: integer("week_id").notNull(),
 });
 
-export const executionTasksRelations = relations(executionTasks, ({ one }) => ({
+export const executionTasksRelations = relations(executionTasks, ({ one, many }) => ({
   week: one(weeks, {
     fields: [executionTasks.weekId],
     references: [weeks.id]
-  })
+  }),
+  subtasks: many(subtasks)
 }));
 
 export const insertExecutionTaskSchema = createInsertSchema(executionTasks).pick({
@@ -91,6 +92,30 @@ export const insertExecutionTaskSchema = createInsertSchema(executionTasks).pick
   dueDate: true,
   status: true,
   weekId: true,
+});
+
+// New subtasks table
+export const subtasks = pgTable("subtasks", {
+  id: serial("id").primaryKey(),
+  parentTaskId: integer("parent_task_id").notNull(),
+  description: text("description").notNull(),
+  completed: boolean("completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  priority: text("priority").default("medium"), // "high", "medium", "low"
+});
+
+export const subtasksRelations = relations(subtasks, ({ one }) => ({
+  parentTask: one(executionTasks, {
+    fields: [subtasks.parentTaskId],
+    references: [executionTasks.id]
+  })
+}));
+
+export const insertSubtaskSchema = createInsertSchema(subtasks).pick({
+  parentTaskId: true,
+  description: true,
+  completed: true,
+  priority: true,
 });
 
 export const weeks = pgTable("weeks", {
@@ -121,6 +146,9 @@ export type GoalStatus = typeof goalStatus.$inferSelect;
 
 export type InsertExecutionTask = z.infer<typeof insertExecutionTaskSchema>;
 export type ExecutionTask = typeof executionTasks.$inferSelect;
+
+export type InsertSubtask = z.infer<typeof insertSubtaskSchema>;
+export type Subtask = typeof subtasks.$inferSelect;
 
 export type InsertWeek = z.infer<typeof insertWeekSchema>;
 export type Week = typeof weeks.$inferSelect;
