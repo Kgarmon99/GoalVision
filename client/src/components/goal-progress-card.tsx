@@ -85,9 +85,9 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
               <div className="flex items-center">
-                <p className="text-sm font-medium text-green-400 neon-text">{goal.name}</p>
-                {percentComplete >= 100 && <Award className="h-3 w-3 ml-1 text-yellow-400 aura-effect aura-green" />}
-                {percentComplete < 100 && <Target className="h-3 w-3 ml-1 text-green-400 aura-effect aura-green" />}
+                <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
+                {percentComplete >= 100 && <Award className="h-3 w-3 ml-1 text-yellow-400" />}
+                {percentComplete < 100 && <Target className="h-3 w-3 ml-1 text-green-400" />}
               </div>
               <div className="flex items-baseline gap-2">
                 <motion.p 
@@ -117,7 +117,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               <Progress 
                 value={percentComplete} 
                 className="h-2.5 bg-gray-800 glow-element" 
-                indicatorClassName={`${getProgressColorClass(percentComplete)} glow-effect aura-green`}
+                indicatorClassName={getProgressColorClass(percentComplete)}
               />
               {percentComplete >= 100 && (
                 <motion.div 
@@ -167,7 +167,7 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           
           <div className="mt-3 flex justify-end">
             <Link href={`/add-progress?goalId=${goal.id}`}>
-              <Button variant="outline" size="sm" className="text-xs border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 group glow-effect glow-green">
+              <Button variant="outline" size="sm" className="text-xs border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
                 <PlusCircle className="h-3 w-3 mr-1 group-hover:text-white transition-colors" />
                 <span className="hidden xs:inline">Update</span> Progress
                 <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />

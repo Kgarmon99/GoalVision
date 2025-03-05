@@ -142,10 +142,9 @@ export default function EditTask() {
         console.error("Error parsing date:", error);
       }
       
-      // Convert null values to appropriate defaults
+      // Convert null ownerAvatar to empty string and ensure categoryColor has a value
       const safeOwnerAvatar = task.ownerAvatar === null ? "" : task.ownerAvatar;
       const safeCategoryColor = task.categoryColor || "blue";
-      const safeWeekId = task.weekId ? task.weekId.toString() : "1"; // Default to week 1 if undefined
       
       form.reset({
         task: task.task,
@@ -154,7 +153,7 @@ export default function EditTask() {
         goalCategory: task.goalCategory,
         categoryColor: safeCategoryColor,
         status: task.status as "done" | "in-progress" | "missed",
-        weekId: safeWeekId,
+        weekId: task.weekId.toString(),
         dueDate: dueDate,
       });
     }
@@ -241,7 +240,7 @@ export default function EditTask() {
               Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-green-500 neon-text">Edit Task</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Edit Task</h1>
               <p className="mt-1 text-sm text-gray-600">
                 Update the details for this task.
               </p>
@@ -249,8 +248,8 @@ export default function EditTask() {
           </div>
           
           <Card>
-            <CardHeader className="border-b border-gray-700">
-              <CardTitle className="text-green-400 neon-text-blue">Task Details</CardTitle>
+            <CardHeader>
+              <CardTitle>Task Details</CardTitle>
               <CardDescription>
                 Make changes to the task information below.
               </CardDescription>
@@ -452,7 +451,7 @@ export default function EditTask() {
                     <Button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="bg-green-600 hover:bg-green-700 glow-effect glow-green"
+                      className="bg-green-600 hover:bg-green-700"
                     >
                       {isSubmitting && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

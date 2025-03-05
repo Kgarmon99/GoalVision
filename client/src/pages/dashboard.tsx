@@ -490,7 +490,7 @@ const Dashboard = () => {
               {/* Quick Stats Cards */}
               {!isLoading && goals.length > 0 && (
                 <section className="mb-8">
-                  <h2 className="text-xl font-semibold text-green-400 neon-text-purple flex items-center mb-4">
+                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
                     <Award className="h-5 w-5 mr-2" />
                     Achievement Stats
                   </h2>
@@ -559,7 +559,7 @@ const Dashboard = () => {
           {/* Getting Started Resources */}
           {!isLoading && !hasAnyData && (
             <section className="mt-12">
-              <h2 className="text-lg font-semibold text-green-400 neon-text-blue mb-4">Getting Started Resources</h2>
+              <h2 className="text-lg font-semibold text-green-400 text-glow mb-4">Getting Started Resources</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 glow-card">
                   <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Add Your First Goal</h3>
