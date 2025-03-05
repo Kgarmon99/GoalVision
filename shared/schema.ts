@@ -174,7 +174,7 @@ export const habits = pgTable("habits", {
   name: text("name").notNull(),
   description: text("description").default(""),
   frequency: text("frequency").notNull(), // daily, weekly, monthly
-  goalId: integer("goal_id").notNull(),
+  goalId: integer("goal_id"), // Make goalId optional
   createdAt: timestamp("created_at").defaultNow(),
   targetStreakDays: integer("target_streak_days").default(7),
   reminderTime: text("reminder_time").default("08:00"), // Format: HH:MM
@@ -184,7 +184,8 @@ export const habits = pgTable("habits", {
 export const habitsRelations = relations(habits, ({ one, many }) => ({
   goal: one(goals, {
     fields: [habits.goalId],
-    references: [goals.id]
+    references: [goals.id],
+    nullable: true
   }),
   streaks: many(habitStreaks)
 }));
