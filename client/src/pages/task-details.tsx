@@ -188,22 +188,22 @@ export default function TaskDetails() {
     switch (status) {
       case "done":
         return (
-          <Badge variant="outline" className="bg-green-900 text-green-400 border-green-500 hover:bg-green-800">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
+          <Badge variant="outline" className="bg-green-900 text-green-400 border-green-500 hover:bg-green-800 neon-text-sm glow-effect-green">
+            <CheckCircle2 className="h-3 w-3 mr-1 aura-effect aura-green" />
             Done
           </Badge>
         );
       case "in-progress":
         return (
-          <Badge variant="outline" className="bg-yellow-900 text-yellow-400 border-yellow-500 hover:bg-yellow-800">
-            <Clock className="h-3 w-3 mr-1" />
+          <Badge variant="outline" className="bg-yellow-900 text-yellow-400 border-yellow-500 hover:bg-yellow-800 neon-text-sm glow-effect-yellow">
+            <Clock className="h-3 w-3 mr-1 aura-effect aura-yellow" />
             In Progress
           </Badge>
         );
       case "missed":
         return (
-          <Badge variant="outline" className="bg-red-900 text-red-400 border-red-500 hover:bg-red-800">
-            <AlertCircle className="h-3 w-3 mr-1" />
+          <Badge variant="outline" className="bg-red-900 text-red-400 border-red-500 hover:bg-red-800 neon-text-sm glow-effect-red">
+            <AlertCircle className="h-3 w-3 mr-1 aura-effect aura-red" />
             Missed
           </Badge>
         );
@@ -299,7 +299,7 @@ export default function TaskDetails() {
             <div className="flex items-center space-x-2">
               <Button 
                 variant="outline" 
-                className="border-green-500 text-green-400 hover:bg-gray-800"
+                className="border-green-500 text-green-400 hover:bg-gray-800 glow-effect-green"
                 onClick={handleToggleStatus}
               >
                 {task?.status === "done" ? (
@@ -317,7 +317,7 @@ export default function TaskDetails() {
               
               <Button 
                 variant="outline" 
-                className="border-green-500 text-green-400 hover:bg-gray-800"
+                className="border-green-500 text-green-400 hover:bg-gray-800 glow-effect-blue"
                 onClick={() => navigate(`/edit-task/${taskId}`)}
               >
                 <Edit2 className="h-4 w-4 mr-2" />
@@ -403,7 +403,7 @@ export default function TaskDetails() {
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-xl text-white">{task.task}</CardTitle>
+                        <CardTitle className="text-xl text-green-500 neon-text">{task.task}</CardTitle>
                         {week && (
                           <CardDescription className="text-green-400">
                             Week {week.number} ({week.dateRange})
@@ -519,8 +519,8 @@ export default function TaskDetails() {
                 {/* Notes and Comments */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
-                    <CardTitle className="text-white flex items-center">
-                      <FileText className="mr-2 h-5 w-5 text-green-400" />
+                    <CardTitle className="text-green-400 neon-text-blue flex items-center">
+                      <FileText className="mr-2 h-5 w-5 text-green-400 aura-effect aura-green" />
                       Notes & Comments
                     </CardTitle>
                     <CardDescription className="text-gray-400">
@@ -537,8 +537,8 @@ export default function TaskDetails() {
                       ))}
                       
                       <div className="mt-4 pt-4 border-t border-gray-800">
-                        <Button className="w-full bg-gray-800 text-green-400 hover:bg-gray-700">
-                          <PlusCircle className="h-4 w-4 mr-2" />
+                        <Button className="w-full bg-gray-800 text-green-400 hover:bg-gray-700 glow-effect-green">
+                          <PlusCircle className="h-4 w-4 mr-2 aura-effect aura-green" />
                           Add Note
                         </Button>
                       </div>
@@ -553,8 +553,8 @@ export default function TaskDetails() {
                 {relatedGoal && (
                   <Card className="bg-gray-900 border border-green-600">
                     <CardHeader className="border-b border-green-800 bg-gray-800/50">
-                      <CardTitle className="text-white flex items-center">
-                        <Target className="mr-2 h-5 w-5 text-green-400" />
+                      <CardTitle className="text-green-400 neon-text-blue flex items-center">
+                        <Target className="mr-2 h-5 w-5 text-green-400 aura-effect aura-green" />
                         Goal Progress
                       </CardTitle>
                     </CardHeader>
@@ -570,17 +570,17 @@ export default function TaskDetails() {
                           <Progress 
                             value={(relatedGoal.current / relatedGoal.target) * 100} 
                             className="h-2" 
-                            indicatorClassName="bg-green-500"
+                            indicatorClassName="bg-green-500 pulse-glow"
                           />
                         </div>
                         
                         <Button 
                           variant="outline" 
-                          className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800"
+                          className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800 glow-effect-green"
                           asChild
                         >
                           <WouterLink href={`/goal-tasks/${relatedGoal.id}`}>
-                            <ArrowRight className="h-4 w-4 mr-2" />
+                            <ArrowRight className="h-4 w-4 mr-2 aura-effect aura-green" />
                             View All Goal Tasks
                           </WouterLink>
                         </Button>
@@ -592,8 +592,8 @@ export default function TaskDetails() {
                 {/* Related Tasks */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
-                    <CardTitle className="text-white flex items-center">
-                      <Link className="mr-2 h-5 w-5 text-green-400" />
+                    <CardTitle className="text-green-400 neon-text-blue flex items-center">
+                      <Link className="mr-2 h-5 w-5 text-green-400 aura-effect aura-green" />
                       Related Tasks
                     </CardTitle>
                   </CardHeader>
@@ -602,8 +602,8 @@ export default function TaskDetails() {
                       <div className="bg-gray-800/50 rounded-md p-3 border border-gray-700 hover:bg-gray-800 transition-colors">
                         <div className="text-sm text-white mb-1">Review financial projections</div>
                         <div className="flex justify-between items-center">
-                          <Badge variant="outline" className="bg-yellow-900 text-yellow-400 border-yellow-500">
-                            <Clock className="h-3 w-3 mr-1" />
+                          <Badge variant="outline" className="bg-yellow-900 text-yellow-400 border-yellow-500 neon-text-sm glow-effect-yellow">
+                            <Clock className="h-3 w-3 mr-1 aura-effect aura-yellow" />
                             In Progress
                           </Badge>
                           <span className="text-xs text-gray-400">Due: March 15, 2025</span>
@@ -613,8 +613,8 @@ export default function TaskDetails() {
                       <div className="bg-gray-800/50 rounded-md p-3 border border-gray-700 hover:bg-gray-800 transition-colors">
                         <div className="text-sm text-white mb-1">Schedule investor meetings</div>
                         <div className="flex justify-between items-center">
-                          <Badge variant="outline" className="bg-green-900 text-green-400 border-green-500">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                          <Badge variant="outline" className="bg-green-900 text-green-400 border-green-500 neon-text-sm glow-effect-green">
+                            <CheckCircle2 className="h-3 w-3 mr-1 aura-effect aura-green" />
                             Done
                           </Badge>
                           <span className="text-xs text-gray-400">Due: March 1, 2025</span>
@@ -623,9 +623,9 @@ export default function TaskDetails() {
                       
                       <Button 
                         variant="outline" 
-                        className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800"
+                        className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800 glow-effect-blue"
                       >
-                        <PlusCircle className="h-4 w-4 mr-2" />
+                        <PlusCircle className="h-4 w-4 mr-2 aura-effect aura-blue" />
                         Link Task
                       </Button>
                     </div>
@@ -635,8 +635,8 @@ export default function TaskDetails() {
                 {/* Task Timeline */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
-                    <CardTitle className="text-white flex items-center">
-                      <Flag className="mr-2 h-5 w-5 text-green-400" />
+                    <CardTitle className="text-green-400 neon-text-blue flex items-center">
+                      <Flag className="mr-2 h-5 w-5 text-green-400 aura-effect aura-green" />
                       Timeline
                     </CardTitle>
                   </CardHeader>
@@ -644,7 +644,7 @@ export default function TaskDetails() {
                     <div className="space-y-4">
                       <div className="relative pl-6 pb-6 border-l border-green-800">
                         <div className="absolute -left-1.5 top-0">
-                          <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+                          <div className="h-3 w-3 bg-green-500 rounded-full aura-effect aura-green"></div>
                         </div>
                         <div className="text-xs text-gray-400 mb-1">March 1, 2025</div>
                         <div className="text-sm text-white">Task created</div>
@@ -652,7 +652,7 @@ export default function TaskDetails() {
                       
                       <div className="relative pl-6 pb-6 border-l border-green-800">
                         <div className="absolute -left-1.5 top-0">
-                          <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
+                          <div className="h-3 w-3 bg-yellow-500 rounded-full aura-effect aura-yellow"></div>
                         </div>
                         <div className="text-xs text-gray-400 mb-1">March 2, 2025</div>
                         <div className="text-sm text-white">Status changed to In Progress</div>
@@ -660,7 +660,7 @@ export default function TaskDetails() {
                       
                       <div className="relative pl-6">
                         <div className="absolute -left-1.5 top-0">
-                          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
+                          <div className="h-3 w-3 bg-blue-500 rounded-full aura-effect aura-blue"></div>
                         </div>
                         <div className="text-xs text-gray-400 mb-1">March 15, 2025</div>
                         <div className="text-sm text-white">Due date</div>

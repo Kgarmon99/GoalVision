@@ -69,6 +69,39 @@
   .glow-effect:hover::before {
     opacity: 1;
   }
+  
+  /* Special glow effects */
+  .glow-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .glow-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(22, 163, 74, 0.4);
+  }
+  
+  .glow-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-button:hover {
+    box-shadow: 0 0 20px rgba(22, 163, 74, 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .glow-element {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-element:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(22, 163, 74, 0.5);
+  }
 
   /* Glow colors */
   .glow-green::before {
@@ -157,6 +190,65 @@
                 0 0 10px rgba(22, 101, 163, 0.5),
                 0 0 15px rgba(22, 101, 163, 0.3);
   }
+  
+  /* Smaller neon text effect */
+  .neon-text-sm {
+    text-shadow: 0 0 3px rgba(22, 163, 74, 0.7),
+                0 0 6px rgba(22, 163, 74, 0.5),
+                0 0 9px rgba(22, 163, 74, 0.3);
+  }
+  
+  /* Color-specific glow effects for buttons */
+  .glow-effect-green {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-effect-green:hover {
+    box-shadow: 0 0 12px rgba(22, 163, 74, 0.7);
+    transform: translateY(-1px);
+  }
+  
+  .glow-effect-blue {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-effect-blue:hover {
+    box-shadow: 0 0 12px rgba(22, 101, 163, 0.7);
+    transform: translateY(-1px);
+  }
+  
+  .glow-effect-red {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-effect-red:hover {
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.7);
+    transform: translateY(-1px);
+  }
+  
+  .glow-effect-yellow {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .glow-effect-yellow:hover {
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.7);
+    transform: translateY(-1px);
+  }
+  
+  /* Additional aura colors */
+  .aura-yellow::before {
+    box-shadow: 0 0 var(--glow-spread) rgba(234, 179, 8, 0.7);
+    background: rgba(234, 179, 8, 0.7);
+  }
+  
+  .aura-red::before {
+    box-shadow: 0 0 var(--glow-spread) rgba(220, 38, 38, 0.7);
+    background: rgba(220, 38, 38, 0.7);
+  }
 }
 
 @keyframes pulse-aura {
@@ -171,4 +263,20 @@
     opacity: 0.5;
     transform: scale(1.15);
   }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(22, 163, 74, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(22, 163, 74, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(22, 163, 74, 0.4);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
