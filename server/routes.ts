@@ -9,12 +9,16 @@ import {
   insertExecutionTaskSchema, 
   insertWeekSchema,
   insertSubtaskSchema,
+  insertHabitSchema,
+  insertHabitStreakSchema,
   goals,
   metrics,
   goalStatus,
   executionTasks,
   subtasks,
-  weeks
+  weeks,
+  habits,
+  habitStreaks
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -26,6 +30,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reset-data", async (req, res) => {
     try {
       // Clear all tables
+      await db.delete(habitStreaks);
+      await db.delete(habits);
       await db.delete(subtasks);
       await db.delete(executionTasks);
       await db.delete(goalStatus);
@@ -433,6 +439,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Error deleting subtask" });
+    }
+  });
+
+  // Habit routes
+  // Get all habits
+  app.get("/api/habits", async (req, res) => {
+    try {
+      const habits = await storage.getAllHabits();
+      res.json(habits);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching habits" });
+    }
+  });
+
+  // Get habits by goal ID
+  app.get("/api/goals/:goalId/habits", async (req, res) => {
+    try {
+      const goalId = parseInt(req.params.goalId);
+      const habits = await storage.getHabitsByGoalId(goalId);
+      res.json(habits);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching habits for goal" });
+    }
+  });
+
+  // Get a specific habit
+  app.get("/api/habits/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const habit = await storage.getHabit(id);
+      
+      if (!habit) {
+        return res.status(404).json({ message: "Habit not found" });
+      }
+      
+      res.json(habit);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching habit" });
+    }
+  });
+
+  // Create a habit
+  app.post("/api/habits", async (req, res) => {
+    try {
+      const habitData = insertHabitSchema.parse(req.body);
+      const habit = await storage.createHabit(habitData);
+      res.status(201).json(habit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid habit data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating habit" });
+    }
+  });
+
+  // Update a habit
+  app.patch("/api/habits/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const habitData = insertHabitSchema.partial().parse(req.body);
+      const updatedHabit = await storage.updateHabit(id, habitData);
+      
+      if (!updatedHabit) {
+        return res.status(404).json({ message: "Habit not found" });
+      }
+      
+      res.json(updatedHabit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid habit data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating habit" });
+    }
+  });
+
+  // Delete a habit
+  app.delete("/api/habits/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteHabit(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Habit not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting habit" });
+    }
+  });
+
+  // Habit Streak routes
+  // Get all streaks for a habit
+  app.get("/api/habits/:habitId/streaks", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      const streaks = await storage.getHabitStreaksByHabitId(habitId);
+      res.json(streaks);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching streaks for habit" });
+    }
+  });
+
+  // Get streaks for a habit in a date range
+  app.get("/api/habits/:habitId/streaks/range", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Default to 30 days ago
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date(); // Default to today
+      
+      const streaks = await storage.getHabitStreaksInDateRange(habitId, startDate, endDate);
+      res.json(streaks);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching streaks for date range" });
+    }
+  });
+
+  // Get current streak count for a habit
+  app.get("/api/habits/:habitId/current-streak", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      const streakCount = await storage.getCurrentStreak(habitId);
+      res.json({ habitId, currentStreak: streakCount });
+    } catch (error) {
+      res.status(500).json({ message: "Error calculating current streak" });
+    }
+  });
+
+  // Get a specific streak
+  app.get("/api/habit-streaks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const streak = await storage.getHabitStreak(id);
+      
+      if (!streak) {
+        return res.status(404).json({ message: "Habit streak not found" });
+      }
+      
+      res.json(streak);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching habit streak" });
+    }
+  });
+
+  // Create a habit streak
+  app.post("/api/habit-streaks", async (req, res) => {
+    try {
+      const streakData = insertHabitStreakSchema.parse(req.body);
+      const streak = await storage.createHabitStreak(streakData);
+      res.status(201).json(streak);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid habit streak data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating habit streak" });
+    }
+  });
+
+  // Update a habit streak
+  app.patch("/api/habit-streaks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const streakData = insertHabitStreakSchema.partial().parse(req.body);
+      const updatedStreak = await storage.updateHabitStreak(id, streakData);
+      
+      if (!updatedStreak) {
+        return res.status(404).json({ message: "Habit streak not found" });
+      }
+      
+      res.json(updatedStreak);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid habit streak data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating habit streak" });
+    }
+  });
+
+  // Delete a habit streak
+  app.delete("/api/habit-streaks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteHabitStreak(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Habit streak not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting habit streak" });
     }
   });
 

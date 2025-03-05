@@ -491,6 +491,131 @@ export class MemStorage implements IStorage {
     this.weeksData.set(id, updatedWeek);
     return updatedWeek;
   }
+  
+  // Habit methods
+  async getAllHabits(): Promise<Habit[]> {
+    return Array.from(this.habitsData.values());
+  }
+  
+  async getHabitsByGoalId(goalId: number): Promise<Habit[]> {
+    return Array.from(this.habitsData.values()).filter(habit => habit.goalId === goalId);
+  }
+  
+  async getHabit(id: number): Promise<Habit | undefined> {
+    return this.habitsData.get(id);
+  }
+  
+  async createHabit(insertHabit: InsertHabit): Promise<Habit> {
+    const id = this.currentHabitId++;
+    const habit: Habit = {
+      ...insertHabit,
+      id,
+      description: insertHabit.description ?? "",
+      createdAt: new Date(),
+      targetStreakDays: insertHabit.targetStreakDays ?? 7,
+      reminderTime: insertHabit.reminderTime ?? "08:00",
+      color: insertHabit.color ?? "primary"
+    };
+    this.habitsData.set(id, habit);
+    return habit;
+  }
+  
+  async updateHabit(id: number, habit: Partial<InsertHabit>): Promise<Habit | undefined> {
+    const existingHabit = this.habitsData.get(id);
+    if (!existingHabit) return undefined;
+    
+    const updatedHabit = { ...existingHabit, ...habit };
+    this.habitsData.set(id, updatedHabit);
+    return updatedHabit;
+  }
+  
+  async deleteHabit(id: number): Promise<boolean> {
+    return this.habitsData.delete(id);
+  }
+  
+  // Habit Streak methods
+  async getHabitStreaksByHabitId(habitId: number): Promise<HabitStreak[]> {
+    return Array.from(this.habitStreaksData.values())
+      .filter(streak => streak.habitId === habitId)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+  
+  async getHabitStreaksInDateRange(habitId: number, startDate: Date, endDate: Date): Promise<HabitStreak[]> {
+    const startTime = startDate.getTime();
+    const endTime = endDate.getTime();
+    
+    return Array.from(this.habitStreaksData.values())
+      .filter(streak => {
+        const streakTime = new Date(streak.date).getTime();
+        return streak.habitId === habitId && streakTime >= startTime && streakTime <= endTime;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+  
+  async getHabitStreak(id: number): Promise<HabitStreak | undefined> {
+    return this.habitStreaksData.get(id);
+  }
+  
+  async createHabitStreak(insertStreak: InsertHabitStreak): Promise<HabitStreak> {
+    const id = this.currentHabitStreakId++;
+    const streak: HabitStreak = {
+      ...insertStreak,
+      id,
+      completed: insertStreak.completed ?? false,
+      notes: insertStreak.notes ?? ""
+    };
+    this.habitStreaksData.set(id, streak);
+    return streak;
+  }
+  
+  async updateHabitStreak(id: number, streak: Partial<InsertHabitStreak>): Promise<HabitStreak | undefined> {
+    const existingStreak = this.habitStreaksData.get(id);
+    if (!existingStreak) return undefined;
+    
+    const updatedStreak = { ...existingStreak, ...streak };
+    this.habitStreaksData.set(id, updatedStreak);
+    return updatedStreak;
+  }
+  
+  async deleteHabitStreak(id: number): Promise<boolean> {
+    return this.habitStreaksData.delete(id);
+  }
+  
+  async getCurrentStreak(habitId: number): Promise<number> {
+    const streaks = await this.getHabitStreaksByHabitId(habitId);
+    if (streaks.length === 0) return 0;
+    
+    // Sort by date in descending order
+    const sortedStreaks = [...streaks].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Start from the most recent streak
+    for (let i = 0; i < sortedStreaks.length; i++) {
+      const streak = sortedStreaks[i];
+      const streakDate = new Date(streak.date);
+      streakDate.setHours(0, 0, 0, 0);
+      
+      // If the streak is not completed, break
+      if (!streak.completed) break;
+      
+      // Check if the streak is within the expected date range
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      expectedDate.setHours(0, 0, 0, 0);
+      
+      // If the date doesn't match the expected sequence, break
+      if (streakDate.getTime() !== expectedDate.getTime()) break;
+      
+      currentStreak++;
+    }
+    
+    return currentStreak;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -688,6 +813,123 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedWeek;
   }
+  
+  // Habit methods
+  async getAllHabits(): Promise<Habit[]> {
+    return await db.select().from(habits);
+  }
+  
+  async getHabitsByGoalId(goalId: number): Promise<Habit[]> {
+    return await db.select().from(habits).where(eq(habits.goalId, goalId));
+  }
+  
+  async getHabit(id: number): Promise<Habit | undefined> {
+    const [habit] = await db.select().from(habits).where(eq(habits.id, id));
+    return habit;
+  }
+  
+  async createHabit(insertHabit: InsertHabit): Promise<Habit> {
+    const [habit] = await db.insert(habits).values(insertHabit).returning();
+    return habit;
+  }
+  
+  async updateHabit(id: number, habit: Partial<InsertHabit>): Promise<Habit | undefined> {
+    const [updatedHabit] = await db
+      .update(habits)
+      .set(habit)
+      .where(eq(habits.id, id))
+      .returning();
+    return updatedHabit;
+  }
+  
+  async deleteHabit(id: number): Promise<boolean> {
+    const result = await db.delete(habits).where(eq(habits.id, id));
+    return !!result;
+  }
+  
+  // Habit Streak methods
+  async getHabitStreaksByHabitId(habitId: number): Promise<HabitStreak[]> {
+    return await db
+      .select()
+      .from(habitStreaks)
+      .where(eq(habitStreaks.habitId, habitId))
+      .orderBy(asc(habitStreaks.date));
+  }
+  
+  async getHabitStreaksInDateRange(habitId: number, startDate: Date, endDate: Date): Promise<HabitStreak[]> {
+    const streaks = await db
+      .select()
+      .from(habitStreaks)
+      .where(eq(habitStreaks.habitId, habitId))
+      .orderBy(asc(habitStreaks.date));
+    
+    // Filter by date range in JS since SQL comparison is causing issues
+    return streaks.filter(streak => {
+      const streakDate = new Date(streak.date);
+      return streakDate >= startDate && streakDate <= endDate;
+    });
+  }
+  
+  async getHabitStreak(id: number): Promise<HabitStreak | undefined> {
+    const [streak] = await db.select().from(habitStreaks).where(eq(habitStreaks.id, id));
+    return streak;
+  }
+  
+  async createHabitStreak(insertStreak: InsertHabitStreak): Promise<HabitStreak> {
+    const [streak] = await db.insert(habitStreaks).values(insertStreak).returning();
+    return streak;
+  }
+  
+  async updateHabitStreak(id: number, streak: Partial<InsertHabitStreak>): Promise<HabitStreak | undefined> {
+    const [updatedStreak] = await db
+      .update(habitStreaks)
+      .set(streak)
+      .where(eq(habitStreaks.id, id))
+      .returning();
+    return updatedStreak;
+  }
+  
+  async deleteHabitStreak(id: number): Promise<boolean> {
+    const result = await db.delete(habitStreaks).where(eq(habitStreaks.id, id));
+    return !!result;
+  }
+  
+  async getCurrentStreak(habitId: number): Promise<number> {
+    // Get all completed streaks for this habit
+    const streaks = await this.getHabitStreaksByHabitId(habitId);
+    if (streaks.length === 0) return 0;
+    
+    // Sort by date in descending order
+    const sortedStreaks = [...streaks].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Start from the most recent streak
+    for (let i = 0; i < sortedStreaks.length; i++) {
+      const streak = sortedStreaks[i];
+      const streakDate = new Date(streak.date);
+      streakDate.setHours(0, 0, 0, 0);
+      
+      // If the streak is not completed, break
+      if (!streak.completed) break;
+      
+      // Check if the streak is within the expected date range
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      expectedDate.setHours(0, 0, 0, 0);
+      
+      // If the date doesn't match the expected sequence, break
+      if (streakDate.getTime() !== expectedDate.getTime()) break;
+      
+      currentStreak++;
+    }
+    
+    return currentStreak;
+  }
 
   // Initialize database with sample data
   async initializeData() {
@@ -844,6 +1086,91 @@ export class DatabaseStorage implements IStorage {
       ];
       
       await Promise.all(tasks.map(task => this.createTask(task)));
+      
+      // Create sample habits
+      const sampleHabits: InsertHabit[] = [
+        {
+          name: "Daily Team Stand-up",
+          description: "Attend the morning stand-up meeting to discuss Revenue goals",
+          frequency: "daily",
+          goalId: goalMap.get("Revenue") || 2,
+          targetStreakDays: 21,
+          reminderTime: "09:30",
+          color: "purple"
+        },
+        {
+          name: "Investor Follow-ups",
+          description: "Send follow-up emails to potential investors",
+          frequency: "daily",
+          goalId: goalMap.get("Funding") || 1,
+          targetStreakDays: 14,
+          reminderTime: "11:00",
+          color: "blue"
+        },
+        {
+          name: "User Feedback Analysis",
+          description: "Review and analyze user feedback to improve growth metrics",
+          frequency: "weekly",
+          goalId: goalMap.get("User Growth") || 3,
+          targetStreakDays: 10,
+          reminderTime: "14:00",
+          color: "green"
+        },
+        {
+          name: "School Partner Check-ins",
+          description: "Weekly call with school partners to discuss issues and progress",
+          frequency: "weekly",
+          goalId: goalMap.get("School Expansion") || 4,
+          targetStreakDays: 12,
+          reminderTime: "15:30",
+          color: "indigo"
+        }
+      ];
+      
+      const createdHabits = await Promise.all(sampleHabits.map(habit => this.createHabit(habit)));
+      
+      // Create sample streaks for the past week
+      const today = new Date();
+      const streaks: InsertHabitStreak[] = [];
+      
+      // Create streaks for the past 10 days for each habit
+      for (const habit of createdHabits) {
+        for (let i = 0; i < 10; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+          
+          // Make some days completed, some not to demonstrate breaking streaks
+          // For the first habit, all days are completed
+          if (habit.id === createdHabits[0].id) {
+            streaks.push({
+              habitId: habit.id,
+              date,
+              completed: true,
+              notes: `Completed day ${i + 1}`
+            });
+          } 
+          // For the second habit, only even days completed
+          else if (habit.id === createdHabits[1].id) {
+            streaks.push({
+              habitId: habit.id,
+              date,
+              completed: i % 2 === 0,
+              notes: i % 2 === 0 ? `Completed day ${i + 1}` : "Missed this day"
+            });
+          }
+          // For others, add breaks in the streak
+          else {
+            streaks.push({
+              habitId: habit.id,
+              date,
+              completed: i !== 3 && i !== 7, // Break on days 3 and 7
+              notes: i !== 3 && i !== 7 ? `Completed day ${i + 1}` : "Missed this day"
+            });
+          }
+        }
+      }
+      
+      await Promise.all(streaks.map(streak => this.createHabitStreak(streak)));
     }
   }
 }
