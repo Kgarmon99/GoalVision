@@ -284,8 +284,11 @@ export default function TaskDetails() {
     queryFn: async () => {
       if (!taskId) return [];
       try {
-        const response = await apiRequest<Subtask[]>("GET", `/api/tasks/${taskId}/subtasks`);
-        return response || [];
+        const response = await fetch(`/api/tasks/${taskId}/subtasks`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch subtasks: ${response.statusText}`);
+        }
+        return response.json();
       } catch (error) {
         console.error("Error fetching subtasks:", error);
         return [];
@@ -297,7 +300,19 @@ export default function TaskDetails() {
   // Add subtask mutation
   const addSubtaskMutation = useMutation({
     mutationFn: async (subtaskData: { parentTaskId: number, description: string, priority: string }) => {
-      return apiRequest("POST", "/api/subtasks", subtaskData);
+      const response = await fetch("/api/subtasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(subtaskData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add subtask: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       // Refetch subtasks to update the list
@@ -321,7 +336,19 @@ export default function TaskDetails() {
   // Toggle subtask completion mutation
   const toggleSubtaskMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: number, completed: boolean }) => {
-      return apiRequest("PATCH", `/api/subtasks/${id}`, { completed });
+      const response = await fetch(`/api/subtasks/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ completed }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update subtask: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       // Refetch subtasks to update the list
@@ -339,7 +366,15 @@ export default function TaskDetails() {
   // Delete subtask mutation
   const deleteSubtaskMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/subtasks/${id}`);
+      const response = await fetch(`/api/subtasks/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete subtask: ${response.statusText}`);
+      }
+      
+      return true;
     },
     onSuccess: () => {
       // Refetch subtasks to update the list
@@ -411,7 +446,19 @@ export default function TaskDetails() {
     // Edit task mutation
     const editTaskMutation = useMutation({
       mutationFn: async (data: z.infer<typeof editTaskFormSchema>) => {
-        return apiRequest("PATCH", `/api/tasks/${task.id}`, data);
+        const response = await fetch(`/api/tasks/${task.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update task: ${response.statusText}`);
+        }
+        
+        return response.json();
       },
       onSuccess: () => {
         toast({
@@ -421,7 +468,10 @@ export default function TaskDetails() {
         });
         onSuccess();
         // Close dialog after successful submission
-        document.querySelector('[data-dialog-close]')?.click();
+        const closeButton = document.querySelector('[data-state="open"] button.bg-gray-800.text-white.border-gray-700') as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.click();
+        }
       },
       onError: (error) => {
         toast({
