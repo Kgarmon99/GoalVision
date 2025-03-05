@@ -184,8 +184,14 @@ const Dashboard = () => {
   const hasAnyData = goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0;
   
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white relative">
+    <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
+      
+      {/* Animated Floating Orbs */}
+      <div className="absolute left-[10%] top-[20%] w-40 h-40 rounded-full bg-gradient-to-r from-green-900/10 to-green-500/5 blur-2xl float-effect-slow"></div>
+      <div className="absolute right-[15%] top-[30%] w-64 h-64 rounded-full bg-gradient-to-r from-blue-900/10 to-purple-500/5 blur-2xl float-effect"></div>
+      <div className="absolute left-[25%] bottom-[15%] w-52 h-52 rounded-full bg-gradient-to-r from-purple-900/5 to-pink-500/5 blur-2xl float-effect-fast"></div>
+      
       <Header />
       
       <main className="flex-1 py-6 relative z-10">
@@ -194,11 +200,13 @@ const Dashboard = () => {
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
-                <Rocket className="h-8 w-8 mr-3 text-green-400 animate-float" />
+                <div className="relative aura-pulse mr-3">
+                  <Rocket className="h-8 w-8 text-green-400 float-effect" />
+                </div>
                 <h1 className="text-3xl font-bold text-white text-glow">2025 Goals Dashboard</h1>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border">
+                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border neon-glow">
                   <span className="text-sm text-green-400">Last updated:</span>
                   <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
                 </div>
@@ -206,7 +214,7 @@ const Dashboard = () => {
                   variant="outline"
                   onClick={handleRefreshData} 
                   disabled={isRefreshing}
-                  className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 transition-colors"
+                  className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 transition-colors neon-glow"
                 >
                   {isRefreshing ? (
                     <>
@@ -241,85 +249,96 @@ const Dashboard = () => {
               {/* Stats Overview */}
               <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect">
                     <Target className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{goals.length}</h3>
+                  <h3 className="text-xl font-bold text-white text-glow">{goals.length}</h3>
                   <p className="text-green-400 text-sm">Active Goals</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect-slow">
                     <BarChart3 className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{(growthMetrics.length + revenueMetrics.length)}</h3>
+                  <h3 className="text-xl font-bold text-white text-glow">{(growthMetrics.length + revenueMetrics.length)}</h3>
                   <p className="text-green-400 text-sm">Key Metrics</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.3 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect-fast">
                     <ListTodo className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{weekTasks.length}</h3>
+                  <h3 className="text-xl font-bold text-white text-glow">{weekTasks.length}</h3>
                   <p className="text-green-400 text-sm">Execution Tasks</p>
                 </motion.div>
                 
                 <motion.div 
-                  className="bg-gray-900/90 rounded-lg border border-green-600 p-4 gradient-border flex flex-col items-center"
+                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.4 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                 >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full">
+                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect">
                     <Calendar className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{weeks.length}</h3>
+                  <h3 className="text-xl font-bold text-white text-glow">{weeks.length}</h3>
                   <p className="text-green-400 text-sm">Planning Weeks</p>
                 </motion.div>
               </div>
             
               {/* Action Bar */}
-              <div className="mb-8 bg-gray-900/80 rounded-lg border border-green-600 p-4 gradient-border flex flex-wrap gap-4 justify-between items-center">
+              <motion.div 
+                className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card flex flex-wrap gap-4 justify-between items-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 <div className="flex items-center">
-                  <Target className="h-6 w-6 mr-2 text-green-400" />
+                  <div className="aura-pulse mr-2">
+                    <Target className="h-6 w-6 text-green-400 float-effect" />
+                  </div>
                   <h2 className="text-lg font-semibold text-green-400 text-glow">2025 Goals Tracker</h2>
                 </div>
                 <div className="flex gap-3 flex-wrap">
                   <Link href="/add-progress">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
-                      <PlusCircle className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover">
+                      <PlusCircle className="h-4 w-4 mr-2 group-hover:text-white transition-colors float-effect-fast" />
                       <span>Update Progress</span>
                     </Button>
                   </Link>
                   <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
-                      <Plus className="h-4 w-4 mr-2 group-hover:text-white transition-colors" />
+                    <Button variant="outline" size="sm" className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover">
+                      <Plus className="h-4 w-4 mr-2 group-hover:text-white transition-colors float-effect-fast" />
                       <span>Add Goal</span>
                     </Button>
                   </Link>
                   <Link href="/add-task">
-                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700">
-                      <Rocket className="h-4 w-4 mr-2" />
+                    <Button size="sm" className="bg-green-600 text-white hover:bg-green-700 neon-glow">
+                      <Rocket className="h-4 w-4 mr-2 float-effect-fast" />
                       <span>Track Execution</span>
                     </Button>
                   </Link>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Main Goals Progress */}
               <section className="mb-8">
@@ -360,14 +379,26 @@ const Dashboard = () => {
               
               {/* Dashboard Tabs - Metrics and Execution */}
               <Tabs defaultValue="metrics" className="w-full mb-8">
-                <TabsList className="w-full justify-start mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1">
-                  <TabsTrigger value="metrics" className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Metrics Dashboard
+                <TabsList className="w-full justify-start mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1 gradient-border">
+                  <TabsTrigger 
+                    value="metrics" 
+                    className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
+                  >
+                    <div className="relative group">
+                      <BarChart3 className="h-4 w-4 mr-2 float-effect-fast" />
+                      <span>Metrics Dashboard</span>
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
+                    </div>
                   </TabsTrigger>
-                  <TabsTrigger value="execution" className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Execution Tracker
+                  <TabsTrigger 
+                    value="execution" 
+                    className="data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
+                  >
+                    <div className="relative group">
+                      <CheckCircle className="h-4 w-4 mr-2 float-effect-fast" />
+                      <span>Execution Tracker</span>
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
+                    </div>
                   </TabsTrigger>
                 </TabsList>
                 
@@ -558,46 +589,94 @@ const Dashboard = () => {
           
           {/* Getting Started Resources */}
           {!isLoading && !hasAnyData && (
-            <section className="mt-12">
-              <h2 className="text-lg font-semibold text-green-400 text-glow mb-4">Getting Started Resources</h2>
+            <motion.section 
+              className="mt-12 relative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/10 blur-3xl float-effect-slow"></div>
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/5 blur-3xl float-effect"></div>
+              
+              <h2 className="text-lg font-semibold text-green-400 text-glow mb-4 flex items-center">
+                <Rocket className="h-5 w-5 mr-2 float-effect" />
+                Getting Started Resources
+              </h2>
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 glow-card">
-                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Add Your First Goal</h3>
-                  <p className="text-gray-400 text-sm mb-4">
-                    Define your 2025 targets with measurable goals to track progress over time.
-                  </p>
-                  <Link href="/add-goal">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
-                      Start <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+                <motion.div 
+                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
+                  <div className="relative">
+                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
+                      <Target className="h-4 w-4 mr-2 float-effect-fast" />
+                      Add Your First Goal
+                    </h3>
+                    <p className="text-gray-300 text-sm mb-4">
+                      Define your 2025 targets with measurable goals to track progress over time.
+                    </p>
+                    <Link href="/add-goal">
+                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
+                        Start <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
+                      </Button>
+                    </Link>
+                  </div>
+                </motion.div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 glow-card">
-                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Track Key Metrics</h3>
-                  <p className="text-gray-400 text-sm mb-4">
-                    Monitor important KPIs related to growth, revenue, and performance.
-                  </p>
-                  <Link href="/add-metric">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
-                      View Metrics <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+                <motion.div 
+                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
+                  <div className="relative">
+                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
+                      <BarChart3 className="h-4 w-4 mr-2 float-effect-fast" />
+                      Track Key Metrics
+                    </h3>
+                    <p className="text-gray-300 text-sm mb-4">
+                      Monitor important KPIs related to growth, revenue, and performance.
+                    </p>
+                    <Link href="/add-metric">
+                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
+                        View Metrics <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
+                      </Button>
+                    </Link>
+                  </div>
+                </motion.div>
                 
-                <div className="bg-gray-950 border border-green-800 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1 glow-card">
-                  <h3 className="text-green-400 font-medium mb-2 text-glow-sm">Plan Weekly Tasks</h3>
-                  <p className="text-gray-400 text-sm mb-4">
-                    Break down your goals into actionable weekly tasks for execution tracking.
-                  </p>
-                  <Link href="/add-task">
-                    <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 glow-button">
-                      Add Tasks <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+                <motion.div 
+                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1 gradient-border glow-card relative overflow-hidden group"
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
+                  <div className="relative">
+                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
+                      <ListTodo className="h-4 w-4 mr-2 float-effect-fast" />
+                      Plan Weekly Tasks
+                    </h3>
+                    <p className="text-gray-300 text-sm mb-4">
+                      Break down your goals into actionable weekly tasks for execution tracking.
+                    </p>
+                    <Link href="/add-task">
+                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
+                        Add Tasks <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
+                      </Button>
+                    </Link>
+                  </div>
+                </motion.div>
               </div>
-            </section>
+            </motion.section>
           )}
         </div>
       </main>
