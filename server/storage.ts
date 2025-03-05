@@ -688,20 +688,140 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Goal Status methods
+  // Helper function to calculate appropriate goal status
+  private async calculateGoalStatus(goalId: number, goalName: string): Promise<string> {
+    try {
+      // Get the goal details
+      const [goal] = await db
+        .select()
+        .from(goals)
+        .where(eq(goals.id, goalId));
+      
+      if (!goal) return "needs-attention"; // Default if goal not found
+      
+      // Calculate progress percentage
+      const progressPercentage = (goal.current / goal.target) * 100;
+      
+      // Get all tasks related to this goal category
+      const allTasks = await this.getAllTasks();
+      const goalTasks = allTasks.filter(task => 
+        task.goalCategory === goalName || // Match by name
+        task.goalCategory === goal.name   // Match by alternate name
+      );
+      
+      // If no tasks, base status only on progress
+      if (goalTasks.length === 0) {
+        if (progressPercentage >= 60) return "on-track";
+        if (progressPercentage >= 30) return "needs-attention";
+        return "off-track";
+      }
+      
+      // Count tasks by status
+      const taskStatuses = {
+        done: 0,
+        inProgress: 0,
+        missed: 0
+      };
+      
+      // Check task due dates and statuses
+      const currentDate = new Date();
+      let hasMissedDeadlines = false;
+      
+      goalTasks.forEach(task => {
+        if (task.status === "done") {
+          taskStatuses.done++;
+        } else if (task.status === "in-progress") {
+          taskStatuses.inProgress++;
+          
+          // Check if task is overdue
+          if (task.dueDate) {
+            const dueDate = new Date(task.dueDate);
+            if (dueDate < currentDate) {
+              hasMissedDeadlines = true;
+            }
+          }
+        } else if (task.status === "missed") {
+          taskStatuses.missed++;
+        }
+      });
+      
+      // Calculate completion rate for tasks
+      const totalTasks = goalTasks.length;
+      const completionRate = totalTasks > 0 ? (taskStatuses.done / totalTasks) * 100 : 0;
+      
+      // Determine status based on multiple factors
+      if (hasMissedDeadlines || taskStatuses.missed > 0) {
+        if (progressPercentage < 30 || completionRate < 30) {
+          return "off-track";
+        } else {
+          return "needs-attention";
+        }
+      }
+      
+      if (progressPercentage >= 70 && completionRate >= 60) {
+        return "on-track";
+      } else if (progressPercentage >= 40 || completionRate >= 40) {
+        return "needs-attention";
+      } else {
+        return "off-track";
+      }
+    } catch (error) {
+      console.error("Error calculating goal status:", error);
+      return "needs-attention"; // Default fallback
+    }
+  }
+
   async getAllGoalStatuses(): Promise<GoalStatus[]> {
-    return await db.select().from(goalStatus);
+    const statuses = await db.select().from(goalStatus);
+    
+    // Recalculate the status for each goal if needed
+    for (const status of statuses) {
+      // Only recalculate if requested through API
+      if (process.env.AUTO_RECALCULATE_STATUS === 'true') {
+        const newStatus = await this.calculateGoalStatus(status.goalId, status.goalName);
+        if (newStatus !== status.status) {
+          await this.updateGoalStatus(status.id, { status: newStatus });
+          status.status = newStatus;
+        }
+      }
+    }
+    
+    return statuses;
   }
   
   async updateGoalStatus(id: number, status: Partial<InsertGoalStatus>): Promise<GoalStatus | undefined> {
+    // If status is not explicitly provided, calculate it
+    if (!status.status && status.goalId) {
+      const currentStatus = await db.query.goalStatus.findFirst({
+        where: eq(goalStatus.id, id)
+      });
+      
+      if (currentStatus) {
+        status.status = await this.calculateGoalStatus(
+          status.goalId, 
+          status.goalName || currentStatus.goalName
+        );
+      }
+    }
+    
     const [updatedStatus] = await db
       .update(goalStatus)
       .set(status)
       .where(eq(goalStatus.id, id))
       .returning();
+    
     return updatedStatus;
   }
   
   async createGoalStatus(insertStatus: InsertGoalStatus): Promise<GoalStatus> {
+    // Calculate initial status if not provided
+    if (!insertStatus.status) {
+      insertStatus.status = await this.calculateGoalStatus(
+        insertStatus.goalId, 
+        insertStatus.goalName
+      );
+    }
+    
     const [status] = await db.insert(goalStatus).values(insertStatus).returning();
     return status;
   }
