@@ -1,470 +1,402 @@
-/* Gamification CSS */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* Gamification Styles */
+:root {
+  --glow-primary: #00ff00;
+  --glow-secondary: #6600ff;
+  --xp-color: #ffcc00;
+  --health-color: #ff3333;
+  --mana-color: #3399ff;
+  --gold-color: #ffcc00;
+}
 
-/* Game UI Elements */
+/* Animated background for game-like feel */
 .game-bg {
-  background-color: #121212;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(0, 255, 0, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(102, 0, 255, 0.05) 0%, transparent 50%);
-}
-
-.game-card {
-  background-color: rgba(15, 15, 20, 0.8);
-  border-radius: 0.75rem;
-  border: 1px solid rgba(80, 80, 120, 0.3);
-  box-shadow: 
-    0 0 15px rgba(0, 255, 0, 0.1),
-    inset 0 0 10px rgba(0, 255, 0, 0.05);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.game-card:hover {
-  box-shadow: 
-    0 0 20px rgba(0, 255, 0, 0.2),
-    inset 0 0 15px rgba(0, 255, 0, 0.1);
-}
-
-/* Level Badge */
-.level-badge {
-  background: linear-gradient(135deg, #44A08D, #093637);
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
-  border: 2px solid #44A08D;
-  box-shadow: 0 0 10px rgba(68, 160, 141, 0.5);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  font-size: 0.875rem;
-}
-
-/* XP Bar */
-.xp-bar {
-  height: 0.5rem;
-  background-color: rgba(50, 50, 70, 0.4);
-  border-radius: 9999px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.xp-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ffd700, #ffaa00);
-  border-radius: 9999px;
-  box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
-}
-
-/* Health and Mana Bars */
-.health-bar, .mana-bar {
-  height: 0.5rem;
-  background-color: rgba(50, 50, 70, 0.4);
-  border-radius: 9999px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.health-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff5f6d, #ff0000);
-  border-radius: 9999px;
-  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-}
-
-.mana-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #36d1dc, #5b86e5);
-  border-radius: 9999px;
-  box-shadow: 0 0 5px rgba(91, 134, 229, 0.5);
-}
-
-/* Player Avatar */
-.player-avatar {
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(80, 80, 120, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
-}
-
-/* Game Button */
-.game-button {
-  background: linear-gradient(135deg, #1a2a3a, #0a0a1a);
-  color: #00ff00;
-  border: 1px solid #00cc00;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2), inset 0 0 5px rgba(0, 255, 0, 0.1);
+  background: linear-gradient(135deg, #000000 0%, #160b33 100%);
   position: relative;
   overflow: hidden;
 }
 
-.game-button:hover {
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.2);
-  transform: translateY(-2px);
-}
-
-.game-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 0 5px rgba(0, 255, 0, 0.3), inset 0 0 5px rgba(0, 255, 0, 0.2);
-}
-
-.game-button::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
-  transform: rotate(30deg);
-  transition: all 0.3s ease;
-  opacity: 0;
-}
-
-.game-button:hover::after {
-  opacity: 0.2;
-}
-
-/* Quest Item */
-.quest-item {
-  background-color: rgba(20, 20, 30, 0.7);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  display: flex;
-  align-items: start;
-  border: 1px solid rgba(80, 80, 120, 0.3);
-  transition: all 0.2s ease;
-}
-
-.quest-item:hover {
-  background-color: rgba(30, 30, 45, 0.8);
-  border-color: rgba(100, 100, 150, 0.4);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
-}
-
-.quest-item.completed {
-  opacity: 0.7;
-  text-decoration: line-through;
-}
-
-.quest-item.high-priority {
-  border-left: 3px solid #ff4500;
-  box-shadow: 0 0 10px rgba(255, 69, 0, 0.2);
-}
-
-.quest-item.medium-priority {
-  border-left: 3px solid #ffa500;
-  box-shadow: 0 0 10px rgba(255, 165, 0, 0.2);
-}
-
-.quest-item.low-priority {
-  border-left: 3px solid #32cd32;
-  box-shadow: 0 0 10px rgba(50, 205, 50, 0.2);
-}
-
-/* Game Checkbox */
-.game-checkbox {
-  appearance: none;
-  width: 1.25rem;
-  height: 1.25rem;
-  background-color: rgba(20, 20, 30, 0.8);
-  border: 1px solid rgba(80, 80, 120, 0.5);
-  border-radius: 0.25rem;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.game-checkbox:checked {
-  background-color: rgba(0, 255, 0, 0.2);
-  border-color: rgba(0, 255, 0, 0.5);
-}
-
-.game-checkbox:checked::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #00ff00;
-  text-shadow: 0 0 3px rgba(0, 255, 0, 0.5);
-  font-size: 0.875rem;
-}
-
-.game-checkbox:hover {
-  box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
-}
-
-/* Floating Indicator */
-.floating-indicator {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-weight: bold;
-  font-size: 1rem;
-  z-index: 100;
-  pointer-events: none;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-
-/* Achievement Popup */
-.achievement-popup {
-  position: fixed;
-  top: 5rem;
-  right: 1rem;
-  background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(15, 15, 25, 0.9));
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(100, 100, 150, 0.4);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  z-index: 1000;
-  max-width: 300px;
-}
-
-.achievement-icon {
-  background: linear-gradient(135deg, #ffd700, #ffaa00);
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  flex-shrink: 0;
-}
-
-/* Item Card */
-.item-card {
-  background-color: rgba(20, 20, 30, 0.8);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid rgba(80, 80, 120, 0.3);
-  transition: all 0.2s ease;
-}
-
-.item-card.common {
-  border-color: rgba(150, 150, 150, 0.5);
-}
-
-.item-card.uncommon {
-  border-color: rgba(0, 200, 0, 0.5);
-  box-shadow: 0 0 10px rgba(0, 200, 0, 0.1);
-}
-
-.item-card.rare {
-  border-color: rgba(100, 100, 255, 0.5);
-  box-shadow: 0 0 10px rgba(100, 100, 255, 0.1);
-}
-
-.item-card.epic {
-  border-color: rgba(200, 50, 200, 0.5);
-  box-shadow: 0 0 10px rgba(200, 50, 200, 0.1);
-}
-
-.item-card.legendary {
-  border-color: rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-}
-
-.rarity-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.625rem;
-  padding: 0.125rem 0.375rem;
-  border-radius: 9999px;
-  text-transform: capitalize;
-}
-
-.rarity-badge.common {
-  background-color: rgba(150, 150, 150, 0.2);
-  color: rgba(200, 200, 200, 0.8);
-}
-
-.rarity-badge.uncommon {
-  background-color: rgba(0, 200, 0, 0.2);
-  color: rgba(0, 250, 0, 0.8);
-}
-
-.rarity-badge.rare {
-  background-color: rgba(100, 100, 255, 0.2);
-  color: rgba(150, 150, 255, 0.8);
-}
-
-.rarity-badge.epic {
-  background-color: rgba(200, 50, 200, 0.2);
-  color: rgba(250, 100, 250, 0.8);
-}
-
-.rarity-badge.legendary {
-  background-color: rgba(255, 215, 0, 0.2);
-  color: rgba(255, 215, 0, 0.8);
-}
-
-/* Skill Tree */
-.skill-tree {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  background: 
-    linear-gradient(transparent, transparent 50%, rgba(20, 20, 30, 0.3) 50%, rgba(20, 20, 30, 0.3)),
-    linear-gradient(to right, transparent, transparent 50%, rgba(20, 20, 30, 0.3) 50%, rgba(20, 20, 30, 0.3));
-  background-size: 2.5rem 2.5rem;
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.skill-tree::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  height: 100%;
-  width: 2px;
-  background: linear-gradient(to bottom, rgba(100, 100, 150, 0.5), rgba(0, 255, 0, 0.5));
-}
-
-.skill-node {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.skill-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.skill-icon.unlocked {
-  background: rgba(0, 255, 0, 0.1);
-  border: 2px solid rgba(0, 255, 0, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-}
-
-.skill-icon.locked {
-  background: rgba(50, 50, 70, 0.3);
-  border: 2px solid rgba(80, 80, 120, 0.5);
-  opacity: 0.5;
-}
-
-/* Avatar Customizer */
-.avatar-slot {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(80, 80, 120, 0.5);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.avatar-slot:hover {
-  border-color: rgba(0, 255, 0, 0.5);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-}
-
-.avatar-overlay {
+.game-bg::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(0, 255, 0, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(102, 0, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(0, 153, 255, 0.03) 0%, transparent 60%);
+  animation: pulse-bg 8s infinite alternate;
+  z-index: 0;
 }
 
-.avatar-slot:hover .avatar-overlay {
+@keyframes pulse-bg {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Game card with glow effect */
+.game-card {
+  background: rgba(10, 10, 20, 0.8);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  border-radius: 10px;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 0, 0.2),
+    0 0 30px rgba(0, 255, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.game-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 0, 0.1),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 40px rgba(0, 255, 0, 0.2);
+}
+
+.game-card:hover::after {
+  left: 100%;
+}
+
+/* Game element styling */
+.xp-bar {
+  height: 6px;
+  background: rgba(255, 204, 0, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--xp-color);
+  border-radius: 3px;
+  box-shadow: 0 0 10px var(--xp-color);
+  transition: width 1s ease-in-out;
+}
+
+.health-bar {
+  height: 8px;
+  background: rgba(255, 51, 51, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.health-bar-fill {
+  height: 100%;
+  background: var(--health-color);
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--health-color);
+  transition: width 0.5s ease;
+}
+
+.mana-bar {
+  height: 8px;
+  background: rgba(51, 153, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.mana-bar-fill {
+  height: 100%;
+  background: var(--mana-color);
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--mana-color);
+  transition: width 0.5s ease;
+}
+
+.quest-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.quest-item {
+  background: rgba(20, 20, 40, 0.7);
+  border-left: 3px solid var(--glow-primary);
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 0 8px 8px 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.quest-item:hover {
+  transform: translateX(5px);
+  background: rgba(30, 30, 60, 0.8);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.quest-item.completed {
+  border-left-color: var(--xp-color);
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.quest-item.high-priority {
+  border-left-color: var(--health-color);
+}
+
+.quest-item.medium-priority {
+  border-left-color: var(--mana-color);
+}
+
+/* Buttons with game-style */
+.game-button {
+  background: linear-gradient(180deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 102, 0, 0.3) 100%);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  border-radius: 5px;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+.game-button::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  transform: rotate(30deg);
+}
+
+.game-button:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.game-button:hover::before {
   opacity: 1;
 }
 
-/* Stat Grid */
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+.game-button:active {
+  transform: translateY(2px);
 }
 
-.stat-item {
-  background-color: rgba(20, 20, 30, 0.5);
-  border-radius: 0.375rem;
-  padding: 0.5rem;
-  border: 1px solid rgba(80, 80, 120, 0.3);
-}
-
-.stat-name {
+/* Game badges and indicators */
+.level-badge {
+  background: linear-gradient(180deg, #333333 0%, #111111 100%);
+  border: 1px solid var(--xp-color);
+  color: var(--xp-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
-  font-size: 0.75rem;
-  color: rgba(200, 200, 220, 0.8);
-  margin-bottom: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1rem;
+  justify-content: center;
   font-weight: bold;
-  display: flex;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-flex;
   align-items: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.stat-bonus {
-  margin-left: 0.25rem;
-  font-size: 0.75rem;
-}
-
-.stat-bonus:not(:empty) {
+.status-badge.active {
+  background: linear-gradient(90deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 102, 0, 0.3) 100%);
+  border: 1px solid rgba(0, 255, 0, 0.5);
   color: #00ff00;
 }
 
-.stat-bonus:empty {
-  display: none;
+.status-badge.completed {
+  background: linear-gradient(90deg, rgba(255, 204, 0, 0.2) 0%, rgba(204, 153, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 204, 0, 0.5);
+  color: #ffcc00;
 }
 
-.stat-bar {
-  height: 0.25rem;
-  background-color: rgba(50, 50, 70, 0.4);
-  border-radius: 9999px;
+.status-badge.failed {
+  background: linear-gradient(90deg, rgba(255, 51, 51, 0.2) 0%, rgba(204, 0, 0, 0.3) 100%);
+  border: 1px solid rgba(255, 51, 51, 0.5);
+  color: #ff3333;
+}
+
+/* Avatar display */
+.player-avatar {
+  border-radius: 50%;
+  border: 2px solid var(--glow-primary);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
   overflow: hidden;
-  margin-top: 0.25rem;
+  position: relative;
 }
 
-.stat-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #00ff00, #009900);
-  border-radius: 9999px;
+.player-avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.5);
 }
 
-/* Game Notification */
-.game-notification {
+/* Reward animations */
+@keyframes coins-reward {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.coins-reward {
+  color: var(--gold-color);
+  position: absolute;
+  font-weight: bold;
+  animation: coins-reward 1.5s ease-out forwards;
+}
+
+/* Floating indicators */
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+.floating-indicator {
+  position: absolute;
+  font-weight: bold;
+  animation: float-up 2s ease-out forwards;
+  pointer-events: none;
+}
+
+.floating-indicator.xp {
+  color: var(--xp-color);
+}
+
+.floating-indicator.health {
+  color: var(--health-color);
+}
+
+.floating-indicator.mana {
+  color: var(--mana-color);
+}
+
+/* Achievement notification */
+.achievement-popup {
   position: fixed;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(15, 15, 25, 0.9));
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(100, 100, 150, 0.4);
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+  bottom: 20px;
+  right: 20px;
+  padding: 15px;
+  background: rgba(10, 10, 20, 0.9);
+  border: 1px solid var(--glow-primary);
+  border-radius: 8px;
+  box-shadow: 
+    0 0 15px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.1);
+  color: white;
+  z-index: 1000;
+  transform: translateX(100%);
+  animation: slide-in 0.5s forwards, slide-out 0.5s 4s forwards;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  z-index: 1000;
-  max-width: 300px;
+  gap: 10px;
+}
+
+@keyframes slide-in {
+  100% { transform: translateX(0); }
+}
+
+@keyframes slide-out {
+  100% { transform: translateX(100%); }
+}
+
+.achievement-icon {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+/* Game-themed checkbox */
+.game-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--glow-primary);
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.game-checkbox:checked {
+  background: var(--glow-primary);
+  border-color: var(--glow-primary);
+}
+
+.game-checkbox:checked::before {
+  content: "✓";
+  position: absolute;
+  color: black;
+  font-weight: bold;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.game-checkbox:hover {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 }
