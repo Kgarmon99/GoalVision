@@ -54,6 +54,25 @@ const MobileNav = () => {
                   <span className="font-medium">Task Board</span>
                 </div>
               </Link>
+              
+              <Link href="/habit-tracker" onClick={closeMenu}>
+                <div className={`flex items-center p-3 rounded-md ${
+                  location === '/habit-tracker' ? 'bg-green-900/30 text-green-400' : 'text-white hover:bg-gray-900/50'
+                }`}>
+                  <Flame className="h-5 w-5 mr-3" />
+                  <span className="font-medium">Habit Streaks</span>
+                </div>
+              </Link>
+              
+              <Link href="/game" onClick={closeMenu}>
+                <div className={`flex items-center p-3 rounded-md ${
+                  location === '/game' ? 'bg-purple-900/30 text-purple-400' : 'text-white hover:bg-gray-900/50'
+                }`}>
+                  <GamepadIcon className="h-5 w-5 mr-3 text-purple-400" />
+                  <span className="font-medium">Game Mode</span>
+                  <div className="ml-auto bg-purple-900 text-purple-300 text-xs py-1 px-2 rounded-full">New!</div>
+                </div>
+              </Link>
 
               <div className="h-px bg-green-800/50 my-2"></div>
               

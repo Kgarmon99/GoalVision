@@ -945,7 +945,13 @@ export const EnhancedProgressCard: React.FC<EnhancedProgressCardProps> = ({
 };
 
 // Sound effects helper for gamification
-export const useGameSounds = () => {
+interface GameSoundHook {
+  playSound: (sound: string) => void;
+  muted: boolean;
+  toggleMute: () => void;
+}
+
+export const useGameSounds = (): GameSoundHook => {
   const soundRefs = {
     achievement: useRef<HTMLAudioElement | null>(null),
     levelUp: useRef<HTMLAudioElement | null>(null),
