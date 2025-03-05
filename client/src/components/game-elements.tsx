@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Award, Star, Gift, Zap } from 'lucide-react';
 import '../styles/gamification.css';
-import confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+// @ts-ignore
+import Confetti from 'react-confetti';
 
 interface XPBarProps {
   current: number;
@@ -143,7 +144,7 @@ export const RewardAnimation: React.FC<RewardAnimationProps> = ({
 interface QuestItemProps {
   title: string;
   description?: string;
-  completed?: boolean;
+  completed?: boolean | null;
   priority?: 'low' | 'medium' | 'high';
   reward?: {
     xp?: number;
@@ -284,7 +285,7 @@ export const Celebration: React.FC<CelebrationProps> = ({
   
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999, pointerEvents: 'none' }}>
-      <confetti
+      <Confetti
         width={width}
         height={height}
         numberOfPieces={500}
@@ -297,7 +298,7 @@ export const Celebration: React.FC<CelebrationProps> = ({
 
 interface PlayerStatProps {
   name: string;
-  avatar?: string;
+  avatar?: string | null;
   level: number;
   xp: number;
   nextLevelXp: number;

@@ -95,7 +95,9 @@ import {
   Flag,
   Link,
   PlusCircle,
-  X
+  X,
+  Gift,
+  Star
 } from "lucide-react";
 
 export default function TaskDetails() {
@@ -230,6 +232,11 @@ export default function TaskDetails() {
     
     try {
       await toggleStatusMutation.mutateAsync({id: taskId, newStatus});
+      
+      // If task is being marked as done, trigger reward animation
+      if (newStatus === "done") {
+        handleRewardAnimation();
+      }
     } catch (error) {
       console.error("Error toggling task status:", error);
     }
@@ -1063,82 +1070,108 @@ export default function TaskDetails() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Task Info Card */}
               <div className="lg:col-span-2">
-                <Card className="bg-gray-900 border border-green-600 mb-6">
-                  <CardHeader className="border-b border-green-800 bg-gray-800/50">
+                <div className="game-card mb-6 p-1">
+                  <div className="border-b border-green-800/50 bg-gray-900/80 p-4 rounded-t-lg">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-xl text-white">{task.task}</CardTitle>
+                        <h2 className="text-xl text-white font-bold mb-1 flex items-center">
+                          <Target className="h-5 w-5 text-green-400 mr-2" />
+                          {task.task}
+                        </h2>
                         {week && (
-                          <CardDescription className="text-green-400">
+                          <div className="text-green-400 text-sm">
                             Week {week.number} ({week.dateRange})
-                          </CardDescription>
+                          </div>
                         )}
                       </div>
                       <div className="mt-1">
-                        {getStatusBadge(task.status)}
+                        <div className={`status-badge ${task.status === 'done' ? 'completed' : task.status === 'in-progress' ? 'active' : 'failed'}`}>
+                          {task.status === 'done' ? (
+                            <>
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Complete
+                            </>
+                          ) : task.status === 'in-progress' ? (
+                            <>
+                              <Clock className="h-3 w-3 mr-1" />
+                              In Progress
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Failed
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-6">
+                  </div>
+                  <div className="p-6 bg-gray-900/80 rounded-b-lg">
+                    {/* Player stats */}
+                    <PlayerStats
+                      name={task.owner || "Hero"}
+                      avatar={task.ownerAvatar}
+                      level={5}
+                      xp={340}
+                      nextLevelXp={500}
+                      health={75}
+                      maxHealth={100}
+                      mana={50}
+                      maxMana={100}
+                      gold={1250}
+                      achievements={7}
+                    />
+                    
+                    <div className="mt-6 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">Task Owner</h3>
-                          <div className="flex items-center">
-                            {task.ownerAvatar ? (
-                              <img 
-                                src={task.ownerAvatar} 
-                                alt={task.owner} 
-                                className="h-8 w-8 rounded-full mr-2 border border-green-500"
-                              />
-                            ) : (
-                              <div className="h-8 w-8 rounded-full bg-green-900 flex items-center justify-center text-white mr-2 border border-green-500">
-                                {task.owner && task.owner.charAt(0) || "U"}
-                              </div>
-                            )}
-                            <span className="text-white font-medium">{task.owner}</span>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">Goal Category</h3>
-                          <div className="flex items-center">
-                            {relatedGoal ? (
-                              <Button 
-                                variant="link" 
-                                asChild 
-                                className="p-0 h-auto text-green-400 hover:text-green-300"
-                              >
-                                <WouterLink href={`/goal-tasks/${relatedGoal.id}`}>
-                                  {getCategoryBadge(task.goalCategory, task.categoryColor)}
-                                  <ArrowRight className="h-3.5 w-3.5 ml-2" />
-                                </WouterLink>
-                              </Button>
-                            ) : (
-                              getCategoryBadge(task.goalCategory, task.categoryColor)
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-400 mb-1">Due Date</h3>
-                          <div className="flex items-center">
+                          <div className="flex items-center mb-1">
                             <Calendar className="h-4 w-4 text-green-400 mr-2" />
-                            <span className="text-white">{task.dueDate}</span>
+                            <h3 className="text-sm font-medium text-green-400">Quest Timeline</h3>
+                          </div>
+                          <div className="bg-gray-800/50 p-3 rounded-md border border-green-900/50">
+                            <div className="text-white">{task.dueDate}</div>
+                            <div className="text-xs text-green-400/70 mt-1">Complete by this date for full rewards</div>
                           </div>
                         </div>
                         
                         {relatedGoal && (
                           <div>
-                            <h3 className="text-sm font-medium text-gray-400 mb-1">Contributes to Goal</h3>
-                            <div className="flex items-center">
+                            <div className="flex items-center mb-1">
                               <Target className="h-4 w-4 text-green-400 mr-2" />
-                              <span className="text-white">{relatedGoal.name}: {relatedGoal.current} / {relatedGoal.target} {relatedGoal.unit}</span>
+                              <h3 className="text-sm font-medium text-green-400">Quest Chain</h3>
+                            </div>
+                            <div className="bg-gray-800/50 p-3 rounded-md border border-green-900/50">
+                              <div className="text-white">{relatedGoal.name}</div>
+                              <div className="mt-2">
+                                <XPBar 
+                                  current={relatedGoal.current} 
+                                  total={relatedGoal.target} 
+                                  level={2} 
+                                  showLevel={false} 
+                                />
+                              </div>
                             </div>
                           </div>
                         )}
+                      </div>
+                      
+                      {/* Quest completion rewards */}
+                      <div className="bg-gray-800/50 p-3 rounded-md border border-green-900/50">
+                        <div className="flex items-center mb-2">
+                          <Gift className="h-4 w-4 text-yellow-400 mr-2" />
+                          <h3 className="text-sm font-medium text-green-400">Quest Rewards</h3>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center text-yellow-300">
+                            <Star className="h-4 w-4 mr-1" />
+                            <span>{rewards.xp} XP</span>
+                          </div>
+                          <div className="flex items-center text-yellow-400">
+                            <Gift className="h-4 w-4 mr-1" />
+                            <span>{rewards.gold} Gold</span>
+                          </div>
+                        </div>
                       </div>
                       
                       {/* Task Subtasks */}
@@ -1175,88 +1208,76 @@ export default function TaskDetails() {
                         
                         {isLoadingSubtasks ? (
                           <div className="space-y-2">
-                            <Skeleton className="h-10 w-full bg-gray-800" />
-                            <Skeleton className="h-10 w-full bg-gray-800" />
-                            <Skeleton className="h-10 w-full bg-gray-800" />
+                            <Skeleton className="h-16 w-full bg-gray-800" />
+                            <Skeleton className="h-16 w-full bg-gray-800" />
+                            <Skeleton className="h-16 w-full bg-gray-800" />
                           </div>
                         ) : subtasks.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center py-6 bg-gray-800/30 rounded-md border border-gray-700/50">
-                            <ListChecks className="h-8 w-8 text-gray-500 mb-2" />
-                            <p className="text-sm text-gray-400 mb-1">No subtasks yet</p>
-                            <p className="text-xs text-gray-500 mb-3 px-6 text-center">Break down this task into smaller steps for better tracking.</p>
+                          <div className="flex flex-col items-center justify-center py-8 bg-gray-800/30 rounded-md border border-gray-700/50">
+                            <ListChecks className="h-10 w-10 text-green-500/30 mb-3" />
+                            <p className="text-sm text-green-400 mb-1 font-bold">No Objectives Available</p>
+                            <p className="text-xs text-gray-400 mb-4 px-6 text-center">Break down your quest into smaller objectives to earn more rewards!</p>
+                            <GameButton 
+                              size="sm" 
+                              onClick={() => {
+                                const buttons = Array.from(document.querySelectorAll('button'));
+                                const addSubtaskButton = buttons.find(btn => btn.textContent?.includes("Add Subtask"));
+                                if (addSubtaskButton) {
+                                  addSubtaskButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                                }
+                              }}
+                            >
+                              <PlusCircle className="h-4 w-4 mr-2" />
+                              Add Quest Objective
+                            </GameButton>
                           </div>
                         ) : (
-                          <div className="space-y-2">
-                            {subtasks.map(subtask => (
-                              <div 
-                                key={subtask.id} 
-                                className={`flex items-start justify-between p-3 rounded-md ${
-                                  subtask.completed ? 'bg-green-900/20 border border-green-800/50' : 'bg-gray-800/50 border border-gray-700/50'
-                                }`}
-                              >
-                                <div className="flex items-start">
-                                  <button 
-                                    className="flex-shrink-0 mt-0.5 focus:outline-none" 
-                                    onClick={() => toggleSubtaskMutation.mutate({ 
-                                      id: subtask.id, 
-                                      completed: !subtask.completed 
-                                    })}
-                                    disabled={toggleSubtaskMutation.isPending}
-                                  >
-                                    {subtask.completed ? (
-                                      <CheckSquare className="h-5 w-5 text-green-400" />
-                                    ) : (
-                                      <Square className="h-5 w-5 text-gray-400 hover:text-gray-300" />
-                                    )}
-                                  </button>
-                                  <div className="ml-3">
-                                    <p className={`text-sm ${subtask.completed ? 'text-green-400' : 'text-white'}`}>
-                                      {subtask.description}
-                                    </p>
-                                    <div className="flex items-center mt-1">
-                                      {subtask.priority === "high" && (
-                                        <Badge variant="outline" className="bg-red-900/30 text-red-400 border-red-500 text-xs">
-                                          <Flag className="h-3 w-3 mr-1" />
-                                          High Priority
-                                        </Badge>
-                                      )}
-                                      {subtask.priority === "medium" && (
-                                        <Badge variant="outline" className="bg-yellow-900/30 text-yellow-400 border-yellow-500 text-xs">
-                                          <Flag className="h-3 w-3 mr-1" />
-                                          Medium Priority
-                                        </Badge>
-                                      )}
-                                      {subtask.priority === "low" && (
-                                        <Badge variant="outline" className="bg-blue-900/30 text-blue-400 border-blue-500 text-xs">
-                                          <Flag className="h-3 w-3 mr-1" />
-                                          Low Priority
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-7 w-7 rounded-full hover:bg-red-900/20 hover:text-red-400"
-                                  onClick={() => deleteSubtaskMutation.mutate(subtask.id)}
-                                  disabled={deleteSubtaskMutation.isPending}
+                          <div className="space-y-3 quest-list">
+                            {subtasks.map(subtask => {
+                              // Calculate rewards based on priority
+                              const priorityRewards = {
+                                high: { xp: 25, coins: 50 },
+                                medium: { xp: 15, coins: 30 },
+                                low: { xp: 10, coins: 20 }
+                              };
+                              const reward = priorityRewards[subtask.priority as keyof typeof priorityRewards];
+                              
+                              return (
+                                <QuestItem
+                                  key={subtask.id}
+                                  title={subtask.description}
+                                  completed={subtask.completed}
+                                  priority={subtask.priority as 'low' | 'medium' | 'high'}
+                                  reward={reward}
+                                  onClick={() => toggleSubtaskMutation.mutate({ 
+                                    id: subtask.id, 
+                                    completed: !subtask.completed 
+                                  })}
+                                  className="relative group"
                                 >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 rounded-full 
+                                              opacity-0 group-hover:opacity-100 hover:bg-red-900/20 hover:text-red-400 
+                                              transition-opacity"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteSubtaskMutation.mutate(subtask.id);
+                                    }}
+                                    disabled={deleteSubtaskMutation.isPending}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </QuestItem>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="border-t border-green-800 bg-gray-800/50 pt-4 justify-start">
-                    <div className="text-sm text-gray-400">
-                      <span className="font-medium text-green-400">Tip:</span> Break down complex tasks into smaller subtasks to make them more manageable.
-                    </div>
-                  </CardFooter>
-                </Card>
+                  </div>
+                </div>
                 
                 {/* Notes and Comments */}
                 <Card className="bg-gray-900 border border-green-600">
