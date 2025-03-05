@@ -7,7 +7,6 @@ import Dashboard from "@/pages/dashboard";
 import AddGoal from "@/pages/add-goal";
 import AddProgress from "@/pages/add-progress";
 import AddTask from "@/pages/add-task";
-import EditTask from "@/pages/edit-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
@@ -20,7 +19,6 @@ function Router() {
       <Route path="/add-goal" component={AddGoal} />
       <Route path="/add-progress" component={AddProgress} />
       <Route path="/add-task" component={AddTask} />
-      <Route path="/edit-task/:id" component={EditTask} />
       <Route path="/tasks/:id" component={TaskDetails} />
       <Route path="/goal-tasks/:id" component={GoalTasks} />
       <Route path="/task-board" component={TaskBoard} />
