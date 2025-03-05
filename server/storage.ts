@@ -16,7 +16,10 @@ import {
   type InsertExecutionTask,
   weeks,
   type Week,
-  type InsertWeek
+  type InsertWeek,
+  subtasks,
+  type Subtask,
+  type InsertSubtask
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -56,6 +59,14 @@ export interface IStorage {
   updateTask(id: number, task: Partial<InsertExecutionTask>): Promise<ExecutionTask | undefined>;
   deleteTask(id: number): Promise<boolean>;
   
+  // Subtask methods
+  getSubtasksByParentId(parentTaskId: number): Promise<Subtask[]>;
+  getAllSubtasks(): Promise<Subtask[]>;
+  getSubtask(id: number): Promise<Subtask | undefined>;
+  createSubtask(subtask: InsertSubtask): Promise<Subtask>;
+  updateSubtask(id: number, subtask: Partial<InsertSubtask>): Promise<Subtask | undefined>;
+  deleteSubtask(id: number): Promise<boolean>;
+  
   // Week methods
   getAllWeeks(): Promise<Week[]>;
   getWeek(id: number): Promise<Week | undefined>;
@@ -69,6 +80,7 @@ export class MemStorage implements IStorage {
   private metricsData: Map<number, Metric>;
   private goalStatusData: Map<number, GoalStatus>;
   private executionTasksData: Map<number, ExecutionTask>;
+  private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
   
   private currentUserId: number;
@@ -76,6 +88,7 @@ export class MemStorage implements IStorage {
   private currentMetricId: number;
   private currentGoalStatusId: number;
   private currentExecutionTaskId: number;
+  private currentSubtaskId: number;
   private currentWeekId: number;
 
   constructor() {
@@ -84,6 +97,7 @@ export class MemStorage implements IStorage {
     this.metricsData = new Map();
     this.goalStatusData = new Map();
     this.executionTasksData = new Map();
+    this.subtasksData = new Map();
     this.weeksData = new Map();
     
     this.currentUserId = 1;
@@ -91,6 +105,7 @@ export class MemStorage implements IStorage {
     this.currentMetricId = 1;
     this.currentGoalStatusId = 1;
     this.currentExecutionTaskId = 1;
+    this.currentSubtaskId = 1;
     this.currentWeekId = 1;
     
     this.initializeData();
@@ -317,6 +332,39 @@ export class MemStorage implements IStorage {
     return this.executionTasksData.delete(id);
   }
   
+  // Subtask methods
+  async getSubtasksByParentId(parentTaskId: number): Promise<Subtask[]> {
+    return Array.from(this.subtasksData.values()).filter(subtask => subtask.parentTaskId === parentTaskId);
+  }
+  
+  async getAllSubtasks(): Promise<Subtask[]> {
+    return Array.from(this.subtasksData.values());
+  }
+  
+  async getSubtask(id: number): Promise<Subtask | undefined> {
+    return this.subtasksData.get(id);
+  }
+  
+  async createSubtask(insertSubtask: InsertSubtask): Promise<Subtask> {
+    const id = this.currentSubtaskId++;
+    const subtask: Subtask = { ...insertSubtask, id, createdAt: new Date() };
+    this.subtasksData.set(id, subtask);
+    return subtask;
+  }
+  
+  async updateSubtask(id: number, subtask: Partial<InsertSubtask>): Promise<Subtask | undefined> {
+    const existingSubtask = this.subtasksData.get(id);
+    if (!existingSubtask) return undefined;
+    
+    const updatedSubtask = { ...existingSubtask, ...subtask };
+    this.subtasksData.set(id, updatedSubtask);
+    return updatedSubtask;
+  }
+  
+  async deleteSubtask(id: number): Promise<boolean> {
+    return this.subtasksData.delete(id);
+  }
+  
   // Week methods
   async getAllWeeks(): Promise<Week[]> {
     return Array.from(this.weeksData.values());
@@ -470,6 +518,48 @@ export class DatabaseStorage implements IStorage {
   
   async deleteTask(id: number): Promise<boolean> {
     const result = await db.delete(executionTasks).where(eq(executionTasks.id, id));
+    return !!result;
+  }
+  
+  // Subtask methods
+  async getSubtasksByParentId(parentTaskId: number): Promise<Subtask[]> {
+    return await db
+      .select()
+      .from(subtasks)
+      .where(eq(subtasks.parentTaskId, parentTaskId));
+  }
+  
+  async getAllSubtasks(): Promise<Subtask[]> {
+    return await db.select().from(subtasks);
+  }
+  
+  async getSubtask(id: number): Promise<Subtask | undefined> {
+    const [subtask] = await db
+      .select()
+      .from(subtasks)
+      .where(eq(subtasks.id, id));
+    return subtask;
+  }
+  
+  async createSubtask(insertSubtask: InsertSubtask): Promise<Subtask> {
+    const [subtask] = await db
+      .insert(subtasks)
+      .values(insertSubtask)
+      .returning();
+    return subtask;
+  }
+  
+  async updateSubtask(id: number, subtask: Partial<InsertSubtask>): Promise<Subtask | undefined> {
+    const [updatedSubtask] = await db
+      .update(subtasks)
+      .set(subtask)
+      .where(eq(subtasks.id, id))
+      .returning();
+    return updatedSubtask;
+  }
+  
+  async deleteSubtask(id: number): Promise<boolean> {
+    const result = await db.delete(subtasks).where(eq(subtasks.id, id));
     return !!result;
   }
   

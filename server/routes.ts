@@ -8,10 +8,12 @@ import {
   insertGoalStatusSchema, 
   insertExecutionTaskSchema, 
   insertWeekSchema,
+  insertSubtaskSchema,
   goals,
   metrics,
   goalStatus,
   executionTasks,
+  subtasks,
   weeks
 } from "@shared/schema";
 import { db } from "./db";
@@ -24,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reset-data", async (req, res) => {
     try {
       // Clear all tables
+      await db.delete(subtasks);
       await db.delete(executionTasks);
       await db.delete(goalStatus);
       await db.delete(metrics);
