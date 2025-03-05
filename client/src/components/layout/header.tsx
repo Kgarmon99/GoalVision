@@ -9,7 +9,9 @@ import {
   LayoutDashboard,
   Target,
   TrendingUp,
-  Flame 
+  Flame,
+  GamepadIcon,
+  Trophy 
 } from "lucide-react";
 import MobileNav from "./mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -59,6 +61,15 @@ const Header = () => {
                 >
                   <Flame className="h-4 w-4 mr-1" />
                   Habit Streaks
+                </Button>
+              </Link>
+              <Link href="/game">
+                <Button 
+                  variant="ghost" 
+                  className={`text-sm ${location === '/game' ? 'text-purple-400 bg-purple-900/30' : 'text-gray-300 hover:text-white hover:bg-gray-900'}`}
+                >
+                  <GamepadIcon className="h-4 w-4 mr-1" />
+                  Game Mode
                 </Button>
               </Link>
             </nav>
