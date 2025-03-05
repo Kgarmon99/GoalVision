@@ -487,15 +487,17 @@ export default function TaskDetails() {
           variant: "default",
         });
         onSuccess();
-        // Try to find and click the Cancel button to close the dialog
+        // Close the dialog programmatically by simulating ESC key press
         try {
-          const dialogElement = document.querySelector('[data-state="open"]');
-          if (dialogElement) {
-            const closeButton = dialogElement.querySelector('button[type="button"].mr-2.bg-gray-800');
-            if (closeButton instanceof HTMLButtonElement) {
-              closeButton.click();
-            }
-          }
+          const escEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            code: 'Escape',
+            keyCode: 27,
+            which: 27,
+            bubbles: true,
+            cancelable: true
+          });
+          document.dispatchEvent(escEvent);
         } catch (err) {
           console.error("Failed to close dialog:", err);
         }
@@ -699,7 +701,7 @@ export default function TaskDetails() {
                 <FormLabel className="text-white">Week</FormLabel>
                 <Select 
                   onValueChange={(value) => field.onChange(parseInt(value))} 
-                  defaultValue={field.value.toString()}
+                  defaultValue={field.value ? field.value.toString() : ""}
                 >
                   <FormControl>
                     <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
