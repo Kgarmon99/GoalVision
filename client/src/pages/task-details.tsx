@@ -315,27 +315,14 @@ export default function TaskDetails() {
                 )}
               </Button>
               
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-gray-900 border border-green-600">
-                  <DialogHeader>
-                    <DialogTitle className="text-white">Edit Task</DialogTitle>
-                    <DialogDescription className="text-gray-400">
-                      This feature is not available in the current version.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button className="bg-green-600 hover:bg-green-700 text-white">Close</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <Button 
+                variant="outline" 
+                className="border-green-500 text-green-400 hover:bg-gray-800"
+                onClick={() => navigate(`/edit-task/${taskId}`)}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>

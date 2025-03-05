@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import AddGoal from "@/pages/add-goal";
 import AddProgress from "@/pages/add-progress";
 import AddTask from "@/pages/add-task";
+import EditTask from "@/pages/edit-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
