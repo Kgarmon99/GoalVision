@@ -52,6 +52,13 @@
                  0 0 35px rgba(74, 222, 128, 0.3),
                  0 0 45px rgba(21, 128, 61, 0.2);
   }
+  
+  .text-glow-sm {
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.4), 
+                 0 0 10px rgba(74, 222, 128, 0.2), 
+                 0 0 15px rgba(74, 222, 128, 0.1);
+    transition: text-shadow 0.5s ease;
+  }
 
   .glow-card {
     box-shadow: 0 0 15px rgba(74, 222, 128, 0.1),
@@ -83,6 +90,13 @@
   
   .glow-card:hover:before {
     opacity: 1;
+  }
+  
+  .glow-element {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
   }
 
   /* Pulsating Aura Effect */
@@ -232,13 +246,13 @@
   }
 
   /* Neon Glow Buttons */
-  .neon-glow {
+  .neon-glow, .glow-button {
     box-shadow: 0 0 5px rgba(74, 222, 128, 0.3),
                 0 0 10px rgba(74, 222, 128, 0.2);
     transition: all 0.3s ease;
   }
 
-  .neon-glow:hover {
+  .neon-glow:hover, .glow-button:hover {
     box-shadow: 0 0 10px rgba(74, 222, 128, 0.5),
                 0 0 20px rgba(74, 222, 128, 0.3),
                 0 0 30px rgba(74, 222, 128, 0.1);
