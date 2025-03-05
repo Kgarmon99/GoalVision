@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useParams, Link as WouterLink } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import {
@@ -44,7 +47,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { ExecutionTask, Week, Goal } from "@shared/schema";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExecutionTask, Week, Goal, Subtask } from "@shared/schema";
 import { 
   Calendar, 
   User, 
@@ -63,7 +84,8 @@ import {
   Square,
   Flag,
   Link,
-  PlusCircle
+  PlusCircle,
+  X
 } from "lucide-react";
 
 export default function TaskDetails() {
@@ -322,18 +344,25 @@ export default function TaskDetails() {
                     Edit
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-gray-900 border border-green-600">
+                <DialogContent className="bg-gray-900 border border-green-600 max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-white">Edit Task</DialogTitle>
                     <DialogDescription className="text-gray-400">
-                      This feature is not available in the current version.
+                      Update the task details below.
                     </DialogDescription>
                   </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button className="bg-green-600 hover:bg-green-700 text-white">Close</Button>
-                    </DialogClose>
-                  </DialogFooter>
+                  
+                  {task && (
+                    <EditTaskForm 
+                      task={task} 
+                      goals={goals}
+                      weeks={week ? [week] : []}
+                      onSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/tasks', taskId] });
+                      }}
+                    />
+                  )}
                 </DialogContent>
               </Dialog>
               
