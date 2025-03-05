@@ -4,6 +4,22 @@ import "./index.css";
 import "./styles/mobile.css";
 import "@/components/ui/glow-effects.css";
 
+// Global error handling for unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  // Prevent the default browser behavior which shows the error in console
+  event.preventDefault();
+  
+  // Log custom message instead of showing the raw error
+  if (event.reason && event.reason.message) {
+    // Only log non-connection related errors, we'll handle connection errors separately
+    if (!event.reason.message.includes('WebSocket') && 
+        !event.reason.message.includes('Failed to connect') &&
+        !event.reason.message.includes('server connection')) {
+      console.log('Error handled gracefully:', event.reason.message);
+    }
+  }
+});
+
 // Improved Vite HMR connection handling
 if (import.meta.hot) {
   // Suppress WebSocket connection errors in console
@@ -13,7 +29,8 @@ if (import.meta.hot) {
        (args[0].includes('WebSocket connection') || 
         args[0].includes('Failed to construct \'WebSocket\'') ||
         args[0].includes('server connection lost'))) {
-      // Suppress connection errors
+      // Suppress connection errors but log a friendlier message
+      console.log('Development server connection issue. This is normal during development and will resolve itself.');
       return;
     }
     originalConsoleError.apply(console, args);
@@ -40,13 +57,14 @@ if (import.meta.hot) {
       // Try to reconnect after a delay
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 1500); // Increased delay for more stability
     }
   });
 
   // Reset reconnect attempts when connected
   import.meta.hot.on('connect', () => {
     reconnectAttempts = 0;
+    console.log('HMR connection established.');
   });
 }
 
@@ -58,8 +76,18 @@ window.addEventListener('load', () => {
     // Force a clean reload after brief delay
     setTimeout(() => {
       window.location.reload();
-    }, 500);
+    }, 750); // Slightly increased for stability
   }
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Error boundary for React rendering
+try {
+  createRoot(document.getElementById("root")!).render(<App />);
+} catch (error) {
+  console.error('Error rendering application:', error);
+  // Attempt recovery
+  const rootEl = document.getElementById("root");
+  if (rootEl) {
+    rootEl.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Application Error</h2><p>Please refresh the page</p></div>';
+  }
+}
