@@ -209,13 +209,23 @@ export function TaskBreakdown({ goals, selectedGoalId }: TaskBreakdownProps) {
                       {goal.name} Goal Completion
                     </h3>
                     <div className="text-right">
-                      <span className="text-green-400 font-bold text-xl">{completionPercentage}%</span>
+                      <span className={`font-bold text-xl ${
+                        completionPercentage >= 75 ? "text-green-400" :
+                        completionPercentage >= 50 ? "text-yellow-400" :
+                        completionPercentage >= 25 ? "text-orange-400" :
+                        "text-red-500"
+                      }`}>{completionPercentage}%</span>
                     </div>
                   </div>
                   <Progress 
                     value={completionPercentage} 
                     className="h-2" 
-                    indicatorClassName="bg-green-500"
+                    indicatorClassName={
+                      completionPercentage >= 75 ? "bg-green-500" :
+                      completionPercentage >= 50 ? "bg-yellow-500" :
+                      completionPercentage >= 25 ? "bg-orange-500" :
+                      "bg-red-600"
+                    }
                   />
                   
                   <div className="mt-4 grid grid-cols-3 gap-2 text-center">

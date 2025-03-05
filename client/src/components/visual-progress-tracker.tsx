@@ -34,7 +34,7 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
   });
 
   return (
-    <Card className="bg-gray-900/90 border border-green-600">
+    <Card className="bg-gray-900/90 border border-green-600/80">
       <CardHeader className="border-b border-green-800 bg-gray-800/50">
         <CardTitle className="text-green-400 flex items-center">
           <TrendingUp className="mr-2 h-5 w-5" />
@@ -74,11 +74,21 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                 <div className="mb-3 flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-medium text-white flex items-center">
-                      <div className={`w-3 h-3 rounded-full bg-${goal.color || 'green'}-500 mr-2`}></div>
+                      <div className={`w-3 h-3 rounded-full mr-2 ${
+                        progressPercentage >= 75 ? "bg-green-500" :
+                        progressPercentage >= 50 ? "bg-yellow-500" :
+                        progressPercentage >= 25 ? "bg-orange-500" :
+                        "bg-red-500 animate-pulse"
+                      }`}></div>
                       {goal.name}
                     </h3>
                     <p className="text-sm text-gray-400 mt-1 flex items-center">
-                      <Target className="h-3.5 w-3.5 mr-1.5 text-green-400" />
+                      <Target className={`h-3.5 w-3.5 mr-1.5 ${
+                        progressPercentage >= 75 ? "text-green-400" :
+                        progressPercentage >= 50 ? "text-yellow-400" :
+                        progressPercentage >= 25 ? "text-orange-400" :
+                        "text-red-500"
+                      }`} />
                       <span className="text-white">{goal.current}</span>
                       <span className="text-gray-500 mx-1">/</span>
                       <span className="text-white">{goal.target} {goal.unit}</span>
@@ -102,12 +112,22 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-xs text-gray-400">Goal Progress</span>
-                      <span className="text-xs font-medium text-green-400">{Math.round(progressPercentage)}%</span>
+                      <span className={`text-xs font-medium ${
+                        progressPercentage >= 75 ? "text-green-400" :
+                        progressPercentage >= 50 ? "text-yellow-400" :
+                        progressPercentage >= 25 ? "text-orange-400" :
+                        "text-red-500"
+                      }`}>{Math.round(progressPercentage)}%</span>
                     </div>
                     <Progress 
                       value={progressPercentage} 
                       className="h-2" 
-                      indicatorClassName="bg-green-500"
+                      indicatorClassName={
+                        progressPercentage >= 75 ? "bg-green-500" :
+                        progressPercentage >= 50 ? "bg-yellow-500" :
+                        progressPercentage >= 25 ? "bg-orange-500" :
+                        "bg-red-600"
+                      }
                     />
                   </div>
                   
@@ -115,7 +135,12 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                   <div>
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-xs text-gray-400">Task Completion</span>
-                      <span className="text-xs font-medium text-green-400">{completionPercentage}%</span>
+                      <span className={`text-xs font-medium ${
+                        completionPercentage >= 75 ? "text-green-400" :
+                        completionPercentage >= 50 ? "text-yellow-400" :
+                        completionPercentage >= 25 ? "text-orange-400" :
+                        "text-red-500"
+                      }`}>{completionPercentage}%</span>
                     </div>
                     <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden flex">
                       <div 
@@ -151,7 +176,12 @@ export function VisualProgressTracker({ goals, tasks }: VisualProgressTrackerPro
                 
                 {/* Task Quick View */}
                 {hoveredGoal === goal.id && goalTasks.length > 0 && (
-                  <div className="mt-4 bg-gray-800/70 rounded-md p-3 border border-green-800/60">
+                  <div className={`mt-4 bg-gray-800/70 rounded-md p-3 border ${
+                    progressPercentage >= 75 ? "border-green-800/60" :
+                    progressPercentage >= 50 ? "border-yellow-800/60" :
+                    progressPercentage >= 25 ? "border-orange-800/60" :
+                    "border-red-800/60"
+                  }`}>
                     <h4 className="text-sm font-medium text-green-400 mb-2">Recent Tasks</h4>
                     <div className="space-y-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
                       {goalTasks.slice(0, 3).map(task => (
