@@ -18,7 +18,7 @@ import {
   Target, Trophy, Flame, Zap, Crown, Gift, Star, 
   Sparkles, Shield, Swords, Award, Smartphone, Bot, 
   Lightbulb, Gem, HeartPulse, Puzzle, ArrowUpRight,
-  Bolt, TrendingUp, Medal
+  Bolt, TrendingUp, Medal, Timer, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Goal, ExecutionTask } from '@shared/schema';
@@ -113,7 +113,7 @@ export default function GamifiedDashboard() {
       id: 'time-management',
       name: 'Time Management',
       description: 'Master the art of time management to increase productivity',
-      icon: <Clock className="h-6 w-6 text-blue-400" />,
+      icon: <Timer className="h-6 w-6 text-blue-400" />,
       unlocked: true,
       position: 10
     },
@@ -304,7 +304,7 @@ export default function GamifiedDashboard() {
                     target={goal.target || 100}
                     level={Math.floor(Math.random() * 5) + 1}
                     daysLeft={Math.floor(Math.random() * 30) + 1}
-                    category={goal.category || "Business"}
+                    category={goal.color || "Business"}
                     icon={<Target className="h-5 w-5 text-green-400" />}
                   />
                 ))}
@@ -332,9 +332,9 @@ export default function GamifiedDashboard() {
                   <QuestItem
                     key={task.id}
                     title={task.task}
-                    description={`Priority: ${task.priority}`}
+                    description={`Due: ${task.dueDate}`}
                     completed={task.status === 'completed'}
-                    priority={task.priority as 'low' | 'medium' | 'high'}
+                    priority={'medium' as 'low' | 'medium' | 'high'}
                     reward={{
                       xp: Math.floor(Math.random() * 50) + 10,
                       coins: Math.floor(Math.random() * 30) + 5
