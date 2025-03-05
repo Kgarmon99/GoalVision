@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, real, pgEnum, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -167,3 +167,63 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Habits table
+export const habits = pgTable("habits", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  frequency: text("frequency").notNull(), // daily, weekly, monthly
+  goalId: integer("goal_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  targetStreakDays: integer("target_streak_days").default(7),
+  reminderTime: text("reminder_time").default("08:00"), // Format: HH:MM
+  color: text("color").default("primary"),
+});
+
+export const habitsRelations = relations(habits, ({ one, many }) => ({
+  goal: one(goals, {
+    fields: [habits.goalId],
+    references: [goals.id]
+  }),
+  streaks: many(habitStreaks)
+}));
+
+export const insertHabitSchema = createInsertSchema(habits).pick({
+  name: true,
+  description: true,
+  frequency: true,
+  goalId: true,
+  targetStreakDays: true,
+  reminderTime: true,
+  color: true,
+});
+
+// Habit streaks table
+export const habitStreaks = pgTable("habit_streaks", {
+  id: serial("id").primaryKey(),
+  habitId: integer("habit_id").notNull(),
+  date: timestamp("date").notNull(),
+  completed: boolean("completed").default(false),
+  notes: text("notes").default(""),
+});
+
+export const habitStreaksRelations = relations(habitStreaks, ({ one }) => ({
+  habit: one(habits, {
+    fields: [habitStreaks.habitId],
+    references: [habits.id]
+  })
+}));
+
+export const insertHabitStreakSchema = createInsertSchema(habitStreaks).pick({
+  habitId: true,
+  date: true,
+  completed: true,
+  notes: true,
+});
+
+export type InsertHabit = z.infer<typeof insertHabitSchema>;
+export type Habit = typeof habits.$inferSelect;
+
+export type InsertHabitStreak = z.infer<typeof insertHabitStreakSchema>;
+export type HabitStreak = typeof habitStreaks.$inferSelect;

@@ -19,7 +19,13 @@ import {
   type InsertWeek,
   subtasks,
   type Subtask,
-  type InsertSubtask
+  type InsertSubtask,
+  habits,
+  type Habit,
+  type InsertHabit,
+  habitStreaks,
+  type HabitStreak,
+  type InsertHabitStreak
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -72,6 +78,23 @@ export interface IStorage {
   getWeek(id: number): Promise<Week | undefined>;
   createWeek(week: InsertWeek): Promise<Week>;
   updateWeek(id: number, week: Partial<InsertWeek>): Promise<Week | undefined>;
+  
+  // Habit methods
+  getAllHabits(): Promise<Habit[]>;
+  getHabitsByGoalId(goalId: number): Promise<Habit[]>;
+  getHabit(id: number): Promise<Habit | undefined>;
+  createHabit(habit: InsertHabit): Promise<Habit>;
+  updateHabit(id: number, habit: Partial<InsertHabit>): Promise<Habit | undefined>;
+  deleteHabit(id: number): Promise<boolean>;
+  
+  // Habit Streak methods
+  getHabitStreaksByHabitId(habitId: number): Promise<HabitStreak[]>;
+  getHabitStreaksInDateRange(habitId: number, startDate: Date, endDate: Date): Promise<HabitStreak[]>;
+  getHabitStreak(id: number): Promise<HabitStreak | undefined>;
+  createHabitStreak(streak: InsertHabitStreak): Promise<HabitStreak>;
+  updateHabitStreak(id: number, streak: Partial<InsertHabitStreak>): Promise<HabitStreak | undefined>;
+  deleteHabitStreak(id: number): Promise<boolean>;
+  getCurrentStreak(habitId: number): Promise<number>; // Returns the current streak count
 }
 
 export class MemStorage implements IStorage {
@@ -82,6 +105,8 @@ export class MemStorage implements IStorage {
   private executionTasksData: Map<number, ExecutionTask>;
   private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
+  private habitsData: Map<number, Habit>;
+  private habitStreaksData: Map<number, HabitStreak>;
   
   private currentUserId: number;
   private currentGoalId: number;
@@ -90,6 +115,8 @@ export class MemStorage implements IStorage {
   private currentExecutionTaskId: number;
   private currentSubtaskId: number;
   private currentWeekId: number;
+  private currentHabitId: number;
+  private currentHabitStreakId: number;
 
   constructor() {
     this.users = new Map();
@@ -99,6 +126,8 @@ export class MemStorage implements IStorage {
     this.executionTasksData = new Map();
     this.subtasksData = new Map();
     this.weeksData = new Map();
+    this.habitsData = new Map();
+    this.habitStreaksData = new Map();
     
     this.currentUserId = 1;
     this.currentGoalId = 1;
@@ -107,6 +136,8 @@ export class MemStorage implements IStorage {
     this.currentExecutionTaskId = 1;
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
+    this.currentHabitId = 1;
+    this.currentHabitStreakId = 1;
     
     // Call initializeData as async function
     this.initializeData().catch(console.error);
