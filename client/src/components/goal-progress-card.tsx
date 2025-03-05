@@ -1,12 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { Goal } from "@shared/schema";
 import { Link } from "wouter";
-import { PlusCircle, TrendingUp, ArrowUpRight, Target, Award, ChevronUp } from "lucide-react";
+import { PlusCircle, ArrowUpRight, Target, Award, ChevronUp, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useGoalCelebrationContext } from "../context/goal-celebration-context";
+import { AnimatedComponent } from "@/components/ui/animated-component";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 
 interface GoalProgressCardProps {
   goal: Goal;
@@ -84,10 +86,11 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   };
   
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <AnimatedComponent
+      animation="slideIn"
+      direction="up"
+      duration={0.4}
+      className="w-full"
     >
       <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
         percentComplete >= 75 ? "border-green-600" :
@@ -99,9 +102,33 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
               <div className="flex items-center">
-                <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
-                {percentComplete >= 100 && <Award className="h-3 w-3 ml-1 text-yellow-400" />}
-                {percentComplete < 100 && <Target className="h-3 w-3 ml-1 text-green-400" />}
+                <AnimatedTooltip
+                  content={`Target: ${formatValue(goal.target, goal.unit)}`}
+                  position="top"
+                  animation="scale"
+                >
+                  <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
+                </AnimatedTooltip>
+                {percentComplete >= 100 && (
+                  <AnimatedComponent
+                    animation="bounce"
+                    duration={0.5}
+                    delay={0.1}
+                    className="ml-1"
+                  >
+                    <Award className="h-3 w-3 text-yellow-400" />
+                  </AnimatedComponent>
+                )}
+                {percentComplete < 100 && (
+                  <AnimatedComponent
+                    animation="pulseIn"
+                    duration={1.5}
+                    iterationCount="infinite"
+                    className="ml-1"
+                  >
+                    <Target className="h-3 w-3 text-green-400" />
+                  </AnimatedComponent>
+                )}
               </div>
               <div className="flex items-baseline gap-2">
                 <motion.p 
@@ -117,35 +144,37 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
                 </p>
               </div>
             </div>
-            <motion.span 
+            
+            <AnimatedComponent
+              animation={percentComplete < 25 ? "heartbeat" : "highlight"}
+              duration={percentComplete < 25 ? 1 : 0.7}
+              iterationCount={percentComplete < 25 ? "infinite" : 1}
               className={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 percentComplete >= 75 ? "bg-green-900/75 text-green-400 border border-green-500" :
                 percentComplete >= 50 ? "bg-yellow-900/75 text-yellow-400 border border-yellow-500" :
                 percentComplete >= 25 ? "bg-orange-900/75 text-orange-400 border border-orange-500" :
                 "bg-red-900/75 text-red-400 border border-red-500"
-              } ${percentComplete < 25 ? "animate-pulse" : "pulse-glow"}`}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400 }}
+              }`}
             >
               {percentComplete}% complete
-            </motion.span>
+            </AnimatedComponent>
           </div>
           
           <div className="mt-3 sm:mt-4">
             <div className="relative">
-              <Progress 
-                value={percentComplete} 
-                className="h-2.5 bg-gray-800 glow-element" 
-                indicatorClassName={getProgressColorClass(percentComplete)}
+              <AnimatedProgress 
+                value={percentComplete}
+                threshold={{ high: 75, medium: 50, low: 25 }}
+                thresholdColors={{
+                  high: "bg-green-500",
+                  medium: "bg-yellow-500",
+                  low: "bg-orange-500",
+                  veryLow: "bg-red-600"
+                }}
+                height="h-2.5"
+                className="bg-gray-800 glow-element"
+                animationDuration={1}
               />
-              {percentComplete >= 100 && (
-                <motion.div 
-                  className="absolute top-0 right-0 h-full w-2.5 bg-yellow-400 rounded-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
-                />
-              )}
             </div>
             <div className="flex items-center justify-between text-xs mt-1">
               <span className="text-green-400">0%</span>
@@ -163,45 +192,57 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
             </button>
           </div>
           
-          {expanded && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-3 text-xs text-gray-400 border-t border-green-900 pt-3"
-            >
-              <div className="grid grid-cols-2 gap-2">
-                {percentComplete < 30 && (
-                  <div className="text-red-500 font-medium mt-3 mb-1 text-xs animate-pulse col-span-2 grid grid-cols-[20px_1fr] items-center gap-1">
-                    <span className="text-xl">⚠️</span>
-                    <span>This goal needs immediate attention! You're falling far behind target.</span>
+          <AnimatePresence>
+            {expanded && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-3 text-xs text-gray-400 border-t border-green-900 pt-3"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  {percentComplete < 30 && (
+                    <AnimatedComponent
+                      animation="wiggle"
+                      duration={0.5}
+                      iterationCount="infinite"
+                      className="text-red-500 font-medium mt-3 mb-1 text-xs col-span-2 grid grid-cols-[20px_1fr] items-center gap-1"
+                    >
+                      <AlertTriangle className="h-5 w-5 text-red-500" />
+                      <span>This goal needs immediate attention! You're falling far behind target.</span>
+                    </AnimatedComponent>
+                  )}
+                  <div>
+                    <p className="text-green-400">Status:</p>
+                    <p className={getAchievementStatusColor()}>{getAchievementStatusText()}</p>
                   </div>
-                )}
-                <div>
-                  <p className="text-green-400">Status:</p>
-                  <p className={getAchievementStatusColor()}>{getAchievementStatusText()}</p>
+                  <div>
+                    <p className="text-green-400">Remaining:</p>
+                    <p className={percentComplete < 25 ? "text-red-500 font-semibold" : ""}>{formatValue(remaining, goal.unit)}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-green-400">Remaining:</p>
-                  <p className={percentComplete < 25 ? "text-red-500 font-semibold" : ""}>{formatValue(remaining, goal.unit)}</p>
-                  
-                </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <div className="mt-3 flex justify-end">
             <Link href={`/add-progress?goalId=${goal.id}`}>
-              <Button variant="outline" size="sm" className="text-xs border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 group">
-                <PlusCircle className="h-3 w-3 mr-1 group-hover:text-white transition-colors" />
+              <AnimatedButton
+                animation="hover"
+                variant="outline"
+                size="sm"
+                className="text-xs border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 group"
+                icon={<PlusCircle className="h-3 w-3 group-hover:text-white transition-colors" />}
+                iconPosition="left"
+              >
                 <span className="hidden xs:inline">Update</span> Progress
                 <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </Button>
+              </AnimatedButton>
             </Link>
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </AnimatedComponent>
   );
 }
