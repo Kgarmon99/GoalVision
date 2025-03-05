@@ -57,21 +57,30 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
   // Determine the progress color class based on percentage
   const getProgressColorClass = (percent: number) => {
     if (percent >= 75) return "bg-green-500";
-    if (percent >= 50) return "bg-green-600";
-    if (percent >= 25) return "bg-green-700";
-    return "bg-green-800";
+    if (percent >= 50) return "bg-yellow-500";
+    if (percent >= 25) return "bg-orange-500";
+    return "bg-red-600";
   };
   
   // Calculate remaining amount
   const remaining = goal.target - goal.current;
   
   // Get achievement status text
-  const getAchievementStatus = () => {
+  const getAchievementStatusText = () => {
     if (percentComplete >= 100) return "Achieved! 🏆";
     if (percentComplete >= 75) return "Almost there!";
     if (percentComplete >= 50) return "Halfway through";
     if (percentComplete >= 25) return "Getting started";
-    return "Just beginning";
+    return "Far from target!";
+  };
+  
+  // Get achievement status color
+  const getAchievementStatusColor = () => {
+    if (percentComplete >= 100) return "text-green-500";
+    if (percentComplete >= 75) return "text-green-400";
+    if (percentComplete >= 50) return "text-yellow-500";
+    if (percentComplete >= 25) return "text-orange-500";
+    return "text-red-500";
   };
   
   return (
@@ -80,7 +89,12 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="glow-card bg-gray-900 border border-green-600 hover:shadow-xl transition-all duration-300">
+      <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
+        percentComplete >= 75 ? "border-green-600" :
+        percentComplete >= 50 ? "border-yellow-600" :
+        percentComplete >= 25 ? "border-orange-600" :
+        "border-red-600"
+      }`}>
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
@@ -104,7 +118,12 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               </div>
             </div>
             <motion.span 
-              className="inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-400 border border-green-500 pulse-glow"
+              className={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                percentComplete >= 75 ? "bg-green-900/75 text-green-400 border border-green-500" :
+                percentComplete >= 50 ? "bg-yellow-900/75 text-yellow-400 border border-yellow-500" :
+                percentComplete >= 25 ? "bg-orange-900/75 text-orange-400 border border-orange-500" :
+                "bg-red-900/75 text-red-400 border border-red-500"
+              } ${percentComplete < 25 ? "animate-pulse" : "pulse-glow"}`}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
@@ -155,11 +174,11 @@ export function GoalProgressCard({ goal }: GoalProgressCardProps) {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <p className="text-green-400">Status:</p>
-                  <p>{getAchievementStatus()}</p>
+                  <p className={getAchievementStatusColor()}>{getAchievementStatusText()}</p>
                 </div>
                 <div>
                   <p className="text-green-400">Remaining:</p>
-                  <p>{formatValue(remaining, goal.unit)}</p>
+                  <p className={percentComplete < 25 ? "text-red-500 font-semibold" : ""}>{formatValue(remaining, goal.unit)}</p>
                 </div>
               </div>
             </motion.div>
