@@ -10,7 +10,7 @@ import AddTask from "@/pages/add-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
-import HabitTracker from "@/pages/habit-tracker";
+import HabitTracker from "@/pages/habit-tracker-fixed";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 
 function Router() {
