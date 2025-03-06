@@ -13,6 +13,7 @@ import TaskBoard from "@/pages/task-board";
 import HabitTracker from "@/pages/habit-tracker-fixed";
 import Profile from "@/pages/profile";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
+import Header from "@/components/layout/header";
 
 function Router() {
   return (
@@ -35,7 +36,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GoalCelebrationProvider>
-        <Router />
+        <div className="min-h-screen bg-gray-950 text-gray-100">
+          <Header />
+          <main>
+            <Router />
+          </main>
+        </div>
         <Toaster />
       </GoalCelebrationProvider>
     </QueryClientProvider>
