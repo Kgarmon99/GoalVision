@@ -395,7 +395,12 @@ const Dashboard = () => {
                     <div className="grid gap-3">
                       {weekTasks
                         .sort((a, b) => {
-                          // First sort by status (in-progress first, then missing, then done)
+                          // First sort by priority
+                          if (a.isPriority !== b.isPriority) {
+                            return a.isPriority ? -1 : 1;
+                          }
+                          
+                          // Then sort by status (in-progress first, then missing, then done)
                           const statusOrder: Record<string, number> = {
                             'in-progress': 0,
                             'missed': 1,
@@ -411,8 +416,12 @@ const Dashboard = () => {
                         })
                         .slice(0, 3)
                         .map(task => (
-                          <Link key={task.id} href={`/tasks/${task.id}`}>
-                            <div className="flex items-center justify-between bg-gray-800/60 hover:bg-gray-800 rounded-md p-3 cursor-pointer group transition-all border border-gray-700 hover:border-green-500">
+                          <Link key={task.id} href={`/task-details/${task.id}`}>
+                            <div className={`flex items-center justify-between bg-gray-800/60 hover:bg-gray-800 rounded-md p-3 cursor-pointer group transition-all border ${
+                              task.isPriority 
+                                ? 'border-green-500 shadow-lg glow-effect-strong' 
+                                : 'border-gray-700 hover:border-green-500'
+                            }`}>
                               <div className="flex items-center overflow-hidden">
                                 <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
                                   task.status === 'done' 
