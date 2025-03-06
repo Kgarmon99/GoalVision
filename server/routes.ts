@@ -294,45 +294,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Toggle task priority status
-  app.post("/api/tasks/:id/toggle-priority", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      // Get the task first
-      const task = await storage.getTask(id);
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      // If we're setting this task as a priority, first reset all other tasks
-      if (!task.isPriority) {
-        // Get all tasks
-        const allTasks = await storage.getAllTasks();
-        
-        // Reset priority on all tasks that currently have it set
-        for (const t of allTasks) {
-          if (t.isPriority) {
-            await storage.updateTask(t.id, { isPriority: false });
-          }
-        }
-      }
-      
-      // Toggle this task's priority status
-      const updatedTask = await storage.updateTask(id, { 
-        isPriority: !task.isPriority 
-      });
-      
-      if (!updatedTask) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.json(updatedTask);
-    } catch (error) {
-      res.status(500).json({ message: "Error updating task priority" });
-    }
-  });
-  
   // Get all weeks
   app.get("/api/weeks", async (req, res) => {
     try {

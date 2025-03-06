@@ -10,7 +10,6 @@ import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,15 +28,11 @@ import {
   BarChart3,
   Award,
   CheckCircle,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
   TrendingUp, 
   DollarSign, 
   Target, 
   Rocket,
   ArrowUpRight,
-  ArrowRight,
   Users
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -358,147 +353,6 @@ const Dashboard = () => {
                   </Link>
                 </div>
               </motion.div>
-              
-              {/* Important Tasks Section */}
-              <motion.section 
-                className="mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
-                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center">
-                    <ListTodo className="h-5 w-5 mr-2" />
-                    Important Tasks
-                  </h2>
-                  <Link href="/task-board">
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="text-green-400 hover:text-green-300 hover:bg-gray-800"
-                    >
-                      View All Tasks <ArrowRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-                
-                {isLoading ? (
-                  <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card">
-                    <div className="space-y-3">
-                      {[1, 2, 3].map((_, i) => (
-                        <div key={i} className="h-14 bg-gray-800/60 rounded-md animate-pulse"></div>
-                      ))}
-                    </div>
-                  </div>
-                ) : weekTasks.length > 0 ? (
-                  <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card">
-                    <div className="grid gap-3">
-                      {weekTasks
-                        .sort((a, b) => {
-                          // First sort by priority
-                          if (a.isPriority !== b.isPriority) {
-                            return a.isPriority ? -1 : 1;
-                          }
-                          
-                          // Then sort by status (in-progress first, then missing, then done)
-                          const statusOrder: Record<string, number> = {
-                            'in-progress': 0,
-                            'missed': 1,
-                            'done': 2
-                          };
-                          
-                          // If status is the same, sort by due date (ascending)
-                          if (statusOrder[a.status] === statusOrder[b.status]) {
-                            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-                          }
-                          
-                          return statusOrder[a.status] - statusOrder[b.status];
-                        })
-                        .slice(0, 3)
-                        .map(task => (
-                          <Link key={task.id} href={`/task-details/${task.id}`}>
-                            <div className={`flex items-center justify-between bg-gray-800/60 hover:bg-gray-800 rounded-md p-3 cursor-pointer group transition-all border ${
-                              task.isPriority 
-                                ? 'border-green-500 shadow-lg glow-effect-strong' 
-                                : 'border-gray-700 hover:border-green-500'
-                            }`}>
-                              <div className="flex items-center overflow-hidden">
-                                <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
-                                  task.status === 'done' 
-                                    ? 'bg-green-900/50 text-green-400 border border-green-500' 
-                                    : task.status === 'in-progress' 
-                                    ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-500 animate-pulse'
-                                    : 'bg-red-900/50 text-red-400 border border-red-500'
-                                }`}>
-                                  {task.status === 'done' ? (
-                                    <CheckCircle2 className="h-4 w-4" />
-                                  ) : task.status === 'in-progress' ? (
-                                    <Clock className="h-4 w-4" />
-                                  ) : (
-                                    <AlertCircle className="h-4 w-4" />
-                                  )}
-                                </div>
-                                <div className="overflow-hidden">
-                                  <p className="text-sm font-medium text-white truncate group-hover:text-green-300 transition-colors">{task.task}</p>
-                                  <div className="flex items-center mt-1">
-                                    <Badge 
-                                      variant="outline" 
-                                      className={`text-xs border mr-2 ${
-                                        task.goalCategory === 'Revenue' 
-                                          ? 'bg-purple-900/40 text-purple-400 border-purple-700'
-                                          : task.goalCategory === 'User Growth' 
-                                          ? 'bg-green-900/40 text-green-400 border-green-700'
-                                          : task.goalCategory === 'Funding' 
-                                          ? 'bg-blue-900/40 text-blue-400 border-blue-700'
-                                          : task.goalCategory === 'School Expansion' 
-                                          ? 'bg-indigo-900/40 text-indigo-400 border-indigo-700'
-                                          : 'bg-gray-700/80 text-gray-300 border-gray-600'
-                                      }`}
-                                    >
-                                      {task.goalCategory}
-                                    </Badge>
-                                    <span className="text-xs text-gray-400">Due: {task.dueDate}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex-shrink-0 ml-2">
-                                <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-green-400 transition-colors" />
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
-                      {weekTasks.length > 3 && (
-                        <div className="text-center pt-2">
-                          <Link href="/task-board">
-                            <Button variant="ghost" size="sm" className="text-green-400 hover:text-green-300">
-                              View All {weekTasks.length} Tasks
-                            </Button>
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-6 gradient-border glow-card text-center">
-                    <div className="mb-4 flex justify-center">
-                      <div className="h-12 w-12 bg-gray-800 rounded-full flex items-center justify-center text-green-400">
-                        <ListTodo className="h-6 w-6" />
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-medium text-white mb-2">No Tasks Available</h3>
-                    <p className="text-gray-400 mb-4">Add your first task to start tracking execution</p>
-                    <Link href="/add-task">
-                      <Button 
-                        className="bg-green-600 text-white hover:bg-green-700"
-                        size="sm"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add Task
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </motion.section>
 
               {/* Main Goals Progress */}
               <section className="mb-8">

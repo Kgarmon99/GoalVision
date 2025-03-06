@@ -73,7 +73,6 @@ export const executionTasks = pgTable("execution_tasks", {
   dueDate: text("due_date").notNull(),
   status: text("status").notNull(), // "done", "in-progress", "missed"
   weekId: integer("week_id").notNull(),
-  isPriority: boolean("is_priority").default(false),
 });
 
 export const executionTasksRelations = relations(executionTasks, ({ one, many }) => ({
@@ -93,7 +92,6 @@ export const insertExecutionTaskSchema = createInsertSchema(executionTasks).pick
   dueDate: true,
   status: true,
   weekId: true,
-  isPriority: true,
 });
 
 // New subtasks table
