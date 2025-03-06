@@ -8,10 +8,12 @@ import {
   TrendingUp, 
   ListChecks,
   Kanban,
-  Plus
+  Plus,
+  User
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/user-avatar";
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);

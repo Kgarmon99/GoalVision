@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import MobileNav from "./mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { UserAvatar } from "@/components/user-avatar";
 
 const Header = () => {
   const isMobile = useIsMobile();
@@ -105,6 +106,13 @@ const Header = () => {
             >
               <BellIcon className="h-5 w-5" />
             </Button>
+            
+            {/* User Avatar */}
+            <Link href="/profile">
+              <Button variant="ghost" className="p-1 hover:bg-gray-800 rounded-full">
+                <UserAvatar showStatus={true} size={isMobile ? "sm" : "md"} />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
