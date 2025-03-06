@@ -22,6 +22,55 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 
+// Simple server-side cache implementation to reduce database load
+// Cache entries expire after specified time to ensure data freshness
+type CacheEntry<T> = {
+  data: T;
+  timestamp: number;
+};
+
+class ServerCache {
+  private cache: Map<string, CacheEntry<any>> = new Map();
+  private defaultTTL: number = 60 * 1000; // Default 60 seconds TTL
+
+  set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now() + ttl
+    });
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    
+    if (!entry) return null;
+    
+    // Check if cache entry has expired
+    if (Date.now() > entry.timestamp) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return entry.data as T;
+  }
+
+  invalidate(key: string): void {
+    this.cache.delete(key);
+  }
+
+  invalidateByPrefix(prefix: string): void {
+    // Convert keys iterator to array before iterating to fix LSP error
+    const keys = Array.from(this.cache.keys());
+    for (const key of keys) {
+      if (key.startsWith(prefix)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+const serverCache = new ServerCache();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
   // All routes are prefixed with /api
@@ -160,7 +209,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all goals
   app.get("/api/goals", async (req, res) => {
     try {
+      // Try to get goals from cache first
+      const cacheKey = "goals:all";
+      const cachedGoals = serverCache.get(cacheKey);
+      
+      if (cachedGoals) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedGoals);
+      }
+      
+      // Cache miss, fetch from database
       const goals = await storage.getAllGoals();
+      
+      // Cache for 30 seconds - goals don't change that frequently but we need fresh data
+      serverCache.set(cacheKey, goals, 30 * 1000);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(goals);
     } catch (error) {
       res.status(500).json({ message: "Error fetching goals" });
@@ -184,6 +250,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await fetch(`http://localhost:${process.env.PORT || 5000}/api/metrics/refresh`, {
           method: 'POST',
         });
+        
+        // Invalidate relevant caches to ensure data consistency
+        serverCache.invalidate("goals:all");
+        serverCache.invalidateByPrefix("metrics:");
       } catch (metricError) {
         console.error("Error refreshing metrics after goal update:", metricError);
         // We don't fail the whole request if metrics update fails
@@ -359,7 +429,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tasks
   app.get("/api/tasks", async (req, res) => {
     try {
+      // Try to get tasks from cache first
+      const cacheKey = "tasks:all";
+      const cachedTasks = serverCache.get(cacheKey);
+      
+      if (cachedTasks) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedTasks);
+      }
+      
+      // Cache miss, fetch from database
       const tasks = await storage.getAllTasks();
+      
+      // Cache for 30 seconds - tasks are frequently accessed
+      serverCache.set(cacheKey, tasks, 30 * 1000);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(tasks);
     } catch (error) {
       res.status(500).json({ message: "Error fetching tasks" });
@@ -407,6 +494,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Task not found" });
       }
       
+      // Invalidate task cache to ensure data consistency
+      serverCache.invalidate("tasks:all");
+      serverCache.invalidateByPrefix(`tasks:week:${updatedTask.weekId}`);
+      
       res.json(updatedTask);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -435,7 +526,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all weeks
   app.get("/api/weeks", async (req, res) => {
     try {
+      // Try to get weeks from cache first
+      const cacheKey = "weeks:all";
+      const cachedWeeks = serverCache.get(cacheKey);
+      
+      if (cachedWeeks) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedWeeks);
+      }
+      
+      // Cache miss, fetch from database
       const weeks = await storage.getAllWeeks();
+      
+      // Cache for 60 seconds - weeks rarely change
+      serverCache.set(cacheKey, weeks, 60 * 1000);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(weeks);
     } catch (error) {
       res.status(500).json({ message: "Error fetching weeks" });
