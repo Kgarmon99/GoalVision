@@ -431,7 +431,11 @@ const Dashboard = () => {
                           </div>
                         </div>
                       ) : growthMetrics.length > 0 ? (
-                        <MetricsCard title="Growth Metrics" metrics={growthMetrics} />
+                        <MetricsCard 
+                          title="Growth Metrics" 
+                          metrics={growthMetrics} 
+                          category="growth" 
+                        />
                       ) : (
                         <EmptyState 
                           title="No Growth Metrics" 

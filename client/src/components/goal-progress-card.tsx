@@ -83,11 +83,15 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate both goals and metrics queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/metrics/category/growth'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/metrics/category/revenue'] });
+      
       setIsEditDialogOpen(false);
       toast({
         title: "Goal updated",
-        description: "Your goal has been updated successfully.",
+        description: "Your goal has been updated successfully. Metrics have been refreshed.",
       });
     },
     onError: (error) => {
@@ -114,11 +118,15 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       return true;
     },
     onSuccess: () => {
+      // Invalidate both goals and metrics queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/metrics/category/growth'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/metrics/category/revenue'] });
+      
       setIsDeleteDialogOpen(false);
       toast({
         title: "Goal deleted",
-        description: "Your goal has been deleted successfully.",
+        description: "Your goal has been deleted successfully. Metrics have been updated.",
       });
       if (onDelete) onDelete(goal.id);
     },
