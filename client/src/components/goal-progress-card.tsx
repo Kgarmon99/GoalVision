@@ -52,15 +52,15 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
   // Create form validation schema based on the shared schema
   const formSchema = insertGoalSchema.partial();
   
-  // Initialize form for goal editing
+  // Initialize form for goal editing with proper type handling
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: goal.name,
       current: goal.current,
       target: goal.target,
-      unit: goal.unit || "",
-      color: goal.color || "primary",
+      unit: goal.unit !== null ? goal.unit : "",
+      color: goal.color !== null ? goal.color : "primary",
     },
   });
   
@@ -486,7 +486,11 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                         <Input 
                           className="bg-gray-800 border-gray-700 text-white"
                           placeholder="e.g., M, K, %, etc." 
-                          {...field} 
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormMessage className="text-red-400" />
@@ -500,7 +504,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-gray-300">Color</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={typeof field.value === 'string' ? field.value : "primary"}>
                         <FormControl>
                           <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                             <SelectValue placeholder="Select a color" />
