@@ -35,10 +35,120 @@ import {
   ArrowUpRight,
   Users
 } from "lucide-react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";
 import { Link } from "wouter";
+
+// Memoized stat card component to prevent unnecessary re-renders
+interface StatCardProps {
+  icon: React.ReactNode;
+  value: number | string;
+  label: string;
+  delay: number;
+}
+
+const StatCard = memo(({ icon, value, label, delay }: StatCardProps) => (
+  <motion.div 
+    className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3, delay }}
+    whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+  >
+    <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect">
+      {icon}
+    </div>
+    <h3 className="text-xl font-bold text-white text-glow">{value}</h3>
+    <p className="text-green-400 text-sm">{label}</p>
+  </motion.div>
+));
+
+// Memoized action bar to prevent unnecessary re-renders
+const ActionBar = memo(() => (
+  <motion.div 
+    className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card flex flex-wrap gap-4 justify-between items-center"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    <div className="flex items-center">
+      <div className="aura-pulse mr-2">
+        <Target className="h-6 w-6 text-green-400 float-effect" />
+      </div>
+      <h2 className="text-lg font-semibold text-green-400 text-glow">2025 Goals Tracker</h2>
+    </div>
+    <div className="flex gap-3 flex-wrap">
+      <Link href="/add-progress">
+        <AnimatedButton 
+          animation="bounce" 
+          variant="outline" 
+          size="sm" 
+          className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
+          icon={<PlusCircle className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
+          label="Update Progress"
+        />
+      </Link>
+      <Link href="/add-goal">
+        <AnimatedButton 
+          animation="shadow" 
+          variant="outline" 
+          size="sm" 
+          className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
+          icon={<Plus className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
+          label="Add Goal"
+        />
+      </Link>
+      <Link href="/add-task">
+        <AnimatedButton 
+          animation="shine" 
+          size="sm" 
+          className="bg-green-600 text-white hover:bg-green-700 neon-glow"
+          icon={<Rocket className="h-4 w-4 float-effect-fast" />}
+          label="Track Execution"
+        />
+      </Link>
+    </div>
+  </motion.div>
+));
+
+// Loading skeletons for goals and metrics as memoized components
+const GoalsSkeleton = memo(() => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {[1, 2, 3, 4].map((_, index) => (
+      <div key={index} className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-32 animate-pulse">
+        <div className="h-4 bg-gray-800 rounded w-1/4 mb-2"></div>
+        <div className="h-8 bg-gray-800 rounded w-1/2 mb-1"></div>
+        <div className="h-4 bg-gray-800 rounded w-1/3 mb-4"></div>
+        <div className="h-2 bg-gray-800 rounded w-full"></div>
+      </div>
+    ))}
+  </div>
+));
+
+// Memoized goals grid component
+interface GoalsGridProps {
+  goals: Goal[];
+}
+
+const GoalsGrid = memo(({ goals }: GoalsGridProps) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {goals.map(goal => (
+      <GoalProgressCard key={goal.id} goal={goal} />
+    ))}
+  </div>
+));
+
+// Memoized metrics grid component
+interface MetricsGridProps {
+  metrics: Metric[];
+  title: string;
+  category: string;
+}
+
+const MetricsGrid = memo(({ metrics, title, category }: MetricsGridProps) => (
+  <MetricsCard title={title} metrics={metrics} category={category} />
+));
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -266,108 +376,37 @@ const Dashboard = () => {
             <>
               {/* Stats Overview */}
               <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <motion.div 
-                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect">
-                    <Target className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white text-glow">{goals.length}</h3>
-                  <p className="text-green-400 text-sm">Active Goals</p>
-                </motion.div>
+                <StatCard 
+                  icon={<Target className="h-8 w-8" />}
+                  value={goals.length}
+                  label="Active Goals"
+                  delay={0.1}
+                />
                 
-                <motion.div 
-                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect-slow">
-                    <BarChart3 className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white text-glow">{(growthMetrics.length + revenueMetrics.length)}</h3>
-                  <p className="text-green-400 text-sm">Key Metrics</p>
-                </motion.div>
+                <StatCard 
+                  icon={<BarChart3 className="h-8 w-8" />}
+                  value={(growthMetrics.length + revenueMetrics.length)}
+                  label="Key Metrics"
+                  delay={0.2}
+                />
                 
-                <motion.div 
-                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect-fast">
-                    <ListTodo className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white text-glow">{weekTasks.length}</h3>
-                  <p className="text-green-400 text-sm">Execution Tasks</p>
-                </motion.div>
+                <StatCard 
+                  icon={<ListTodo className="h-8 w-8" />}
+                  value={weekTasks.length}
+                  label="Execution Tasks"
+                  delay={0.3}
+                />
                 
-                <motion.div 
-                  className="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card aura-pulse flex flex-col items-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                >
-                  <div className="text-green-400 mb-1 bg-green-900/30 p-2 rounded-full float-effect">
-                    <Calendar className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white text-glow">{weeks.length}</h3>
-                  <p className="text-green-400 text-sm">Planning Weeks</p>
-                </motion.div>
+                <StatCard 
+                  icon={<Calendar className="h-8 w-8" />}
+                  value={weeks.length}
+                  label="Planning Weeks"
+                  delay={0.4}
+                />
               </div>
             
-              {/* Action Bar */}
-              <motion.div 
-                className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-green-600 p-4 gradient-border glow-card flex flex-wrap gap-4 justify-between items-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="flex items-center">
-                  <div className="aura-pulse mr-2">
-                    <Target className="h-6 w-6 text-green-400 float-effect" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-green-400 text-glow">2025 Goals Tracker</h2>
-                </div>
-                <div className="flex gap-3 flex-wrap">
-                  <Link href="/add-progress">
-                    <AnimatedButton 
-                      animation="bounce" 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
-                      icon={<PlusCircle className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
-                      label="Update Progress"
-                    />
-                  </Link>
-                  <Link href="/add-goal">
-                    <AnimatedButton 
-                      animation="shadow" 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-green-600 text-green-400 hover:bg-gray-800 hover:border-green-400 group neon-glow iridescent-hover"
-                      icon={<Plus className="h-4 w-4 group-hover:text-white transition-colors float-effect-fast" />}
-                      label="Add Goal"
-                    />
-                  </Link>
-                  <Link href="/add-task">
-                    <AnimatedButton 
-                      animation="shine" 
-                      size="sm" 
-                      className="bg-green-600 text-white hover:bg-green-700 neon-glow"
-                      icon={<Rocket className="h-4 w-4 float-effect-fast" />}
-                      label="Track Execution"
-                    />
-                  </Link>
-                </div>
-              </motion.div>
+              {/* Action Bar - Using memoized component */}
+              <ActionBar />
 
               {/* Main Goals Progress */}
               <section className="mb-8">
@@ -379,22 +418,9 @@ const Dashboard = () => {
                 </div>
                 
                 {isLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((_, index) => (
-                      <div key={index} className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-4 h-32 animate-pulse">
-                        <div className="h-4 bg-gray-800 rounded w-1/4 mb-2"></div>
-                        <div className="h-8 bg-gray-800 rounded w-1/2 mb-1"></div>
-                        <div className="h-4 bg-gray-800 rounded w-1/3 mb-4"></div>
-                        <div className="h-2 bg-gray-800 rounded w-full"></div>
-                      </div>
-                    ))}
-                  </div>
+                  <GoalsSkeleton />
                 ) : goals.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {goals.map(goal => (
-                      <GoalProgressCard key={goal.id} goal={goal} />
-                    ))}
-                  </div>
+                  <GoalsGrid goals={goals} />
                 ) : (
                   <EmptyState 
                     title="No Goals Yet" 
@@ -446,7 +472,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       ) : growthMetrics.length > 0 ? (
-                        <MetricsCard 
+                        <MetricsGrid 
                           title="Growth Metrics" 
                           metrics={growthMetrics} 
                           category="growth" 
@@ -473,7 +499,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       ) : revenueMetrics.length > 0 ? (
-                        <MetricsCard 
+                        <MetricsGrid 
                           title="Revenue Metrics" 
                           metrics={revenueMetrics} 
                           category="revenue" 
