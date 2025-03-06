@@ -128,7 +128,8 @@ const Dashboard = () => {
     enabled: !!currentWeekId,
   });
   
-  const handleRefreshData = async () => {
+  // Memoize handlers to avoid unnecessary re-renders
+  const handleRefreshData = useCallback(async () => {
     setIsRefreshing(true);
     
     try {
@@ -156,36 +157,50 @@ const Dashboard = () => {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [
+    refetchGoals, refetchGrowthMetrics, refetchRevenueMetrics, 
+    refetchGoalStatuses, refetchWeeks, currentWeekId, 
+    refetchWeek, refetchTasks, toast
+  ]);
   
-  const handlePreviousWeek = () => {
+  const handlePreviousWeek = useCallback(() => {
     if (weeks.length > 0 && currentWeekId) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
       if (currentIndex > 0) {
         setCurrentWeekId(weeks[currentIndex - 1].id);
       }
     }
-  };
+  }, [weeks, currentWeekId]);
   
-  const handleNextWeek = () => {
+  const handleNextWeek = useCallback(() => {
     if (weeks.length > 0 && currentWeekId) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
       if (currentIndex < weeks.length - 1) {
         setCurrentWeekId(weeks[currentIndex + 1].id);
       }
     }
-  };
+  }, [weeks, currentWeekId]);
   
-  const isLoading = 
+  // Memoize computed values
+  const isLoading = useMemo(() => 
     isLoadingGoals || 
     isLoadingGrowthMetrics || 
     isLoadingRevenueMetrics || 
     isLoadingGoalStatuses || 
     isLoadingWeeks ||
-    (currentWeekId && (isLoadingWeek || isLoadingTasks));
+    (currentWeekId && (isLoadingWeek || isLoadingTasks)),
+    [
+      isLoadingGoals, isLoadingGrowthMetrics, isLoadingRevenueMetrics,
+      isLoadingGoalStatuses, isLoadingWeeks, currentWeekId,
+      isLoadingWeek, isLoadingTasks
+    ]
+  );
   
-  // Check if there's any data to display
-  const hasAnyData = goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0;
+  // Check if there's any data to display - memoized to prevent recalculations
+  const hasAnyData = useMemo(() => 
+    goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0,
+    [goals.length, growthMetrics.length, revenueMetrics.length, weeks.length]
+  );
   
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">

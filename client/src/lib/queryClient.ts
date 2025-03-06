@@ -55,9 +55,9 @@ export async function apiRequest(
 type UnauthorizedBehavior = "returnNull" | "throw";
 
 // Enhanced query function with better error handling
-export const getQueryFn: <T>(options: {
+export const getQueryFn: <TData = unknown>(options: {
   on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
+}) => QueryFunction<TData, unknown[]> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
@@ -71,21 +71,21 @@ export const getQueryFn: <T>(options: {
         // Handle network errors specifically
         console.log("Error handled gracefully:", `Query failed (${String(queryKey[0])}): Failed to fetch`);
         // Return an empty array as fallback data
-        return ([] as any) as T;
+        return ([] as unknown) as TData;
       }
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        return null;
+        return null as unknown as TData;
       }
 
       await throwIfResNotOk(res);
       
       try {
-        return await res.json();
+        return await res.json() as TData;
       } catch (jsonError) {
         // Handle empty responses or invalid JSON
         if ((jsonError as Error).message.includes("Unexpected end of JSON input")) {
-          return null; // Return null for empty responses
+          return null as unknown as TData; // Return null for empty responses
         }
         throw jsonError;
       }
@@ -96,7 +96,7 @@ export const getQueryFn: <T>(options: {
         console.log("Error handled gracefully:", error.message);
       }
       // Return empty array as fallback data
-      return ([] as any) as T;
+      return ([] as unknown) as TData;
     }
   };
 
@@ -108,27 +108,26 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: true,  // Only refetch when window regains focus
       staleTime: 5 * 60 * 1000,    // Data remains fresh for 5 minutes
-      cacheTime: 30 * 60 * 1000,   // Cache data for 30 minutes
+      gcTime: 30 * 60 * 1000,      // Keep unused data in cache for 30 minutes
       retry: (failureCount, error) => {
         // Only retry network errors, not API errors
         if (error instanceof Error) {
           const isNetworkError = !error.message.includes("API Error") && 
-                                 error.message.includes("network");
+                                 (error.message.includes("network") || 
+                                  error.message.includes("Failed to fetch"));
           return failureCount < 2 && isNetworkError;
         }
         return false;
       },
-      // Performance optimizations
-      keepPreviousData: true,      // Keep previous data while fetching new data
-      refetchOnMount: 'always',    // Fetch fresh data when component mounts
-      suspense: false,             // Don't use React Suspense for queries
+      // Performance optimizations for React Query v5
+      placeholderData: (previousData: unknown) => previousData, // Similar to keepPreviousData
+      refetchOnMount: true,        // Fetch fresh data when component mounts if stale
     },
     mutations: {
       retry: false,
       // Use optimistic updates for better UX
-      onError: (err, variables, context) => {
+      onError: (err) => {
         console.error('Mutation error:', err);
-        // The context contains the previous state snapshot to restore on error
       }
     },
   },

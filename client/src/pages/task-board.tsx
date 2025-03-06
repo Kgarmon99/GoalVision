@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
@@ -58,27 +58,34 @@ export default function TaskBoard() {
     queryKey: ['/api/weeks'],
   });
   
-  // Filter and sort tasks
-  const filteredTasks = tasks.filter(task => {
-    if (filterStatus && task.status !== filterStatus) return false;
-    if (filterGoal && task.goalCategory !== filterGoal) return false;
-    return true;
-  }).sort((a, b) => {
-    if (sortBy === "dueDate") {
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-    } else {
-      return a.goalCategory.localeCompare(b.goalCategory);
-    }
-  });
+  // Filter and sort tasks - memoized to prevent recalculation on each render
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
+      if (filterStatus && task.status !== filterStatus) return false;
+      if (filterGoal && task.goalCategory !== filterGoal) return false;
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === "dueDate") {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else {
+        return a.goalCategory.localeCompare(b.goalCategory);
+      }
+    });
+  }, [tasks, filterStatus, filterGoal, sortBy]);
 
-  const handleTaskStatusChange = (taskId: number, newStatus: string) => {
+  // Memoize handler to prevent recreating function on each render
+  const handleTaskStatusChange = useCallback((taskId: number, newStatus: string) => {
     toast({
       title: "Task Status Updated",
       description: `Task has been moved to ${newStatus.replace("-", " ")}`,
     });
-  };
+  }, [toast]);
   
-  const isLoading = isLoadingTasks || isLoadingGoals || isLoadingWeeks;
+  // Memoized loading state
+  const isLoading = useMemo(() => 
+    isLoadingTasks || isLoadingGoals || isLoadingWeeks, 
+    [isLoadingTasks, isLoadingGoals, isLoadingWeeks]
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative">
