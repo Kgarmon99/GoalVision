@@ -11,9 +11,7 @@ import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
 import HabitTracker from "@/pages/habit-tracker-fixed";
-import Profile from "@/pages/profile";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
-import Header from "@/components/layout/header";
 
 function Router() {
   return (
@@ -26,7 +24,6 @@ function Router() {
       <Route path="/goal-tasks/:id" component={GoalTasks} />
       <Route path="/task-board" component={TaskBoard} />
       <Route path="/habit-tracker" component={HabitTracker} />
-      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -36,12 +33,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GoalCelebrationProvider>
-        <div className="min-h-screen bg-gray-950 text-gray-100">
-          <Header />
-          <main>
-            <Router />
-          </main>
-        </div>
+        <Router />
         <Toaster />
       </GoalCelebrationProvider>
     </QueryClientProvider>
