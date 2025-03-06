@@ -100,14 +100,15 @@ export const getQueryFn: <T>(options: {
     }
   };
 
-// Configure the Query Client with enhanced error handling
+// Configure the Query Client with enhanced error handling and optimization
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true,  // Only refetch when window regains focus
+      staleTime: 5 * 60 * 1000,    // Data remains fresh for 5 minutes
+      cacheTime: 30 * 60 * 1000,   // Cache data for 30 minutes
       retry: (failureCount, error) => {
         // Only retry network errors, not API errors
         if (error instanceof Error) {
@@ -116,10 +117,19 @@ export const queryClient = new QueryClient({
           return failureCount < 2 && isNetworkError;
         }
         return false;
-      }
+      },
+      // Performance optimizations
+      keepPreviousData: true,      // Keep previous data while fetching new data
+      refetchOnMount: 'always',    // Fetch fresh data when component mounts
+      suspense: false,             // Don't use React Suspense for queries
     },
     mutations: {
-      retry: false
+      retry: false,
+      // Use optimistic updates for better UX
+      onError: (err, variables, context) => {
+        console.error('Mutation error:', err);
+        // The context contains the previous state snapshot to restore on error
+      }
     },
   },
 });

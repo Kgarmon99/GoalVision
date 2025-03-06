@@ -35,7 +35,7 @@ import {
   ArrowUpRight,
   Users
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";
 import { Link } from "wouter";
