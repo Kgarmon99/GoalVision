@@ -33,7 +33,7 @@ export default function HabitTracker() {
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  
+
   const form = useForm<HabitFormValues>({
     resolver: zodResolver(habitFormSchema),
     defaultValues: {
@@ -45,7 +45,7 @@ export default function HabitTracker() {
       color: "primary"
     }
   });
-  
+
   // Fetch goals
   useEffect(() => {
     async function fetchGoals() {
@@ -62,7 +62,7 @@ export default function HabitTracker() {
     }
     fetchGoals();
   }, []);
-  
+
   // Fetch habits when selected goal changes
   useEffect(() => {
     async function fetchHabits() {
@@ -79,26 +79,26 @@ export default function HabitTracker() {
     }
     fetchHabits();
   }, []);
-  
+
   // Submit handler for adding a new habit
   const onSubmit = async (values: HabitFormValues) => {
     try {
       await apiRequest("POST", '/api/habits', values);
-      
+
       // Refetch habits
       const response = await apiRequest("GET", '/api/habits');
       const data = await response.json();
       setHabits(data);
-      
+
       // Reset form and close dialog
       form.reset();
       setIsAddHabitOpen(false);
-      
+
       toast({
         title: "Habit Created",
         description: "Your new habit has been successfully created.",
       });
-      
+
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
       if (values.goalId) {
@@ -113,24 +113,24 @@ export default function HabitTracker() {
       });
     }
   };
-  
+
   // Delete a habit
   const deleteHabit = async (habitId: number) => {
     if (!confirm("Are you sure you want to delete this habit? This will also delete all streak records.")) {
       return;
     }
-    
+
     try {
       await apiRequest("DELETE", `/api/habits/${habitId}`);
-      
+
       // Remove from local state
       setHabits(habits.filter(h => h.id !== habitId));
-      
+
       toast({
         title: "Habit Deleted",
         description: "The habit has been successfully deleted.",
       });
-      
+
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
       queryClient.invalidateQueries({ queryKey: ['/api/habits', habitId] });
@@ -143,7 +143,7 @@ export default function HabitTracker() {
       });
     }
   };
-  
+
   if (isLoading && habits.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
@@ -157,19 +157,19 @@ export default function HabitTracker() {
                   <span className="hidden sm:inline">Home</span>
                 </Link>
               </div>
-              
+
               <div className="flex items-center space-x-1 sm:space-x-4">
                 <div className="flex overflow-x-auto no-scrollbar space-x-1 sm:space-x-2 p-2">
                   <Link href="/dashboard" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
                     <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
                     <span>Dashboard</span>
                   </Link>
-                  
+
                   <Link href="/task-board" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
                     <ListTodo className="h-4 w-4 mr-1 sm:mr-2" />
                     <span>Tasks</span>
                   </Link>
-                  
+
                   <Link href="/habit-tracker-fixed" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
                     <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
                     <span>Habits</span>
@@ -186,16 +186,16 @@ export default function HabitTracker() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
-      
+
       {/* Animated Floating Orbs */}
       <div className="absolute left-[10%] top-[20%] w-40 h-40 rounded-full bg-gradient-to-r from-green-900/10 to-green-500/5 blur-2xl float-effect-slow"></div>
       <div className="absolute right-[15%] top-[30%] w-64 h-64 rounded-full bg-gradient-to-r from-blue-900/10 to-purple-500/5 blur-2xl float-effect"></div>
       <div className="absolute left-[25%] bottom-[15%] w-52 h-52 rounded-full bg-gradient-to-r from-purple-900/5 to-pink-500/5 blur-2xl float-effect-fast"></div>
-      
+
       {/* Navigation Bar */}
       <div className="sticky top-0 z-50 w-full bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,19 +206,19 @@ export default function HabitTracker() {
                 <span className="hidden sm:inline">Home</span>
               </Link>
             </div>
-            
+
             <div className="flex items-center space-x-1 sm:space-x-4">
               <div className="flex overflow-x-auto no-scrollbar space-x-1 sm:space-x-2 p-2">
                 <Link href="/dashboard" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
                   <LayoutDashboard className="h-4 w-4 mr-1 sm:mr-2" />
                   <span>Dashboard</span>
                 </Link>
-                
+
                 <Link href="/task-board" className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors">
                   <ListTodo className="h-4 w-4 mr-1 sm:mr-2" />
                   <span>Tasks</span>
                 </Link>
-                
+
                 <Link href="/habit-tracker-fixed" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
                   <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
                   <span>Habits</span>
@@ -228,13 +228,18 @@ export default function HabitTracker() {
           </div>
         </div>
       </div>
-      
+
       <main className="flex-1 py-6 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
+                <img 
+                  src="/images/user-profile.jpeg" 
+                  alt="Kahlil Garmon" 
+                  className="w-12 h-12 rounded-full border-2 border-green-400 shadow-lg shadow-green-500/20 mr-3" 
+                />
                 <div className="relative aura-pulse mr-3">
                   <Flame className="h-8 w-8 text-orange-400 float-effect" />
                 </div>
@@ -259,7 +264,7 @@ export default function HabitTracker() {
                         Create a new habit to track consistently. Habits are most effective when tracked daily.
                       </DialogDescription>
                     </DialogHeader>
-                    
+
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
                         <FormField
@@ -275,7 +280,7 @@ export default function HabitTracker() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="description"
@@ -289,7 +294,7 @@ export default function HabitTracker() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -321,7 +326,7 @@ export default function HabitTracker() {
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={form.control}
                             name="frequency"
@@ -348,7 +353,7 @@ export default function HabitTracker() {
                             )}
                           />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <FormField
                             control={form.control}
@@ -366,7 +371,7 @@ export default function HabitTracker() {
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={form.control}
                             name="reminderTime"
@@ -380,7 +385,7 @@ export default function HabitTracker() {
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={form.control}
                             name="color"
@@ -409,7 +414,7 @@ export default function HabitTracker() {
                             )}
                           />
                         </div>
-                        
+
                         <DialogFooter>
                           <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Create Habit</Button>
                         </DialogFooter>
@@ -420,22 +425,22 @@ export default function HabitTracker() {
               </div>
             </div>
           </div>
-          
+
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="bg-gray-800 border-b border-gray-700">
               <TabsTrigger value="all" className="text-gray-300 data-[state=active]:text-green-400">All Habits</TabsTrigger>
               <TabsTrigger value="byGoal" className="text-gray-300 data-[state=active]:text-green-400">By Goal</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="all" className="mt-6">
               <HabitStreakTracker />
-              
+
               <div className="mt-8">
                 <div className="flex items-center mb-4">
                   <h2 className="text-xl font-bold text-white text-glow">All Habits</h2>
                   <div className="ml-3 h-px flex-1 bg-gradient-to-r from-green-500/50 to-transparent"></div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {habits.map(habit => (
                     <motion.div
@@ -489,7 +494,7 @@ export default function HabitTracker() {
                     </motion.div>
                   ))}
                 </div>
-                
+
                 {habits.length === 0 && (
                   <motion.div 
                     initial={{ opacity: 0 }}
@@ -512,7 +517,7 @@ export default function HabitTracker() {
                 )}
               </div>
             </TabsContent>
-            
+
             <TabsContent value="byGoal" className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -534,10 +539,10 @@ export default function HabitTracker() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   {selectedGoalId && <HabitStreakTracker goalId={selectedGoalId} />}
                 </div>
-                
+
                 <div className="space-y-4">
                   <Card className="bg-gray-900 border-gray-800 shadow-xl">
                     <CardHeader className="pb-2 border-b border-gray-800">

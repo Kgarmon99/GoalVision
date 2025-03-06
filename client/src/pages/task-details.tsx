@@ -106,10 +106,10 @@ export default function TaskDetails() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Get task ID from URL
   const taskId = parseInt(params.id);
-  
+
   // Fetch task details
   const { 
     data: task, 
@@ -120,7 +120,7 @@ export default function TaskDetails() {
     queryKey: ['/api/tasks', taskId],
     enabled: !isNaN(taskId),
   });
-  
+
   // Fetch week info
   const { 
     data: week,
@@ -129,7 +129,7 @@ export default function TaskDetails() {
     queryKey: ['/api/weeks', task?.weekId],
     enabled: !!task?.weekId,
   });
-  
+
   // Fetch goals info to find the related goal
   const {
     data: goals = [],
@@ -138,33 +138,33 @@ export default function TaskDetails() {
     queryKey: ['/api/goals'],
     enabled: !!task
   });
-  
+
   // Find the goal this task belongs to
   const relatedGoal = task ? goals.find(goal => goal.name === task.goalCategory) : undefined;
-  
+
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/tasks/${id}`, {
         method: "DELETE"
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to delete task: ${response.statusText}`);
       }
-      
+
       return true;
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
-      
+
       toast({
         title: "Task deleted",
         description: "Task has been deleted successfully.",
         variant: "default",
       });
-      
+
       // Navigate back to dashboard
       navigate("/");
     },
@@ -176,10 +176,10 @@ export default function TaskDetails() {
       });
     }
   });
-  
+
   const handleDeleteTask = async () => {
     if (!task || !taskId) return;
-    
+
     setIsDeleting(true);
     try {
       await deleteTaskMutation.mutateAsync(taskId);
@@ -187,7 +187,7 @@ export default function TaskDetails() {
       setIsDeleting(false);
     }
   };
-  
+
   // Toggle task status mutation
   const toggleStatusMutation = useMutation({
     mutationFn: async ({id, newStatus}: {id: number, newStatus: string}) => {
@@ -198,18 +198,18 @@ export default function TaskDetails() {
         },
         body: JSON.stringify({status: newStatus}),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to update task status: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
       // Invalidate tasks cache to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tasks', taskId] });
-      
+
       toast({
         title: "Task updated",
         description: "Task status has been updated successfully.",
@@ -224,16 +224,16 @@ export default function TaskDetails() {
       });
     }
   });
-  
+
   const handleToggleStatus = async () => {
     if (!task || !taskId) return;
-    
+
     // Toggle between "done" and "in-progress"
     const newStatus = task.status === "done" ? "in-progress" : "done";
-    
+
     try {
       await toggleStatusMutation.mutateAsync({id: taskId, newStatus});
-      
+
       // If task is being marked as done, trigger reward animation
       if (newStatus === "done") {
         handleRewardAnimation();
@@ -242,7 +242,7 @@ export default function TaskDetails() {
       console.error("Error toggling task status:", error);
     }
   };
-  
+
   // Function to get status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -271,11 +271,11 @@ export default function TaskDetails() {
         return <Badge className="bg-gray-800 text-gray-300 border-gray-600">{status}</Badge>;
     }
   };
-  
+
   // Function to get category badge styling
   const getCategoryBadge = (category: string | null | undefined, color: string | null | undefined = "") => {
     if (!category) return null;
-    
+
     const colorMap: Record<string, string> = {
       "blue": "bg-blue-900 text-blue-400 border-blue-500",
       "indigo": "bg-indigo-900 text-indigo-400 border-indigo-500",
@@ -284,9 +284,9 @@ export default function TaskDetails() {
       "red": "bg-red-900 text-red-400 border-red-500",
       "yellow": "bg-yellow-900 text-yellow-400 border-yellow-500"
     };
-    
+
     const badgeColor = color && colorMap[color] ? colorMap[color] : "bg-gray-800 text-gray-300 border-gray-600";
-    
+
     return (
       <Badge variant="outline" className={badgeColor}>
         <Target className="h-3 w-3 mr-1" />
@@ -294,7 +294,7 @@ export default function TaskDetails() {
       </Badge>
     );
   };
-  
+
   // Form schemas for editing tasks and subtasks
   const editTaskFormSchema = z.object({
     task: z.string().min(3, "Task description must be at least 3 characters"),
@@ -334,7 +334,7 @@ export default function TaskDetails() {
     },
     enabled: !!taskId
   });
-  
+
   // Add subtask mutation
   const addSubtaskMutation = useMutation({
     mutationFn: async (subtaskData: { parentTaskId: number, description: string, priority: string }) => {
@@ -345,17 +345,17 @@ export default function TaskDetails() {
         },
         body: JSON.stringify(subtaskData),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to add subtask: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
       // Refetch subtasks to update the list
       refetchSubtasks();
-      
+
       toast({
         title: "Subtask added",
         description: "Subtask has been added successfully.",
@@ -370,7 +370,7 @@ export default function TaskDetails() {
       });
     }
   });
-  
+
   // Toggle subtask completion mutation
   const toggleSubtaskMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: number, completed: boolean }) => {
@@ -381,11 +381,11 @@ export default function TaskDetails() {
         },
         body: JSON.stringify({ completed }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to update subtask: ${response.statusText}`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -400,24 +400,24 @@ export default function TaskDetails() {
       });
     }
   });
-  
+
   // Delete subtask mutation
   const deleteSubtaskMutation = useMutation({
     mutationFn: async (id: number) => {
       const response = await fetch(`/api/subtasks/${id}`, {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to delete subtask: ${response.statusText}`);
       }
-      
+
       return true;
     },
     onSuccess: () => {
       // Refetch subtasks to update the list
       refetchSubtasks();
-      
+
       toast({
         title: "Subtask deleted",
         description: "Subtask has been deleted successfully.",
@@ -432,19 +432,19 @@ export default function TaskDetails() {
       });
     }
   });
-  
+
   // Dummy notes for demonstration
   const notes = [
     { id: 1, text: "Include latest user growth metrics in the pitch", date: "March 2, 2025" },
     { id: 2, text: "Follow up with Sarah about potential introductions", date: "March 4, 2025" }
   ];
-  
+
   if (isError) {
     return (
       <div className="min-h-screen flex flex-col bg-black text-white relative">
         <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
         <Header />
-        
+
         <main className="flex-1 py-8 relative z-10">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <Card className="bg-gray-900 border border-green-600">
@@ -464,12 +464,12 @@ export default function TaskDetails() {
             </Card>
           </div>
         </main>
-        
+
         <Footer />
       </div>
     );
   }
-  
+
   // Edit Task Form Component
   interface EditTaskFormProps {
     task: ExecutionTask;
@@ -480,7 +480,7 @@ export default function TaskDetails() {
 
   function EditTaskForm({ task, goals, weeks, onSuccess }: EditTaskFormProps) {
     const { toast } = useToast();
-    
+
     // Edit task mutation
     const editTaskMutation = useMutation({
       mutationFn: async (data: z.infer<typeof editTaskFormSchema>) => {
@@ -491,11 +491,11 @@ export default function TaskDetails() {
           },
           body: JSON.stringify(data),
         });
-        
+
         if (!response.ok) {
           throw new Error(`Failed to update task: ${response.statusText}`);
         }
-        
+
         return response.json();
       },
       onSuccess: () => {
@@ -567,7 +567,7 @@ export default function TaskDetails() {
               </FormItem>
             )}
           />
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -586,7 +586,7 @@ export default function TaskDetails() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="ownerAvatar"
@@ -605,7 +605,7 @@ export default function TaskDetails() {
               )}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -634,7 +634,7 @@ export default function TaskDetails() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="categoryColor"
@@ -664,7 +664,7 @@ export default function TaskDetails() {
               )}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -683,7 +683,7 @@ export default function TaskDetails() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="status"
@@ -710,7 +710,7 @@ export default function TaskDetails() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name="weekId"
@@ -738,7 +738,7 @@ export default function TaskDetails() {
               </FormItem>
             )}
           />
-          
+
           <div className="flex justify-end pt-4">
             <DialogClose asChild>
               <Button variant="outline" className="mr-2 bg-gray-800 text-white border-gray-700">
@@ -804,7 +804,7 @@ export default function TaskDetails() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="priority"
@@ -830,7 +830,7 @@ export default function TaskDetails() {
               </FormItem>
             )}
           />
-          
+
           <div className="flex justify-end pt-4">
             <DialogClose asChild>
               <Button variant="outline" className="mr-2 bg-gray-800 text-white border-gray-700">
@@ -854,19 +854,19 @@ export default function TaskDetails() {
   const [showReward, setShowReward] = useState(false);
   const [showAchievement, setShowAchievement] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
-  
+
   // Trigger reward animation when task status changes
   const handleRewardAnimation = () => {
     setShowReward(true);
     setTimeout(() => setShowReward(false), 2000);
-    
+
     // 30% chance to trigger achievement
     if (Math.random() < 0.3) {
       setTimeout(() => {
         setShowAchievement(true);
       }, 500);
     }
-    
+
     // If task is completed, show celebration
     if (task?.status === 'done') {
       setShowCelebration(true);
@@ -876,7 +876,7 @@ export default function TaskDetails() {
   // Character stats - simulated game mechanics
   const playerStats = {
     name: task?.owner || "Player",
-    avatar: task?.ownerAvatar || "",
+    avatar: task?.ownerAvatar || "/images/user-profile.jpeg", // Added default avatar path
     level: 5,
     xp: 340,
     nextLevelXp: 500,
@@ -896,7 +896,7 @@ export default function TaskDetails() {
     if (subtaskCount > 2) return 'medium';
     return 'low';
   };
-  
+
   // Calculate rewards based on task
   const calculateRewards = () => {
     if (!task) return { xp: 0, gold: 0 };
@@ -908,14 +908,14 @@ export default function TaskDetails() {
       gold: baseGold + (subtasks.length * 10)
     };
   };
-  
+
   const rewards = calculateRewards();
-  
+
   return (
     <div className="min-h-screen flex flex-col game-bg text-white relative">
       <div className="absolute inset-0 z-0"></div>
       <Header />
-      
+
       {/* Game reward animations */}
       {showReward && (
         <RewardAnimation 
@@ -924,19 +924,19 @@ export default function TaskDetails() {
           position={{ x: window.innerWidth / 2, y: window.innerHeight / 2 }} 
         />
       )}
-      
+
       <Achievement 
         title="Task Master" 
         description="Complete a task with all subtasks"
         isOpen={showAchievement}
         onClose={() => setShowAchievement(false)}
       />
-      
+
       <Celebration 
         isActive={showCelebration}
         onComplete={() => setShowCelebration(false)}
       />
-      
+
       <main className="flex-1 py-8 relative z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -947,7 +947,7 @@ export default function TaskDetails() {
               </Button>
               <h1 className="text-2xl font-bold text-white">Task Details</h1>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button 
                 variant="outline" 
@@ -966,7 +966,7 @@ export default function TaskDetails() {
                   </>
                 )}
               </Button>
-              
+
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
@@ -981,7 +981,7 @@ export default function TaskDetails() {
                       Update the task details below.
                     </DialogDescription>
                   </DialogHeader>
-                  
+
                   {task && (
                     <EditTaskForm 
                       task={task} 
@@ -995,7 +995,7 @@ export default function TaskDetails() {
                   )}
                 </DialogContent>
               </Dialog>
-              
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive">
@@ -1024,7 +1024,7 @@ export default function TaskDetails() {
               </AlertDialog>
             </div>
           </div>
-          
+
           {isLoading || isLoadingWeek || isLoadingGoals ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
@@ -1111,7 +1111,7 @@ export default function TaskDetails() {
                     {/* Player stats */}
                     <PlayerStats
                       name={task.owner || "Hero"}
-                      avatar={task.ownerAvatar}
+                      avatar={playerStats.avatar}
                       level={5}
                       xp={340}
                       nextLevelXp={500}
@@ -1122,7 +1122,7 @@ export default function TaskDetails() {
                       gold={1250}
                       achievements={7}
                     />
-                    
+
                     <div className="mt-6 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -1135,7 +1135,7 @@ export default function TaskDetails() {
                             <div className="text-xs text-green-400/70 mt-1">Complete by this date for full rewards</div>
                           </div>
                         </div>
-                        
+
                         {relatedGoal && (
                           <div>
                             <div className="flex items-center mb-1">
@@ -1156,7 +1156,7 @@ export default function TaskDetails() {
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Quest completion rewards */}
                       <div className="bg-gray-800/50 p-3 rounded-md border border-green-900/50">
                         <div className="flex items-center mb-2">
@@ -1174,7 +1174,7 @@ export default function TaskDetails() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Task Subtasks */}
                       <div className="mt-6">
                         <div className="flex justify-between items-center mb-3">
@@ -1209,7 +1209,7 @@ export default function TaskDetails() {
                             </DialogContent>
                           </Dialog>
                         </div>
-                        
+
                         {isLoadingSubtasks ? (
                           <div className="space-y-2">
                             <Skeleton className="h-16 w-full bg-gray-800" />
@@ -1245,7 +1245,7 @@ export default function TaskDetails() {
                                 low: { xp: 10, coins: 20 }
                               };
                               const reward = priorityRewards[subtask.priority as keyof typeof priorityRewards];
-                              
+
                               return (
                                 <div key={subtask.id} className="relative group">
                                   <QuestItem
@@ -1282,7 +1282,7 @@ export default function TaskDetails() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Notes and Comments */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
@@ -1302,7 +1302,7 @@ export default function TaskDetails() {
                           <div className="text-xs text-gray-400">{note.date}</div>
                         </div>
                       ))}
-                      
+
                       <div className="mt-4 pt-4 border-t border-gray-800">
                         <Button className="w-full bg-gray-800 text-green-400 hover:bg-gray-700">
                           <PlusCircle className="h-4 w-4 mr-2" />
@@ -1313,7 +1313,7 @@ export default function TaskDetails() {
                   </CardContent>
                 </Card>
               </div>
-              
+
               {/* Sidebar Cards */}
               <div className="space-y-6">
                 {/* Goal Progress Card */}
@@ -1340,7 +1340,7 @@ export default function TaskDetails() {
                             indicatorClassName="bg-green-500"
                           />
                         </div>
-                        
+
                         <Button 
                           variant="outline" 
                           className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800"
@@ -1355,7 +1355,7 @@ export default function TaskDetails() {
                     </CardContent>
                   </Card>
                 )}
-                
+
                 {/* Related Tasks */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
@@ -1376,7 +1376,7 @@ export default function TaskDetails() {
                           <span className="text-xs text-gray-400">Due: March 15, 2025</span>
                         </div>
                       </div>
-                      
+
                       <div className="bg-gray-800/50 rounded-md p-3 border border-gray-700 hover:bg-gray-800 transition-colors">
                         <div className="text-sm text-white mb-1">Schedule investor meetings</div>
                         <div className="flex justify-between items-center">
@@ -1387,7 +1387,7 @@ export default function TaskDetails() {
                           <span className="text-xs text-gray-400">Due: March 1, 2025</span>
                         </div>
                       </div>
-                      
+
                       <Button 
                         variant="outline" 
                         className="w-full mt-2 border-green-500 text-green-400 hover:bg-gray-800"
@@ -1398,7 +1398,7 @@ export default function TaskDetails() {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 {/* Task Timeline */}
                 <Card className="bg-gray-900 border border-green-600">
                   <CardHeader className="border-b border-green-800 bg-gray-800/50">
@@ -1416,7 +1416,7 @@ export default function TaskDetails() {
                         <div className="text-xs text-gray-400 mb-1">March 1, 2025</div>
                         <div className="text-sm text-white">Task created</div>
                       </div>
-                      
+
                       <div className="relative pl-6 pb-6 border-l border-green-800">
                         <div className="absolute -left-1.5 top-0">
                           <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
@@ -1424,7 +1424,7 @@ export default function TaskDetails() {
                         <div className="text-xs text-gray-400 mb-1">March 2, 2025</div>
                         <div className="text-sm text-white">Status changed to In Progress</div>
                       </div>
-                      
+
                       <div className="relative pl-6">
                         <div className="absolute -left-1.5 top-0">
                           <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
@@ -1440,9 +1440,8 @@ export default function TaskDetails() {
           ) : null}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
 };
-

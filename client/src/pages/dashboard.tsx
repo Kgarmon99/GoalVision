@@ -329,7 +329,12 @@ const Dashboard = () => {
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
-                <div className="relative aura-pulse mr-3">
+                <div className="relative aura-pulse mr-3 flex items-center">
+                  <img 
+                    src="/images/user-profile.jpeg" 
+                    alt="Kahlil Garmon" 
+                    className="w-12 h-12 rounded-full border-2 border-green-400 shadow-lg shadow-green-500/20 mr-3" 
+                  />
                   <Rocket className="h-8 w-8 text-green-400 float-effect" />
                 </div>
                 <h1 className="text-3xl font-bold text-white text-glow">2025 Goals Dashboard</h1>
