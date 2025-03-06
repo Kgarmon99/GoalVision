@@ -156,7 +156,7 @@ const Dashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentWeekId, setCurrentWeekId] = useState<number | null>(null);
   const [shouldShowQuickStart, setShouldShowQuickStart] = useState(false);
-  
+
   // Fetch goals
   const { 
     data: goals = [], 
@@ -165,7 +165,7 @@ const Dashboard = () => {
   } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
   });
-  
+
   // Fetch growth metrics
   const { 
     data: growthMetrics = [], 
@@ -174,7 +174,7 @@ const Dashboard = () => {
   } = useQuery<Metric[]>({
     queryKey: ['/api/metrics/category/growth'],
   });
-  
+
   // Fetch revenue metrics
   const { 
     data: revenueMetrics = [], 
@@ -183,7 +183,7 @@ const Dashboard = () => {
   } = useQuery<Metric[]>({
     queryKey: ['/api/metrics/category/revenue'],
   });
-  
+
   // Fetch goal statuses
   const { 
     data: goalStatuses = [], 
@@ -192,7 +192,7 @@ const Dashboard = () => {
   } = useQuery<GoalStatus[]>({
     queryKey: ['/api/goal-statuses'],
   });
-  
+
   // Fetch all weeks
   const { 
     data: weeks = [], 
@@ -201,13 +201,13 @@ const Dashboard = () => {
   } = useQuery<Week[]>({
     queryKey: ['/api/weeks'],
   });
-  
+
   // Determine current week ID from weeks data
   useEffect(() => {
     if (weeks && weeks.length > 0 && !currentWeekId) {
       setCurrentWeekId(weeks[0].id);
     }
-    
+
     // Check if we should show the quick start guide
     // Show when data has been reset (no goals, no weeks)
     if (!isLoadingGoals && !isLoadingWeeks && goals.length === 0 && weeks.length === 0) {
@@ -216,7 +216,7 @@ const Dashboard = () => {
       setShouldShowQuickStart(false);
     }
   }, [weeks, currentWeekId, isLoadingGoals, isLoadingWeeks, goals]);
-  
+
   // Fetch current week (only if currentWeekId is set)
   const { 
     data: currentWeek,
@@ -226,7 +226,7 @@ const Dashboard = () => {
     queryKey: ['/api/weeks', currentWeekId],
     enabled: !!currentWeekId,
   });
-  
+
   // Fetch tasks for current week
   const { 
     data: weekTasks = [], 
@@ -237,11 +237,11 @@ const Dashboard = () => {
     queryKey: ['/api/tasks/week', currentWeekId],
     enabled: !!currentWeekId,
   });
-  
+
   // Memoize handlers to avoid unnecessary re-renders
   const handleRefreshData = useCallback(async () => {
     setIsRefreshing(true);
-    
+
     try {
       await Promise.all([
         refetchGoals(), 
@@ -251,9 +251,9 @@ const Dashboard = () => {
         refetchWeeks(),
         ...(currentWeekId ? [refetchWeek(), refetchTasks()] : []),
       ]);
-      
+
       setLastUpdated(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
-      
+
       toast({
         title: "Data refreshed",
         description: "Dashboard data has been updated successfully.",
@@ -272,7 +272,7 @@ const Dashboard = () => {
     refetchGoalStatuses, refetchWeeks, currentWeekId, 
     refetchWeek, refetchTasks, toast
   ]);
-  
+
   const handlePreviousWeek = useCallback(() => {
     if (weeks.length > 0 && currentWeekId) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
@@ -281,7 +281,7 @@ const Dashboard = () => {
       }
     }
   }, [weeks, currentWeekId]);
-  
+
   const handleNextWeek = useCallback(() => {
     if (weeks.length > 0 && currentWeekId) {
       const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
@@ -290,7 +290,7 @@ const Dashboard = () => {
       }
     }
   }, [weeks, currentWeekId]);
-  
+
   // Memoize computed values
   const isLoading = useMemo(() => 
     isLoadingGoals || 
@@ -305,24 +305,24 @@ const Dashboard = () => {
       isLoadingWeek, isLoadingTasks
     ]
   );
-  
+
   // Check if there's any data to display - memoized to prevent recalculations
   const hasAnyData = useMemo(() => 
     goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0,
     [goals.length, growthMetrics.length, revenueMetrics.length, weeks.length]
   );
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
-      
+
       {/* Animated Floating Orbs */}
       <div className="absolute left-[10%] top-[20%] w-40 h-40 rounded-full bg-gradient-to-r from-green-900/10 to-green-500/5 blur-2xl float-effect-slow"></div>
       <div className="absolute right-[15%] top-[30%] w-64 h-64 rounded-full bg-gradient-to-r from-blue-900/10 to-purple-500/5 blur-2xl float-effect"></div>
       <div className="absolute left-[25%] bottom-[15%] w-52 h-52 rounded-full bg-gradient-to-r from-purple-900/5 to-pink-500/5 blur-2xl float-effect-fast"></div>
-      
+
       <Header />
-      
+
       <main className="flex-1 py-6 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
@@ -365,17 +365,17 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Quick Start Guide - only show when data is empty */}
           {shouldShowQuickStart && (
             <QuickStartGuide />
           )}
-          
+
           {/* No Data State */}
           {!isLoading && !hasAnyData && !shouldShowQuickStart && (
             <NoDataEmptyState />
           )}
-          
+
           {/* Main Dashboard Content */}
           {(isLoading || hasAnyData) && (
             <>
@@ -387,21 +387,21 @@ const Dashboard = () => {
                   label="Active Goals"
                   delay={0.1}
                 />
-                
+
                 <StatCard 
                   icon={<BarChart3 className="h-8 w-8" />}
                   value={(growthMetrics.length + revenueMetrics.length)}
                   label="Key Metrics"
                   delay={0.2}
                 />
-                
+
                 <StatCard 
                   icon={<ListTodo className="h-8 w-8" />}
                   value={weekTasks.length}
                   label="Execution Tasks"
                   delay={0.3}
                 />
-                
+
                 <StatCard 
                   icon={<Calendar className="h-8 w-8" />}
                   value={weeks.length}
@@ -409,7 +409,7 @@ const Dashboard = () => {
                   delay={0.4}
                 />
               </div>
-            
+
               {/* Action Bar - Using memoized component */}
               <ActionBar />
 
@@ -421,7 +421,7 @@ const Dashboard = () => {
                     Main Goals Progress
                   </h2>
                 </div>
-                
+
                 {isLoading ? (
                   <GoalsSkeleton />
                 ) : goals.length > 0 ? (
@@ -436,7 +436,7 @@ const Dashboard = () => {
                   />
                 )}
               </section>
-              
+
               {/* Dashboard Tabs - Metrics and Execution */}
               <Tabs defaultValue="metrics" className="w-full mb-8">
                 <TabsList className="w-full justify-start mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1 gradient-border">
@@ -461,7 +461,7 @@ const Dashboard = () => {
                     </div>
                   </TabsTrigger>
                 </TabsList>
-                
+
                 {/* Metrics Tab Content */}
                 <TabsContent value="metrics" className="mt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -491,7 +491,7 @@ const Dashboard = () => {
                         />
                       )}
                     </div>
-                    
+
                     {/* Revenue Metrics */}
                     <div className="col-span-1">
                       {isLoading ? (
@@ -518,7 +518,7 @@ const Dashboard = () => {
                         />
                       )}
                     </div>
-                    
+
                     {/* Status Indicators */}
                     <div className="col-span-1 md:col-span-2 lg:col-span-1">
                       {isLoading ? (
@@ -543,7 +543,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </TabsContent>
-                
+
                 {/* Execution Tab Content */}
                 <TabsContent value="execution" className="mt-0">
                   {isLoading ? (
@@ -585,7 +585,7 @@ const Dashboard = () => {
                   )}
                 </TabsContent>
               </Tabs>
-              
+
               {/* Quick Stats Cards */}
               {!isLoading && goals.length > 0 && (
                 <section className="mb-8">
@@ -593,7 +593,7 @@ const Dashboard = () => {
                     <Award className="h-5 w-5 mr-2" />
                     Achievement Stats
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
@@ -606,7 +606,7 @@ const Dashboard = () => {
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
                         <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
@@ -621,7 +621,7 @@ const Dashboard = () => {
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
                         <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
@@ -635,7 +635,7 @@ const Dashboard = () => {
                         </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="bg-gray-900/70 border border-green-600 glow-card">
                       <CardContent className="p-4 flex items-center">
                         <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
@@ -654,7 +654,7 @@ const Dashboard = () => {
               )}
             </>
           )}
-          
+
           {/* Getting Started Resources */}
           {!isLoading && !hasAnyData && (
             <motion.section 
@@ -665,12 +665,12 @@ const Dashboard = () => {
             >
               <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/10 blur-3xl float-effect-slow"></div>
               <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/5 blur-3xl float-effect"></div>
-              
+
               <h2 className="text-lg font-semibold text-green-400 text-glow mb-4 flex items-center">
                 <Rocket className="h-5 w-5 mr-2 float-effect" />
                 Getting Started Resources
               </h2>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <motion.div 
                   className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
@@ -695,7 +695,7 @@ const Dashboard = () => {
                     </Link>
                   </div>
                 </motion.div>
-                
+
                 <motion.div 
                   className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
@@ -705,7 +705,7 @@ const Dashboard = () => {
                 >
                   <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
                   <div className="relative">
-                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
+                    <h3 className="text-green-400 font-medium mb-2 text-glow flexitems-center">
                       <BarChart3 className="h-4 w-4 mr-2 float-effect-fast" />
                       Track Key Metrics
                     </h3>
@@ -719,7 +719,7 @@ const Dashboard = () => {
                     </Link>
                   </div>
                 </motion.div>
-                
+
                 <motion.div 
                   className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1 gradient-border glow-card relative overflow-hidden group"
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
@@ -748,7 +748,7 @@ const Dashboard = () => {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
