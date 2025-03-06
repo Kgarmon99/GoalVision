@@ -1432,6 +1432,17 @@ export default function TaskDetails() {
                         <div className="text-xs text-gray-400 mb-1">March 15, 2025</div>
                         <div className="text-sm text-white">Due date</div>
                       </div>
+                      <div className="relative pl-6 mt-4">
+                        <div className="absolute -left-1.5 top-0">
+                          <img 
+                            src="/images/kahlil-profile.jpeg" 
+                            alt="Kahlil Garmon" 
+                            className="h-5 w-5 rounded-full border border-green-400" 
+                          />
+                        </div>
+                        <div className="text-xs text-gray-400 mb-1">Assigned to</div>
+                        <div className="text-sm text-white">Kahlil Garmon</div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
