@@ -1,17 +1,15 @@
+import { useState, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  ArrowUpIcon, 
-  ArrowDownIcon, 
-  MinusIcon, 
   TrendingUp, 
   DollarSign, 
   Users, 
   BarChart3,
   RefreshCw
 } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, MinusIcon } from "@radix-ui/react-icons";
 import { Metric } from "@shared/schema";
-import { useState } from "react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,7 +33,8 @@ const getMetricIcon = (metricName: string) => {
   }
 };
 
-const MetricsCard = ({ title, metrics, category }: MetricsCardProps) => {
+// Memoizing the component to prevent unnecessary re-renders
+const MetricsCard = memo(({ title, metrics, category }: MetricsCardProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
@@ -133,6 +132,6 @@ const MetricsCard = ({ title, metrics, category }: MetricsCardProps) => {
       </CardContent>
     </Card>
   );
-};
+});
 
 export default MetricsCard;
