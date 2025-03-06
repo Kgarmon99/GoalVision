@@ -26,6 +26,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
   // All routes are prefixed with /api
   
+  // Update metrics based on goal data
+  app.post("/api/metrics/refresh", async (req, res) => {
+    try {
+      const goals = await storage.getAllGoals();
+      const existingGrowthMetrics = await storage.getMetricsByCategory("growth");
+      const existingRevenueMetrics = await storage.getMetricsByCategory("revenue");
+      
+      // Calculate growth metrics
+      if (goals.length > 0) {
+        // Find User Growth goal if it exists
+        const userGrowthGoal = goals.find(g => g.name.toLowerCase().includes("user") || g.name.toLowerCase().includes("growth"));
+        if (userGrowthGoal) {
+          // Update Monthly Active Users metric
+          const mauMetric = existingGrowthMetrics.find(m => m.name === "Monthly Active Users");
+          if (mauMetric) {
+            const current = `${userGrowthGoal.current.toFixed(1)}M`;
+            const previous = mauMetric.value;
+            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
+            const trend = ((userGrowthGoal.current - previousValue) / previousValue) * 100;
+            
+            await storage.updateMetric(mauMetric.id, {
+              value: current,
+              previousValue: previous,
+              trend: Math.abs(trend),
+              trendDirection: trend >= 0 ? "up" : "down"
+            });
+          }
+          
+          // Update User Growth Rate
+          const growthRateMetric = existingGrowthMetrics.find(m => m.name === "User Retention Rate");
+          if (growthRateMetric) {
+            const completionPercentage = (userGrowthGoal.current / userGrowthGoal.target) * 100;
+            const current = `${completionPercentage.toFixed(1)}%`;
+            const previous = growthRateMetric.value;
+            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
+            const trend = ((completionPercentage - previousValue) / previousValue) * 100;
+            
+            await storage.updateMetric(growthRateMetric.id, {
+              value: current,
+              previousValue: previous,
+              trend: Math.abs(trend),
+              trendDirection: trend >= 0 ? "up" : "down"
+            });
+          }
+        }
+        
+        // Find school related goal if it exists
+        const schoolGoal = goals.find(g => g.name.toLowerCase().includes("school"));
+        if (schoolGoal) {
+          // Update School Onboarding Rate
+          const schoolMetric = existingGrowthMetrics.find(m => m.name === "School Onboarding Rate");
+          if (schoolMetric) {
+            const current = `${schoolGoal.current}/month`;
+            const previous = schoolMetric.value;
+            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
+            const trend = ((schoolGoal.current - previousValue) / previousValue) * 100;
+            
+            await storage.updateMetric(schoolMetric.id, {
+              value: current,
+              previousValue: previous,
+              trend: Math.abs(trend),
+              trendDirection: trend >= 0 ? "up" : "down"
+            });
+          }
+        }
+        
+        // Find Revenue goal if it exists
+        const revenueGoal = goals.find(g => g.name.toLowerCase().includes("revenue"));
+        if (revenueGoal) {
+          // Update Monthly Recurring Revenue
+          const mrrMetric = existingRevenueMetrics.find(m => m.name === "Monthly Recurring Revenue");
+          if (mrrMetric) {
+            const current = `$${(revenueGoal.current / 12).toFixed(2)}M`;
+            const previous = mrrMetric.value;
+            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
+            const monthlyValue = revenueGoal.current / 12;
+            const trend = ((monthlyValue - previousValue) / previousValue) * 100;
+            
+            await storage.updateMetric(mrrMetric.id, {
+              value: current,
+              previousValue: previous,
+              trend: Math.abs(trend),
+              trendDirection: trend >= 0 ? "up" : "down"
+            });
+          }
+          
+          // Update Annual Recurring Revenue
+          const arrMetric = existingRevenueMetrics.find(m => m.name === "Annual Recurring Revenue");
+          if (arrMetric) {
+            const current = `$${revenueGoal.current.toFixed(1)}M`;
+            const previous = arrMetric.value;
+            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
+            const trend = ((revenueGoal.current - previousValue) / previousValue) * 100;
+            
+            await storage.updateMetric(arrMetric.id, {
+              value: current,
+              previousValue: previous,
+              trend: Math.abs(trend),
+              trendDirection: trend >= 0 ? "up" : "down"
+            });
+          }
+        }
+      }
+      
+      res.status(200).json({ message: "Metrics updated successfully" });
+    } catch (error) {
+      console.error("Error updating metrics:", error);
+      res.status(500).json({ message: "Error updating metrics", error: String(error) });
+    }
+  });
+  
   // Clear all sample data
   app.post("/api/reset-data", async (req, res) => {
     try {
@@ -65,6 +176,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!updatedGoal) {
         return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      // Automatically update metrics based on the updated goal
+      try {
+        // Make a simple request to our metrics refresh endpoint
+        await fetch(`http://localhost:${process.env.PORT || 5000}/api/metrics/refresh`, {
+          method: 'POST',
+        });
+      } catch (metricError) {
+        console.error("Error refreshing metrics after goal update:", metricError);
+        // We don't fail the whole request if metrics update fails
       }
       
       res.json(updatedGoal);
