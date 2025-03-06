@@ -79,6 +79,25 @@ const MobileNav = () => {
               
               <div className="h-px bg-green-800/50 my-2"></div>
               
+              <Link href="/profile" onClick={closeMenu}>
+                <div className="flex items-center p-3 rounded-md text-white hover:bg-gray-900/50">
+                  <User className="h-5 w-5 mr-3 text-green-400" />
+                  <span className="font-medium">Profile</span>
+                </div>
+              </Link>
+              
+              <div className="h-px bg-green-800/50 my-2"></div>
+              
+              <div className="flex items-center justify-between p-3 rounded-md bg-gray-900/30">
+                <div className="flex items-center">
+                  <UserAvatar size="md" showStatus={true} />
+                  <div className="ml-3">
+                    <div className="font-medium text-white">Kahlil Garmon</div>
+                    <div className="text-sm text-green-400">Goal Master</div>
+                  </div>
+                </div>
+              </div>
+              
               <Button
                 variant="default"
                 className="w-full mt-4 bg-green-600 hover:bg-green-700"
