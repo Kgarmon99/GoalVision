@@ -1,4 +1,4 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient, QueryFunction, QueryKey } from "@tanstack/react-query";
 
 // Improved error handling for API responses
 async function throwIfResNotOk(res: Response) {
@@ -54,38 +54,42 @@ export async function apiRequest(
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 
-// Enhanced query function with better error handling
-export const getQueryFn: <TData = unknown>(options: {
+// Enhanced query function with better error handling and fixed typing for React Query v5
+export function getQueryFn<T = unknown>(options: {
   on401: UnauthorizedBehavior;
-}) => QueryFunction<TData, unknown[]> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
+}): QueryFunction<T, QueryKey> {
+  return async ({ queryKey }) => {
     try {
       // Improved error handling for fetch that catches network errors
       let res: Response;
       try {
         res = await fetch(queryKey[0] as string, {
           credentials: "include",
+          // Add cache control headers to work with our server-side caching
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
         });
       } catch (fetchError) {
         // Handle network errors specifically
         console.log("Error handled gracefully:", `Query failed (${String(queryKey[0])}): Failed to fetch`);
         // Return an empty array as fallback data
-        return ([] as unknown) as TData;
+        return ([] as unknown) as T;
       }
 
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        return null as unknown as TData;
+      if (options.on401 === "returnNull" && res.status === 401) {
+        return null as unknown as T;
       }
 
       await throwIfResNotOk(res);
       
       try {
-        return await res.json() as TData;
+        return await res.json() as T;
       } catch (jsonError) {
         // Handle empty responses or invalid JSON
         if ((jsonError as Error).message.includes("Unexpected end of JSON input")) {
-          return null as unknown as TData; // Return null for empty responses
+          return null as unknown as T; // Return null for empty responses
         }
         throw jsonError;
       }
@@ -96,14 +100,16 @@ export const getQueryFn: <TData = unknown>(options: {
         console.log("Error handled gracefully:", error.message);
       }
       // Return empty array as fallback data
-      return ([] as unknown) as TData;
+      return ([] as unknown) as T;
     }
   };
+}
 
 // Configure the Query Client with enhanced error handling and optimization
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Explicitly type the default query function to fix TypeScript errors
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: true,  // Only refetch when window regains focus
@@ -120,7 +126,7 @@ export const queryClient = new QueryClient({
         return false;
       },
       // Performance optimizations for React Query v5
-      placeholderData: (previousData: unknown) => previousData, // Similar to keepPreviousData
+      placeholderData: (previousData: unknown) => previousData, // Similar to keepPreviousData in v4
       refetchOnMount: true,        // Fetch fresh data when component mounts if stale
     },
     mutations: {

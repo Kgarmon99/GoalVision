@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
@@ -26,6 +26,51 @@ import {
   X
 } from "lucide-react";
 import { ExecutionTask, Goal, Week } from "@shared/schema";
+
+// Memoized task board component to prevent unnecessary re-rendering
+const MemoizedDragDropTaskBoard = memo(DragDropTaskBoard);
+
+// Memoized progress tracker component to prevent unnecessary re-rendering
+const MemoizedVisualProgressTracker = memo(VisualProgressTracker);
+
+// Memoized loading indicator to prevent unnecessary re-rendering
+const LoadingIndicator = memo(() => (
+  <div className="flex items-center justify-center h-96 bg-gray-900/80 rounded-lg border border-green-600">
+    <div className="flex flex-col items-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
+      <p className="text-green-400">Loading tasks...</p>
+    </div>
+  </div>
+));
+
+// Quick help section memoized to prevent re-rendering
+const QuickHelpCard = memo(() => (
+  <div className="mt-8 p-4 bg-gray-900/80 rounded-lg border border-green-800/50 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+    <div className="p-3 bg-green-900/30 rounded-full">
+      <Rocket className="h-8 w-8 text-green-400" />
+    </div>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-1">Pro Tip: Drag & Drop to Update Status</h3>
+      <p className="text-gray-400 mb-2">
+        Simply drag tasks between columns to update their status. This helps you stay organized and track your progress visually.
+      </p>
+      <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+        <div className="flex items-center px-2 py-1 bg-yellow-900/20 border border-yellow-500/50 rounded-md">
+          <Clock className="h-3 w-3 text-yellow-400 mr-1" />
+          <span className="text-xs text-yellow-400">In Progress</span>
+        </div>
+        <div className="flex items-center px-2 py-1 bg-green-900/20 border border-green-500/50 rounded-md">
+          <CheckCircle2 className="h-3 w-3 text-green-400 mr-1" />
+          <span className="text-xs text-green-400">Completed</span>
+        </div>
+        <div className="flex items-center px-2 py-1 bg-red-900/20 border border-red-500/50 rounded-md">
+          <Target className="h-3 w-3 text-red-400 mr-1" />
+          <span className="text-xs text-red-400">Missed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+));
 
 export default function TaskBoard() {
   const { toast } = useToast();
@@ -266,12 +311,7 @@ export default function TaskBoard() {
           </div>
           
           {isLoading ? (
-            <div className="flex items-center justify-center h-96 bg-gray-900/80 rounded-lg border border-green-600">
-              <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-                <p className="text-green-400">Loading tasks...</p>
-              </div>
-            </div>
+            <LoadingIndicator />
           ) : filteredTasks.length === 0 ? (
             <EmptyState
               title="No Tasks Found"
@@ -281,43 +321,19 @@ export default function TaskBoard() {
               addText="Add Your First Task"
             />
           ) : viewMode === "board" ? (
-            <DragDropTaskBoard 
+            <MemoizedDragDropTaskBoard 
               tasks={filteredTasks} 
               onTaskStatusChange={handleTaskStatusChange} 
             />
           ) : (
-            <VisualProgressTracker
+            <MemoizedVisualProgressTracker
               goals={goals}
               tasks={filteredTasks}
             />
           )}
           
-          {/* Quick Help Card */}
-          <div className="mt-8 p-4 bg-gray-900/80 rounded-lg border border-green-800/50 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
-            <div className="p-3 bg-green-900/30 rounded-full">
-              <Rocket className="h-8 w-8 text-green-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-1">Pro Tip: Drag & Drop to Update Status</h3>
-              <p className="text-gray-400 mb-2">
-                Simply drag tasks between columns to update their status. This helps you stay organized and track your progress visually.
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                <div className="flex items-center px-2 py-1 bg-yellow-900/20 border border-yellow-500/50 rounded-md">
-                  <Clock className="h-3 w-3 text-yellow-400 mr-1" />
-                  <span className="text-xs text-yellow-400">In Progress</span>
-                </div>
-                <div className="flex items-center px-2 py-1 bg-green-900/20 border border-green-500/50 rounded-md">
-                  <CheckCircle2 className="h-3 w-3 text-green-400 mr-1" />
-                  <span className="text-xs text-green-400">Completed</span>
-                </div>
-                <div className="flex items-center px-2 py-1 bg-red-900/20 border border-red-500/50 rounded-md">
-                  <Target className="h-3 w-3 text-red-400 mr-1" />
-                  <span className="text-xs text-red-400">Missed</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Quick Help Card - Memoized to prevent unnecessary re-renders */}
+          <QuickHelpCard />
         </div>
       </main>
       
