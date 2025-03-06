@@ -4,6 +4,8 @@ import { log } from "./vite";
 
 if (!process.env.DATABASE_URL) {
   log("DATABASE_URL is not set. Please set your database connection string in .env file", "database");
+  log("Current working directory: " + process.cwd(), "database");
+  log("Environment variables available: " + Object.keys(process.env).join(", "), "database");
   process.exit(1);
 }
 
