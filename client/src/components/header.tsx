@@ -7,7 +7,7 @@
           </Button>
           <Button variant="ghost" className="relative group">
             <img 
-              src="/images/kahlil-profile.jpeg" 
+              src="/images/user-profile.jpeg" 
               alt="Kahlil Garmon" 
               className="h-8 w-8 rounded-full border border-green-400 transition-all group-hover:border-green-300 group-hover:shadow-lg group-hover:shadow-green-500/20" 
             />

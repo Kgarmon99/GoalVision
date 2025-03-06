@@ -415,15 +415,6 @@ export default function HabitTracker() {
                           />
                         </div>
 
-                        <div className="mt-6 flex items-center">
-                          <img 
-                            src="/images/kahlil-profile.jpeg" 
-                            alt="Kahlil Garmon" 
-                            className="h-8 w-8 rounded-full border border-green-400 mr-3" 
-                          />
-                          <div className="text-sm text-gray-300">Tracked by Kahlil Garmon</div>
-                        </div>
-
                         <DialogFooter>
                           <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Create Habit</Button>
                         </DialogFooter>

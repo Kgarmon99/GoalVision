@@ -586,23 +586,6 @@ const Dashboard = () => {
                 </TabsContent>
               </Tabs>
               
-              {/* User Profile Section */}
-              {!isLoading && (
-                <section className="mb-6 flex items-center">
-                  <div className="mr-4">
-                    <img 
-                      src="/images/kahlil-profile.jpeg" 
-                      alt="Kahlil Garmon" 
-                      className="h-16 w-16 rounded-full border-2 border-green-500 shadow-lg shadow-green-500/20" 
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Kahlil Garmon</h3>
-                    <p className="text-sm text-gray-400">2025 Vision Tracker</p>
-                  </div>
-                </section>
-              )}
-              
               {/* Quick Stats Cards */}
               {!isLoading && goals.length > 0 && (
                 <section className="mb-8">
