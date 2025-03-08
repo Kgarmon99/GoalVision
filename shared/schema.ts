@@ -10,6 +10,7 @@ export const goals = pgTable("goals", {
   target: real("target").notNull(),
   unit: text("unit").default(""),
   color: text("color").default("primary"),
+  deadline: text("deadline").default(""), // Store as ISO string format (e.g., "2025-12-31")
 });
 
 export const goalsRelations = relations(goals, ({ many }) => ({
@@ -22,6 +23,7 @@ export const insertGoalSchema = createInsertSchema(goals).pick({
   target: true,
   unit: true,
   color: true,
+  deadline: true,
 });
 
 export const metrics = pgTable("metrics", {
