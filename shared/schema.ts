@@ -177,15 +177,17 @@ export const habits = pgTable("habits", {
   goalId: integer("goal_id"), // Make goalId optional
   createdAt: timestamp("created_at").defaultNow(),
   targetStreakDays: integer("target_streak_days").default(7),
+  targetDaysPerWeek: integer("target_days_per_week").default(5),
   reminderTime: text("reminder_time").default("08:00"), // Format: HH:MM
   color: text("color").default("primary"),
+  priority: text("priority").default("medium"), // high, medium, low
+  category: text("category").default("general"),
 });
 
 export const habitsRelations = relations(habits, ({ one, many }) => ({
   goal: one(goals, {
     fields: [habits.goalId],
-    references: [goals.id],
-    nullable: true
+    references: [goals.id]
   }),
   streaks: many(habitStreaks)
 }));
@@ -196,8 +198,11 @@ export const insertHabitSchema = createInsertSchema(habits).pick({
   frequency: true,
   goalId: true,
   targetStreakDays: true,
+  targetDaysPerWeek: true,
   reminderTime: true,
   color: true,
+  priority: true,
+  category: true,
 });
 
 // Habit streaks table
