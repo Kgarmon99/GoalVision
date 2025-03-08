@@ -12,6 +12,7 @@ import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
 import HabitTrackerFixed from "@/pages/habit-tracker-fixed";
 import HabitTracker from "@/pages/habit-tracker-new";
+import HabitTrackerSuper from "@/pages/habit-tracker-super";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/task-board" component={TaskBoard} />
       <Route path="/habit-tracker" component={HabitTracker} />
       <Route path="/habit-tracker-fixed" component={HabitTrackerFixed} />
+      <Route path="/habit-tracker-super" component={HabitTrackerSuper} />
       <Route component={NotFound} />
     </Switch>
   );

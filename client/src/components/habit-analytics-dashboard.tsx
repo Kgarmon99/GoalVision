@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
-import { Habit, HabitStreak } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from "recharts";
-import { format, subDays, isWeekend, differenceInDays, isSameDay, startOfWeek, endOfWeek, getDay, isWithinInterval } from "date-fns";
-import { Info, ChevronRight, Zap, Calendar, TrendingUp, PieChart as PieChartIcon, BarChart as BarChartIcon, LineChart as LineChartIcon, Award, Clock } from "lucide-react";
-import { AnimatedComponent } from "@/components/ui/animated-component";
-import { AnimatedProgress } from "@/components/ui/animated-progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { format, parseISO, isSameDay, isMonday, isTuesday, isWednesday, isThursday, isFriday, isSaturday, isSunday, addDays, subDays, differenceInDays, differenceInWeeks, startOfWeek, endOfWeek } from "date-fns";
+import { Habit, HabitStreak } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { motion } from "framer-motion";
+import { TrendingUp, BarChart as BarChartIcon, Calendar, Clock, Award, Target, MoveUp, CheckCircle2, XCircle, Zap, Users } from "lucide-react";
+import { AnimatedComponent } from "@/components/ui/animated-component";
 
 interface HabitAnalyticsDashboardProps {
   habitId?: number;
@@ -36,806 +34,633 @@ interface TimeAnalysis {
 }
 
 export function HabitAnalyticsDashboard({ habitId, allHabits, onHabitSelect }: HabitAnalyticsDashboardProps) {
-  const [selectedHabitId, setSelectedHabitId] = useState<number | undefined>(habitId);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [habits, setHabits] = useState<Habit[]>(allHabits || []);
   const [streaks, setStreaks] = useState<HabitStreak[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>("overview");
-  
-  // Analytics metrics
-  const [completionRate, setCompletionRate] = useState<number>(0);
-  const [currentStreak, setCurrentStreak] = useState<number>(0);
-  const [longestStreak, setLongestStreak] = useState<number>(0);
+  const [streakData, setStreakData] = useState<StreakData[]>([]);
+  const [loadingHabits, setLoadingHabits] = useState(true);
+  const [loadingStreaks, setLoadingStreaks] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<'30days' | '3months' | 'year'>('30days');
+  const [consistencyScore, setConsistencyScore] = useState<number>(0);
   const [weekdayAnalysis, setWeekdayAnalysis] = useState<DayAnalysis[]>([]);
-  const [weekendVsWeekday, setWeekendVsWeekday] = useState<{ name: string; value: number }[]>([]);
-  const [timeAnalysis, setTimeAnalysis] = useState<TimeAnalysis[]>([]);
-  const [streakHistory, setStreakHistory] = useState<{ date: string; streak: number }[]>([]);
+  const [timeOfDayAnalysis, setTimeOfDayAnalysis] = useState<TimeAnalysis[]>([]);
+  const [strongestStreak, setStrongestStreak] = useState<number>(0);
+  const [weeklyCompletion, setWeeklyCompletion] = useState<{date: string, completed: number, missed: number}[]>([]);
+  const { toast } = useToast();
   
-  // Fetch habits if not provided
+  // Fetch habits data if not provided
   useEffect(() => {
-    if (!allHabits) {
+    if (allHabits && allHabits.length > 0) {
+      setHabits(allHabits);
+      setLoadingHabits(false);
+      
+      // Set selected habit from the provided habitId or first habit
+      const habit = habitId 
+        ? allHabits.find(h => h.id === habitId) 
+        : allHabits[0];
+        
+      if (habit) {
+        setSelectedHabit(habit);
+        fetchStreaksForHabit(habit.id);
+      }
+    } else {
       async function fetchHabits() {
         try {
-          setLoading(true);
+          setLoadingHabits(true);
           const response = await apiRequest("GET", '/api/habits');
           const data = await response.json();
           setHabits(data);
           
           if (data.length > 0) {
-            const initialHabitId = habitId || data[0].id;
-            setSelectedHabitId(initialHabitId);
-            setSelectedHabit(data.find(h => h.id === initialHabitId) || null);
+            const habit = habitId 
+              ? data.find((h: any) => h.id === habitId) 
+              : data[0];
+              
+            if (habit) {
+              setSelectedHabit(habit);
+              fetchStreaksForHabit(habit.id);
+            }
           }
           
-          setLoading(false);
+          setLoadingHabits(false);
         } catch (error) {
           console.error('Error fetching habits:', error);
-          setLoading(false);
+          toast({
+            title: "Failed to load habits",
+            description: "Please try again later",
+            variant: "destructive"
+          });
+          setLoadingHabits(false);
         }
       }
+      
       fetchHabits();
-    } else if (habitId && allHabits.length > 0) {
-      setSelectedHabitId(habitId);
-      setSelectedHabit(allHabits.find(h => h.id === habitId) || null);
-    } else if (allHabits.length > 0) {
-      setSelectedHabitId(allHabits[0].id);
-      setSelectedHabit(allHabits[0]);
     }
   }, [habitId, allHabits]);
   
-  // Fetch streaks for selected habit
-  useEffect(() => {
-    if (!selectedHabitId) return;
-    
-    async function fetchStreaks() {
-      try {
-        setLoading(true);
-        const today = new Date();
-        const startDate = subDays(today, 90); // Get 90 days of history
-        
-        const response = await apiRequest("GET", `/api/habits/${selectedHabitId}/streaks/range?startDate=${startDate.toISOString()}&endDate=${today.toISOString()}`);
-        const data = await response.json();
-        setStreaks(data);
-        
-        const currentStreakResponse = await apiRequest("GET", `/api/habits/${selectedHabitId}/current-streak`);
-        const currentStreakData = await currentStreakResponse.json();
-        setCurrentStreak(currentStreakData.currentStreak);
-        
-        calculateAnalytics(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching habit streaks:', error);
-        setLoading(false);
+  // Handle manual habit selection
+  const handleHabitChange = (habitId: string) => {
+    const habit = habits.find(h => h.id === parseInt(habitId));
+    if (habit) {
+      setSelectedHabit(habit);
+      fetchStreaksForHabit(habit.id);
+      
+      // Call parent's onHabitSelect if provided
+      if (onHabitSelect) {
+        onHabitSelect(habit.id);
       }
-    }
-    
-    fetchStreaks();
-  }, [selectedHabitId]);
-  
-  // Handler for habit selection
-  const handleHabitSelect = (id: number) => {
-    setSelectedHabitId(id);
-    const habit = habits.find(h => h.id === id);
-    setSelectedHabit(habit || null);
-    
-    if (onHabitSelect) {
-      onHabitSelect(id);
     }
   };
   
-  // Calculate analytics from streak data
-  const calculateAnalytics = (streakData: HabitStreak[]) => {
-    if (!streakData.length) {
-      setCompletionRate(0);
-      setLongestStreak(0);
-      setWeekdayAnalysis([]);
-      setWeekendVsWeekday([]);
-      setTimeAnalysis([]);
-      setStreakHistory([]);
-      return;
+  // Fetch streak data for selected habit
+  async function fetchStreaksForHabit(habitId: number) {
+    try {
+      setLoadingStreaks(true);
+      
+      // Get date range based on selected period
+      const today = new Date();
+      let startDate = new Date();
+      
+      if (selectedPeriod === '30days') {
+        startDate.setDate(today.getDate() - 30);
+      } else if (selectedPeriod === '3months') {
+        startDate.setMonth(today.getMonth() - 3);
+      } else {
+        startDate.setFullYear(today.getFullYear() - 1);
+      }
+      
+      // Format dates for API query
+      const formattedStartDate = startDate.toISOString().split('T')[0];
+      const formattedEndDate = today.toISOString().split('T')[0];
+      
+      // Fetch streaks for the date range
+      const response = await apiRequest("GET", `/api/habits/${habitId}/streaks/range?startDate=${formattedStartDate}&endDate=${formattedEndDate}`);
+      const streakData = await response.json();
+      setStreaks(streakData);
+      
+      // Process streak data for charts
+      processStreakData(streakData, startDate, today);
+      
+      setLoadingStreaks(false);
+    } catch (error) {
+      console.error('Error fetching streaks:', error);
+      toast({
+        title: "Failed to load habit streaks",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+      setLoadingStreaks(false);
+    }
+  }
+  
+  // Process and format streak data for visualization
+  const processStreakData = (streaks: HabitStreak[], startDate: Date, endDate: Date) => {
+    // Create a data point for each day in the range
+    const data: StreakData[] = [];
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const dateStr = format(currentDate, 'yyyy-MM-dd');
+      const streak = streaks.find(s => 
+        format(new Date(s.date), 'yyyy-MM-dd') === dateStr
+      );
+      
+      data.push({
+        date: new Date(currentDate),
+        completed: streak ? streak.completed : false
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // Calculate completion rate
-    const completedDays = streakData.filter(s => s.completed).length;
-    const completionPercentage = (completedDays / streakData.length) * 100;
-    setCompletionRate(Math.round(completionPercentage));
+    setStreakData(data);
     
-    // Calculate longest streak
-    let currentCount = 0;
-    let maxCount = 0;
+    // Calculate consistency score - percentage of completed days
+    const totalDays = data.length;
+    const completedDays = data.filter(d => d.completed).length;
+    const score = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+    setConsistencyScore(score);
     
-    // Sort streaks by date
-    const sortedStreaks = [...streakData].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    
-    // Calculate streak history for chart
-    const streakHistoryData: { date: string; streak: number }[] = [];
-    let runningStreak = 0;
-    
-    sortedStreaks.forEach((streak, index) => {
-      const streakDate = new Date(streak.date);
-      
-      if (streak.completed) {
-        runningStreak++;
-        currentCount++;
-        maxCount = Math.max(maxCount, currentCount);
-      } else {
-        runningStreak = 0;
-        currentCount = 0;
-      }
-      
-      // Only add points where the streak changes or every 7 days to reduce data points
-      if (index % 7 === 0 || index === sortedStreaks.length - 1) {
-        streakHistoryData.push({
-          date: format(streakDate, 'MMM dd'),
-          streak: runningStreak
-        });
-      }
-    });
-    
-    setLongestStreak(maxCount);
-    setStreakHistory(streakHistoryData);
-    
-    // Analyze performance by day of week
-    const dayMap: Record<string, { completed: number; total: number }> = {
-      'Sunday': { completed: 0, total: 0 },
-      'Monday': { completed: 0, total: 0 },
-      'Tuesday': { completed: 0, total: 0 },
-      'Wednesday': { completed: 0, total: 0 },
-      'Thursday': { completed: 0, total: 0 },
-      'Friday': { completed: 0, total: 0 },
-      'Saturday': { completed: 0, total: 0 }
+    // Perform day of week analysis
+    const dayAnalysis: { [key: string]: { total: number, completed: number } } = {
+      'Monday': { total: 0, completed: 0 },
+      'Tuesday': { total: 0, completed: 0 },
+      'Wednesday': { total: 0, completed: 0 },
+      'Thursday': { total: 0, completed: 0 },
+      'Friday': { total: 0, completed: 0 },
+      'Saturday': { total: 0, completed: 0 },
+      'Sunday': { total: 0, completed: 0 }
     };
     
-    // Weekend vs weekday data
-    const weekendData = { completed: 0, total: 0 };
-    const weekdayData = { completed: 0, total: 0 };
-    
-    sortedStreaks.forEach(streak => {
-      const date = new Date(streak.date);
-      const dayName = format(date, 'EEEE');
-      
-      dayMap[dayName].total++;
-      if (streak.completed) {
-        dayMap[dayName].completed++;
-      }
-      
-      // Weekend vs weekday
-      if (isWeekend(date)) {
-        weekendData.total++;
-        if (streak.completed) weekendData.completed++;
-      } else {
-        weekdayData.total++;
-        if (streak.completed) weekdayData.completed++;
+    // Count occurrences and completions by day of week
+    data.forEach(d => {
+      const dayName = format(d.date, 'EEEE');
+      dayAnalysis[dayName].total++;
+      if (d.completed) {
+        dayAnalysis[dayName].completed++;
       }
     });
     
-    // Create day analysis
-    const weekdayAnalysisData = Object.entries(dayMap).map(([day, data]) => ({
-      day,
-      completionRate: data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0,
-      count: data.total
+    // Convert to array format for chart
+    const weekdayAnalysisData: DayAnalysis[] = Object.entries(dayAnalysis).map(([day, stats]) => ({
+      day: day.substring(0, 3), // abbreviate to Mon, Tue, etc.
+      completionRate: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
+      count: stats.total
     }));
     
     setWeekdayAnalysis(weekdayAnalysisData);
     
-    // Create weekend vs weekday data
-    const weekendCompletionRate = weekendData.total > 0 ? Math.round((weekendData.completed / weekendData.total) * 100) : 0;
-    const weekdayCompletionRate = weekdayData.total > 0 ? Math.round((weekdayData.completed / weekdayData.total) * 100) : 0;
-    
-    setWeekendVsWeekday([
-      { name: 'Weekdays', value: weekdayCompletionRate },
-      { name: 'Weekends', value: weekendCompletionRate }
+    // Calculate time of day analysis
+    // Since we don't have actual time data, we'll use dummy data here
+    // In a real app, you would use the actual completion times
+    setTimeOfDayAnalysis([
+      { period: 'Morning', completionRate: 75 },
+      { period: 'Afternoon', completionRate: 60 },
+      { period: 'Evening', completionRate: 40 },
+      { period: 'Night', completionRate: 25 }
     ]);
     
-    // Time analysis (monthly, weekly, daily)
-    const today = new Date();
-    const lastWeek = subDays(today, 7);
-    const lastMonth = subDays(today, 30);
+    // Calculate strongest streak
+    let currentStreak = 0;
+    let maxStreak = 0;
     
-    const lastWeekStreaks = sortedStreaks.filter(s => 
-      new Date(s.date) >= lastWeek && new Date(s.date) <= today
-    );
-    const lastMonthStreaks = sortedStreaks.filter(s => 
-      new Date(s.date) >= lastMonth && new Date(s.date) <= today
-    );
+    data.forEach(d => {
+      if (d.completed) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    });
     
-    const weeklyCompletion = lastWeekStreaks.length > 0 
-      ? Math.round((lastWeekStreaks.filter(s => s.completed).length / lastWeekStreaks.length) * 100)
-      : 0;
+    setStrongestStreak(maxStreak);
     
-    const monthlyCompletion = lastMonthStreaks.length > 0
-      ? Math.round((lastMonthStreaks.filter(s => s.completed).length / lastMonthStreaks.length) * 100)
-      : 0;
+    // Generate weekly completion data
+    const weeklyData: { [key: string]: { completed: number, missed: number } } = {};
+    let currentWeekStart = startOfWeek(startDate);
+    const lastWeekEnd = endOfWeek(endDate);
     
-    setTimeAnalysis([
-      { period: 'Last 7 days', completionRate: weeklyCompletion },
-      { period: 'Last 30 days', completionRate: monthlyCompletion },
-      { period: 'All time', completionRate: Math.round(completionPercentage) }
-    ]);
+    while (currentWeekStart <= lastWeekEnd) {
+      const weekKey = format(currentWeekStart, 'MMM d');
+      weeklyData[weekKey] = { completed: 0, missed: 0 };
+      currentWeekStart = addDays(currentWeekStart, 7);
+    }
+    
+    // Populate weekly data
+    data.forEach(d => {
+      const weekStart = startOfWeek(d.date);
+      const weekKey = format(weekStart, 'MMM d');
+      
+      if (weeklyData[weekKey]) {
+        if (d.completed) {
+          weeklyData[weekKey].completed++;
+        } else {
+          weeklyData[weekKey].missed++;
+        }
+      }
+    });
+    
+    // Convert to array for chart
+    const weeklyCompletionData = Object.entries(weeklyData).map(([date, stats]) => ({
+      date,
+      completed: stats.completed,
+      missed: stats.missed
+    }));
+    
+    setWeeklyCompletion(weeklyCompletionData);
   };
   
-  // Smart recommendations based on analytics
-  const getRecommendations = () => {
-    if (!streaks.length || !selectedHabit) return [];
+  // Handle period selection change
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value as '30days' | '3months' | 'year');
     
+    if (selectedHabit) {
+      fetchStreaksForHabit(selectedHabit.id);
+    }
+  };
+  
+  // Generate recommendations based on habit data
+  const getRecommendations = (): string[] => {
     const recommendations: string[] = [];
     
-    // Recommendation based on completion rate
-    if (completionRate < 30) {
-      recommendations.push("Your completion rate is quite low. Consider making this habit smaller or easier to complete.");
-    } else if (completionRate < 60) {
-      recommendations.push("Try setting a consistent time of day for this habit to improve your completion rate.");
+    if (weekdayAnalysis.length > 0) {
+      // Find best day
+      const bestDay = [...weekdayAnalysis].sort((a, b) => b.completionRate - a.completionRate)[0];
+      if (bestDay.completionRate > 70) {
+        recommendations.push(`You're most consistent on ${bestDay.day}days (${bestDay.completionRate}% completion). Keep up the good work!`);
+      }
+      
+      // Find worst day
+      const worstDay = [...weekdayAnalysis].sort((a, b) => a.completionRate - b.completionRate)[0];
+      if (worstDay.completionRate < 50 && worstDay.count > 3) {
+        recommendations.push(`You struggle most on ${worstDay.day}days (only ${worstDay.completionRate}% completion). Try setting a special reminder for this day.`);
+      }
     }
     
-    // Recommendation based on day analysis
-    const lowestPerformanceDay = [...weekdayAnalysis].sort((a, b) => a.completionRate - b.completionRate)[0];
-    if (lowestPerformanceDay && lowestPerformanceDay.count > 3) {
-      recommendations.push(`You tend to miss this habit most often on ${lowestPerformanceDay.day}s. Consider adjusting your approach for this day.`);
-    }
-    
-    // Weekend vs weekday recommendation
-    const weekendPerf = weekendVsWeekday.find(d => d.name === 'Weekends')?.value || 0;
-    const weekdayPerf = weekendVsWeekday.find(d => d.name === 'Weekdays')?.value || 0;
-    
-    if (weekendPerf < weekdayPerf - 20) {
-      recommendations.push("Your weekend consistency is much lower than weekdays. Try creating a weekend-specific routine.");
-    } else if (weekdayPerf < weekendPerf - 20) {
-      recommendations.push("You perform better on weekends than weekdays. Consider how to apply your weekend approach to weekdays.");
+    // Consistency score recommendations
+    if (consistencyScore < 30) {
+      recommendations.push("Your consistency is low. Start with smaller daily goals to build momentum.");
+    } else if (consistencyScore > 80) {
+      recommendations.push("Excellent consistency! Consider increasing the challenge of your habit.");
     }
     
     // Streak recommendations
-    if (currentStreak === 0 && streaks.length > 10) {
-      recommendations.push("You've broken your streak. Remember why this habit matters to you and start fresh today.");
-    } else if (currentStreak > 0 && currentStreak === longestStreak && currentStreak >= 7) {
-      recommendations.push(`Congratulations! You're on your best streak ever (${currentStreak} days). Keep it going!`);
+    if (strongestStreak < 3) {
+      recommendations.push("Focus on building longer streaks. Even 3 days in a row can help form a habit.");
+    } else if (strongestStreak >= 21) {
+      recommendations.push("You've achieved a 21+ day streak! This habit is becoming part of your routine.");
     }
     
-    return recommendations.length ? recommendations : ["Keep tracking your habit consistently to receive personalized recommendations."];
+    // Add general recommendations if we have few specific ones
+    if (recommendations.length < 2) {
+      recommendations.push("Track your habit at the same time each day to build consistency.");
+      recommendations.push("Link this habit to an existing daily routine to make it easier to remember.");
+    }
+    
+    return recommendations;
   };
   
-  if (loading) {
+  // Generate summary text
+  const getSummaryText = (): string => {
+    if (consistencyScore >= 80) {
+      return "Excellent habit consistency! You're well on your way to making this a permanent part of your routine.";
+    } else if (consistencyScore >= 60) {
+      return "Good consistency. You're making steady progress with this habit.";
+    } else if (consistencyScore >= 40) {
+      return "Moderate consistency. Try to identify what's making this habit challenging.";
+    } else {
+      return "This habit needs attention. Consider simplifying it or setting more specific triggers.";
+    }
+  };
+  
+  // Get color based on consistency score
+  const getScoreColor = (score: number): string => {
+    if (score >= 80) return "text-green-400";
+    if (score >= 60) return "text-emerald-400";
+    if (score >= 40) return "text-yellow-400";
+    return "text-red-400";
+  };
+  
+  // Loading state
+  if (loadingHabits && habits.length === 0) {
     return (
-      <Card className="shadow-lg bg-gray-900/70 border-gray-800">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-center p-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center w-full h-64">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+          <p className="text-gray-400">Loading analytics data...</p>
+        </div>
+      </div>
     );
   }
   
+  // No habits state
   if (habits.length === 0) {
     return (
-      <Card className="shadow-lg bg-gray-900/70 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-white">Habit Analytics</CardTitle>
-          <CardDescription className="text-gray-400">Insights and patterns from your habit data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center p-6 text-center">
-            <BarChartIcon className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-white">No habits found</h3>
-            <p className="text-sm text-gray-400 mt-2">
-              Create habits to see analytics and insights
-            </p>
+      <div className="flex flex-col items-center justify-center w-full h-64 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-800 mb-2">
+            <BarChartIcon className="h-8 w-8 text-blue-400" />
           </div>
-        </CardContent>
-      </Card>
+          <h3 className="text-xl font-semibold text-white">No habits to analyze</h3>
+          <p className="text-gray-400 max-w-md">
+            Create and track habits to see detailed analytics and insights on your progress.
+          </p>
+        </div>
+      </div>
     );
   }
   
   return (
-    <AnimatedComponent animation="fadeIn" delay={0.1}>
-      <Card className="shadow-xl bg-gray-900/80 border-gray-800 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-indigo-500/10 opacity-50 blur-xl pointer-events-none"></div>
-        
-        <CardHeader className="relative z-10 border-b border-gray-800">
-          <CardTitle className="flex items-center text-white">
-            <BarChartIcon className="mr-2 h-6 w-6 text-blue-500" />
-            <span className="text-glow">Habit Analytics Dashboard</span>
-          </CardTitle>
-          <CardDescription className="text-gray-400">Data-driven insights for your habits</CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6 relative z-10 pt-6">
-          {/* Habit Selection */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {habits.map((habit, index) => (
-              <motion.div
-                key={habit.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Badge 
-                  variant={selectedHabitId === habit.id ? 'default' : 'outline'}
-                  className={`cursor-pointer transition-all ${
-                    selectedHabitId === habit.id ? 'scale-110 shadow-glow' : 'hover:scale-105'
-                  } ${habit.color === 'primary' ? 'bg-primary' : 
-                    habit.color === 'blue' ? 'bg-blue-500' : 
-                    habit.color === 'green' ? 'bg-green-500' : 
-                    habit.color === 'purple' ? 'bg-purple-500' : 
-                    habit.color === 'indigo' ? 'bg-indigo-500' : 'bg-primary'}`}
-                  onClick={() => handleHabitSelect(habit.id)}
-                >
+    <div className="space-y-8">
+      {/* Header with habit selector and period selector */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-400 mb-1">Select Habit</label>
+          <Select
+            value={selectedHabit ? selectedHabit.id.toString() : ""}
+            onValueChange={handleHabitChange}
+          >
+            <SelectTrigger className="w-full bg-gray-800 border-gray-700">
+              <SelectValue placeholder="Select a habit to analyze" />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-800 border-gray-700">
+              {habits.map((habit) => (
+                <SelectItem key={habit.id} value={habit.id.toString()}>
                   {habit.name}
-                </Badge>
-              </motion.div>
-            ))}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-400 mb-1">Time Period</label>
+          <div className="flex rounded-md overflow-hidden border border-gray-700">
+            <Button
+              variant="ghost"
+              className={`px-3 py-1 rounded-none ${selectedPeriod === '30days' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+              onClick={() => handlePeriodChange('30days')}
+            >
+              30 Days
+            </Button>
+            <Button
+              variant="ghost"
+              className={`px-3 py-1 rounded-none ${selectedPeriod === '3months' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+              onClick={() => handlePeriodChange('3months')}
+            >
+              3 Months
+            </Button>
+            <Button
+              variant="ghost"
+              className={`px-3 py-1 rounded-none ${selectedPeriod === 'year' ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+              onClick={() => handlePeriodChange('year')}
+            >
+              Year
+            </Button>
           </div>
-          
-          {selectedHabit && (
-            <>
-              <Tabs 
-                defaultValue="overview" 
-                value={activeTab} 
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid grid-cols-3 w-full bg-gray-800">
-                  <TabsTrigger value="overview" className="data-[state=active]:bg-gray-700">Overview</TabsTrigger>
-                  <TabsTrigger value="patterns" className="data-[state=active]:bg-gray-700">Patterns</TabsTrigger>
-                  <TabsTrigger value="recommendations" className="data-[state=active]:bg-gray-700">Smart Tips</TabsTrigger>
-                </TabsList>
-                
-                {/* Overview Tab */}
-                <TabsContent value="overview" className="pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gray-800/80 p-4 rounded-md border border-gray-700 flex flex-col items-center">
-                      <div className="text-sm text-gray-400 mb-2">Completion Rate</div>
-                      <div className="text-3xl font-bold text-white">{completionRate}%</div>
-                      <div className="w-full mt-2">
-                        <AnimatedProgress 
-                          value={completionRate} 
-                          className="h-2 bg-gray-700" 
-                          indicatorClassName="bg-gradient-to-r from-blue-600 to-indigo-500"
+        </div>
+      </div>
+      
+      {selectedHabit && (
+        <AnimatedComponent animation="fadeIn" delay={0.2}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Habit Overview Card */}
+            <Card className="bg-gray-900/50 border-gray-800 shadow-md overflow-hidden">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-blue-400" />
+                      <span>Habit Overview</span>
+                    </CardTitle>
+                    <CardDescription>{selectedHabit.name}</CardDescription>
+                  </div>
+                  <Badge 
+                    className={`${selectedHabit.priority === 'high' ? 'bg-red-500/20 text-red-300' : 
+                      selectedHabit.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' : 
+                      'bg-blue-500/20 text-blue-300'}`}
+                  >
+                    {selectedHabit.priority.toUpperCase()}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pb-4">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="bg-gray-800/70 p-3 rounded-lg border border-gray-700">
+                      <p className="text-sm text-gray-400">Consistency</p>
+                      <p className={`text-xl font-bold ${getScoreColor(consistencyScore)}`}>{consistencyScore}%</p>
+                    </div>
+                    <div className="bg-gray-800/70 p-3 rounded-lg border border-gray-700">
+                      <p className="text-sm text-gray-400">Best Streak</p>
+                      <p className="text-xl font-bold text-orange-400">{strongestStreak} days</p>
+                    </div>
+                    <div className="bg-gray-800/70 p-3 rounded-lg border border-gray-700">
+                      <p className="text-sm text-gray-400">Goal</p>
+                      <p className="text-xl font-bold text-cyan-400">{selectedHabit.targetDaysPerWeek}/week</p>
+                    </div>
+                    <div className="bg-gray-800/70 p-3 rounded-lg border border-gray-700">
+                      <p className="text-sm text-gray-400">Category</p>
+                      <p className="text-xl font-bold text-purple-400 capitalize">{selectedHabit.category || "General"}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+                    <h3 className="text-md font-medium text-white mb-2 flex items-center">
+                      <Users className="h-4 w-4 mr-2 text-blue-400" />
+                      Summary
+                    </h3>
+                    <p className="text-gray-300">{getSummaryText()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Recommendations Card */}
+            <Card className="bg-gray-900/50 border-gray-800 shadow-md overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <Zap className="h-5 w-5 text-yellow-400" />
+                  <span>Recommendations</span>
+                </CardTitle>
+                <CardDescription>Personalized insights for improvement</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {getRecommendations().map((recommendation, idx) => (
+                    <div key={idx} className="flex items-start space-x-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                      <div className="mt-0.5 bg-gray-700 rounded-full p-1.5 text-yellow-400">
+                        <Award className="h-3 w-3" />
+                      </div>
+                      <p className="text-sm text-gray-300">{recommendation}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </AnimatedComponent>
+      )}
+      
+      {selectedHabit && (
+        <AnimatedComponent animation="fadeIn" delay={0.4}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Weekly Completion Chart */}
+            <Card className="bg-gray-900/50 border-gray-800 shadow-md overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <Calendar className="h-5 w-5 text-green-400" />
+                  <span>Weekly Completion</span>
+                </CardTitle>
+                <CardDescription>Tracking weekly consistency</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  {loadingStreaks ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
+                    </div>
+                  ) : weeklyCompletion.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={weeklyCompletion} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="date" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#E5E7EB' }}
+                          labelStyle={{ color: '#F9FAFB' }}
                         />
-                      </div>
+                        <Legend />
+                        <Bar dataKey="completed" name="Completed" fill="#10B981" />
+                        <Bar dataKey="missed" name="Missed" fill="#EF4444" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-400">No completion data available</p>
                     </div>
-                    
-                    <div className="bg-gray-800/80 p-4 rounded-md border border-gray-700 flex flex-col items-center">
-                      <div className="text-sm text-gray-400 mb-2">Current Streak</div>
-                      <div className="text-3xl font-bold flex items-center text-white">
-                        {currentStreak} <span className="text-sm ml-1 font-normal text-gray-400">days</span>
-                      </div>
-                      <div className="mt-2 text-xs text-gray-400">
-                        <span className={currentStreak >= longestStreak && longestStreak > 0 ? "text-green-400" : "text-gray-400"}>
-                          {currentStreak >= longestStreak && longestStreak > 0 ? "Best streak ever!" : `Best: ${longestStreak} days`}
-                        </span>
-                      </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Day of Week Analysis Chart */}
+            <Card className="bg-gray-900/50 border-gray-800 shadow-md overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChartIcon className="h-5 w-5 text-blue-400" />
+                  <span>Day of Week Analysis</span>
+                </CardTitle>
+                <CardDescription>Identify your strongest and weakest days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  {loadingStreaks ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
                     </div>
-                    
-                    <div className="bg-gray-800/80 p-4 rounded-md border border-gray-700 flex flex-col items-center">
-                      <div className="text-sm text-gray-400 mb-2">Total Records</div>
-                      <div className="text-3xl font-bold text-white">{streaks.length}</div>
-                      <div className="mt-2 text-xs text-gray-400">
-                        {streaks.length > 0 ? 
-                          `Since ${format(new Date(streaks[0].date), 'MMM d, yyyy')}` : 
-                          "No data yet"}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800 mt-6">
-                    <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                      <LineChartIcon className="h-5 w-5 mr-2 text-blue-400" />
-                      Streak History
-                    </h3>
-                    
-                    {streakHistory.length > 1 ? (
-                      <div className="w-full h-60 mt-4">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={streakHistory}>
-                            <XAxis dataKey="date" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#f9fafb' }}
-                              itemStyle={{ color: '#f9fafb' }}
-                              labelStyle={{ color: '#f9fafb' }}
+                  ) : weekdayAnalysis.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={weekdayAnalysis} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis dataKey="day" stroke="#9CA3AF" />
+                        <YAxis stroke="#9CA3AF" />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#E5E7EB' }}
+                          labelStyle={{ color: '#F9FAFB' }}
+                          formatter={(value) => [`${value}%`, 'Completion Rate']}
+                        />
+                        <Bar dataKey="completionRate" name="Completion Rate" fill="#60A5FA">
+                          {weekdayAnalysis.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.completionRate > 70 ? '#10B981' : 
+                                    entry.completionRate > 40 ? '#60A5FA' : 
+                                    '#EF4444'} 
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="streak" 
-                              stroke="#3b82f6" 
-                              strokeWidth={2} 
-                              dot={{ stroke: '#3b82f6', strokeWidth: 2, r: 4, fill: '#1f2937' }}
-                              activeDot={{ stroke: '#3b82f6', strokeWidth: 2, r: 6, fill: '#1f2937' }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                    ) : (
-                      <div className="text-center p-4 text-gray-400">Not enough data to show streak history</div>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800">
-                      <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                        <PieChartIcon className="h-5 w-5 mr-2 text-blue-400" />
-                        Time Analysis
-                      </h3>
-                      
-                      {timeAnalysis.length > 0 ? (
-                        <div className="space-y-4">
-                          {timeAnalysis.map((period, index) => (
-                            <div key={index} className="flex flex-col">
-                              <div className="flex justify-between mb-1">
-                                <span className="text-sm text-gray-300">{period.period}</span>
-                                <span className="text-sm font-medium text-gray-300">{period.completionRate}%</span>
-                              </div>
-                              <AnimatedProgress 
-                                value={period.completionRate} 
-                                className="h-2 bg-gray-700" 
-                                indicatorClassName={index === 0 ? "bg-blue-500" : index === 1 ? "bg-indigo-500" : "bg-purple-500"}
-                              />
-                            </div>
                           ))}
-                        </div>
-                      ) : (
-                        <div className="text-center p-4 text-gray-400">Not enough data for time analysis</div>
-                      )}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-400">No day analysis data available</p>
                     </div>
-                    
-                    <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800">
-                      <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                        <Calendar className="h-5 w-5 mr-2 text-blue-400" />
-                        Weekend vs. Weekday
-                      </h3>
-                      
-                      {weekendVsWeekday.length > 0 ? (
-                        <div className="w-full h-40">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={weekendVsWeekday}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={50}
-                                outerRadius={70}
-                                paddingAngle={5}
-                                dataKey="value"
-                                label={({ name, value }) => `${name}: ${value}%`}
-                                labelLine={false}
-                              >
-                                <Cell fill="#4f46e5" />
-                                <Cell fill="#8b5cf6" />
-                              </Pie>
-                              <Tooltip 
-                                formatter={(value) => [`${value}%`, 'Completion Rate']}
-                                contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }}
-                                itemStyle={{ color: '#f9fafb' }}
-                                labelStyle={{ color: '#f9fafb' }}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
-                      ) : (
-                        <div className="text-center p-4 text-gray-400">Not enough data for weekend vs. weekday analysis</div>
-                      )}
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </AnimatedComponent>
+      )}
+      
+      {selectedHabit && (
+        <AnimatedComponent animation="fadeIn" delay={0.6}>
+          <div className="grid grid-cols-1 gap-6">
+            {/* Habit Completion Timeline */}
+            <Card className="bg-gray-900/50 border-gray-800 shadow-md overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-2">
+                  <MoveUp className="h-5 w-5 text-purple-400" />
+                  <span>Habit Completion Timeline</span>
+                </CardTitle>
+                <CardDescription>View your progress over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  {loadingStreaks ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-500 border-t-transparent"></div>
                     </div>
-                  </div>
-                </TabsContent>
-                
-                {/* Patterns Tab */}
-                <TabsContent value="patterns" className="pt-4">
-                  <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800 mb-6">
-                    <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                      <Calendar className="h-5 w-5 mr-2 text-blue-400" />
-                      Day of Week Performance
-                    </h3>
-                    
-                    {weekdayAnalysis.length > 0 ? (
-                      <div className="w-full h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={weekdayAnalysis}>
-                            <XAxis dataKey="day" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip 
-                              formatter={(value) => [`${value}%`, 'Completion Rate']}
-                              contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151' }}
-                              itemStyle={{ color: '#f9fafb' }}
-                              labelStyle={{ color: '#f9fafb' }}
-                            />
-                            <Bar 
-                              dataKey="completionRate" 
-                              radius={[4, 4, 0, 0]}
-                              barSize={30}
-                            >
-                              {weekdayAnalysis.map((entry, index) => (
-                                <Cell 
-                                  key={`cell-${index}`} 
-                                  fill={entry.completionRate > 75 ? '#10b981' : entry.completionRate > 50 ? '#3b82f6' : entry.completionRate > 25 ? '#8b5cf6' : '#ef4444'} 
-                                />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    ) : (
-                      <div className="text-center p-4 text-gray-400">Not enough data to analyze daily patterns</div>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800">
-                      <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                        <TrendingUp className="h-5 w-5 mr-2 text-blue-400" />
-                        Completion Trend
-                      </h3>
-                      
-                      {streaks.length > 7 ? (
-                        <div className="space-y-4">
-                          <div className="text-gray-400 mb-2">Recent 30-day trend compared to previous 30 days:</div>
-                          {(() => {
-                            // Calculate recent vs previous completion rates
-                            const today = new Date();
-                            const last30Days = subDays(today, 30);
-                            const previous30Days = subDays(last30Days, 30);
-                            
-                            const recentStreaks = streaks.filter(s => 
-                              isWithinInterval(new Date(s.date), { start: last30Days, end: today })
-                            );
-                            
-                            const previousStreaks = streaks.filter(s => 
-                              isWithinInterval(new Date(s.date), { start: previous30Days, end: last30Days })
-                            );
-                            
-                            const recentCompletionRate = recentStreaks.length > 0 
-                              ? Math.round((recentStreaks.filter(s => s.completed).length / recentStreaks.length) * 100) 
-                              : 0;
-                              
-                            const previousCompletionRate = previousStreaks.length > 0 
-                              ? Math.round((previousStreaks.filter(s => s.completed).length / previousStreaks.length) * 100) 
-                              : 0;
-                              
-                            const difference = recentCompletionRate - previousCompletionRate;
-                            const trendText = difference > 0 
-                              ? `Improving (+${difference}%)` 
-                              : difference < 0 
-                                ? `Declining (${difference}%)` 
-                                : "Stable (no change)";
-                                
-                            const trendColor = difference > 0 
-                              ? "text-green-400" 
-                              : difference < 0 
-                                ? "text-red-400" 
-                                : "text-blue-400";
-                                
-                            return (
-                              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
-                                <div>
-                                  <div className="text-sm text-gray-400">Current: {recentCompletionRate}%</div>
-                                  <div className="text-sm text-gray-400">Previous: {previousCompletionRate}%</div>
-                                </div>
-                                <div className={`text-lg font-medium ${trendColor}`}>
-                                  {trendText}
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      ) : (
-                        <div className="text-center p-4 text-gray-400">Need more data for trend analysis (at least 2 weeks)</div>
-                      )}
+                  ) : streakData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={streakData.map((d, idx) => ({
+                          date: format(d.date, 'MMM d'),
+                          completed: d.completed ? 1 : 0,
+                          index: idx
+                        }))}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="#9CA3AF"
+                          interval={Math.floor(streakData.length / 10)} // Show fewer x-axis labels
+                        />
+                        <YAxis 
+                          stroke="#9CA3AF"
+                          domain={[0, 1]}
+                          ticks={[0, 1]}
+                          tickFormatter={(value) => value === 1 ? 'Yes' : 'No'}
+                        />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#E5E7EB' }}
+                          labelStyle={{ color: '#F9FAFB' }}
+                          formatter={(value) => [value === 1 ? 'Completed' : 'Missed', 'Status']}
+                        />
+                        <Legend />
+                        <Line 
+                          type="step" 
+                          dataKey="completed" 
+                          name="Completion" 
+                          stroke="#10B981" 
+                          dot={{ stroke: '#10B981', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 8 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-400">No timeline data available</p>
                     </div>
-                    
-                    <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800">
-                      <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                        <Clock className="h-5 w-5 mr-2 text-blue-400" />
-                        Consistency Score
-                      </h3>
-                      
-                      {(() => {
-                        // Calculate consistency score based on regularity and streaks
-                        if (streaks.length < 7) {
-                          return (
-                            <div className="text-center p-4 text-gray-400">Need more data for consistency score (at least 7 days)</div>
-                          );
-                        }
-                        
-                        // Sort streaks by date
-                        const sortedStreaks = [...streaks].sort((a, b) => 
-                          new Date(a.date).getTime() - new Date(b.date).getTime()
-                        );
-                        
-                        // Calculate gaps between tracking dates
-                        const gaps: number[] = [];
-                        for (let i = 1; i < sortedStreaks.length; i++) {
-                          const currentDate = new Date(sortedStreaks[i].date);
-                          const prevDate = new Date(sortedStreaks[i-1].date);
-                          const gap = differenceInDays(currentDate, prevDate);
-                          if (gap > 1) gaps.push(gap);
-                        }
-                        
-                        // Calculate average gap (smaller is better)
-                        const avgGap = gaps.length > 0 ? 
-                          gaps.reduce((sum, gap) => sum + gap, 0) / gaps.length : 1;
-                          
-                        // Calculate streak ratio (higher is better)
-                        const streakRatio = currentStreak / (sortedStreaks.length / 7);
-                        
-                        // Calculate consistency score (0-100)
-                        const gapScore = Math.max(0, 50 - (avgGap * 10));
-                        const streakScore = Math.min(50, streakRatio * 10);
-                        
-                        const consistencyScore = Math.round(gapScore + streakScore);
-                        
-                        // Determine consistency level
-                        let consistencyLevel = "";
-                        let consistencyColor = "";
-                        
-                        if (consistencyScore >= 90) {
-                          consistencyLevel = "Exceptional";
-                          consistencyColor = "text-emerald-400";
-                        } else if (consistencyScore >= 75) {
-                          consistencyLevel = "Excellent";
-                          consistencyColor = "text-green-400";
-                        } else if (consistencyScore >= 60) {
-                          consistencyLevel = "Good";
-                          consistencyColor = "text-blue-400";
-                        } else if (consistencyScore >= 40) {
-                          consistencyLevel = "Moderate";
-                          consistencyColor = "text-yellow-400";
-                        } else if (consistencyScore >= 20) {
-                          consistencyLevel = "Needs Improvement";
-                          consistencyColor = "text-orange-400";
-                        } else {
-                          consistencyLevel = "Poor";
-                          consistencyColor = "text-red-400";
-                        }
-                        
-                        return (
-                          <div className="flex flex-col items-center">
-                            <div className="relative w-36 h-36 mb-4">
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className={`text-4xl font-bold ${consistencyColor}`}>{consistencyScore}</div>
-                              </div>
-                              <svg className="w-full h-full" viewBox="0 0 100 100">
-                                <circle
-                                  cx="50"
-                                  cy="50"
-                                  r="45"
-                                  fill="none"
-                                  stroke="#374151"
-                                  strokeWidth="10"
-                                />
-                                <circle
-                                  cx="50"
-                                  cy="50"
-                                  r="45"
-                                  fill="none"
-                                  stroke={consistencyColor.replace('text-', 'var(--')}
-                                  strokeWidth="10"
-                                  strokeDasharray={`${(consistencyScore / 100) * 283} 283`}
-                                  transform="rotate(-90 50 50)"
-                                  strokeLinecap="round"
-                                  className="transition-all duration-1000 ease-out"
-                                  style={{ 
-                                    stroke: consistencyScore >= 90 ? '#10b981' : 
-                                            consistencyScore >= 75 ? '#22c55e' : 
-                                            consistencyScore >= 60 ? '#3b82f6' : 
-                                            consistencyScore >= 40 ? '#eab308' : 
-                                            consistencyScore >= 20 ? '#f97316' : '#ef4444' 
-                                  }}
-                                />
-                              </svg>
-                            </div>
-                            <div className={`text-xl font-medium ${consistencyColor} mb-2`}>
-                              {consistencyLevel}
-                            </div>
-                            <div className="text-sm text-gray-400 text-center">
-                              {consistencyScore >= 75 ? 
-                                "You're highly consistent with this habit!" : 
-                                consistencyScore >= 40 ? 
-                                "You're making good progress with consistency." : 
-                                "Focus on building more consistent tracking."}
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                {/* Recommendations Tab */}
-                <TabsContent value="recommendations" className="pt-4">
-                  <div className="bg-gray-900/40 rounded-lg p-6 border border-gray-800">
-                    <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                      <Zap className="h-5 w-5 mr-2 text-yellow-400" />
-                      Smart Recommendations
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      {getRecommendations().map((recommendation, index) => (
-                        <div key={index} className="bg-gray-800/60 rounded-lg p-4 border border-gray-700">
-                          <div className="flex items-start">
-                            <div className="bg-gray-700 rounded-full p-1 mr-3 mt-0.5">
-                              <ChevronRight className="h-4 w-4 text-blue-400" />
-                            </div>
-                            <p className="text-gray-300">{recommendation}</p>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {streaks.length > 0 && (
-                        <>
-                          <Separator className="my-6 bg-gray-800" />
-                          
-                          <div className="bg-gray-800/60 rounded-lg p-4 border border-gray-700">
-                            <h4 className="text-md font-medium text-white mb-2 flex items-center">
-                              <Award className="h-4 w-4 mr-2 text-yellow-400" />
-                              Ideal Target
-                            </h4>
-                            
-                            {(() => {
-                              // Calculate ideal target based on historical performance
-                              const completedDays = streaks.filter(s => s.completed).length;
-                              const completionPercentage = completedDays / streaks.length;
-                              
-                              // Current target days from habit
-                              const currentTarget = selectedHabit.targetStreakDays || 7;
-                              
-                              // If completion rate is high, suggest a slightly higher target
-                              // If it's low, suggest a lower, more achievable target
-                              let idealTarget = currentTarget;
-                              
-                              if (completionPercentage >= 0.8 && currentStreak >= currentTarget) {
-                                // Doing very well, can increase target by 30%
-                                idealTarget = Math.ceil(currentTarget * 1.3);
-                              } else if (completionPercentage >= 0.6) {
-                                // Doing well, can slightly increase target
-                                idealTarget = Math.ceil(currentTarget * 1.1);
-                              } else if (completionPercentage <= 0.3 && currentTarget > 3) {
-                                // Struggling, suggest an easier target
-                                idealTarget = Math.max(3, Math.floor(currentTarget * 0.7));
-                              }
-                              
-                              const targetDiff = idealTarget - currentTarget;
-                              
-                              return (
-                                <div className="text-gray-300">
-                                  {targetDiff > 0 ? (
-                                    <p>Based on your performance, you could increase your target streak from {currentTarget} to {idealTarget} days. You're consistently meeting your current goal!</p>
-                                  ) : targetDiff < 0 ? (
-                                    <p>Consider adjusting your target streak from {currentTarget} to {idealTarget} days for now. A more achievable goal may help you build momentum.</p>
-                                  ) : (
-                                    <p>Your current target of {currentTarget} days seems well matched to your current performance level.</p>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                          
-                          <div className="bg-indigo-900/20 rounded-lg p-4 border border-indigo-800/50 mt-4">
-                            <h4 className="text-md font-medium text-white mb-2 flex items-center">
-                              <Info className="h-4 w-4 mr-2 text-indigo-400" />
-                              Did You Know?
-                            </h4>
-                            <p className="text-gray-300">
-                              {[
-                                "Research suggests it takes an average of 66 days to form a new habit, not the commonly cited 21 days.",
-                                "Missing one day doesn't significantly impact habit formation. It's consistency over time that matters most.",
-                                "Morning habits tend to have higher completion rates as willpower is typically stronger earlier in the day.",
-                                "Habit stacking (connecting a new habit to an existing one) can increase success rates by 70%.",
-                                "The most sustainable habits start small. People who start with tiny habits are 3x more likely to maintain them."
-                              ][Math.floor(Math.random() * 5)]}
-                            </p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </AnimatedComponent>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </AnimatedComponent>
+      )}
+    </div>
   );
 }
