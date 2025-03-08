@@ -103,10 +103,10 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
         
         setStreaks(streaks.map(s => s.id === updatedStreakData.id ? updatedStreakData : s));
       } else {
-        // Create new streak
+        // Create new streak - ensure date is in ISO string format
         const newStreak = await apiRequest("POST", '/api/habit-streaks', {
           habitId: selectedHabit.id,
-          date: today,
+          date: today.toISOString(), // Convert to ISO string format
           completed: true,
           notes: `Completed on ${format(today, 'MMM dd, yyyy')}`
         });
@@ -157,10 +157,10 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
         
         setStreaks(streaks.map(s => s.id === updatedStreakData.id ? updatedStreakData : s));
       } else {
-        // Create new streak
+        // Create new streak - ensure date is in ISO string format
         const newStreak = await apiRequest("POST", '/api/habit-streaks', {
           habitId: selectedHabit.id,
-          date: today,
+          date: today.toISOString(), // Convert to ISO string format
           completed: false,
           notes: `Missed on ${format(today, 'MMM dd, yyyy')}`
         });
