@@ -1,81 +1,213 @@
-/* Glow Effects CSS */
-
-/* Primary gradient glow card */
-.glow-card {
+/* Glow Effects */
+.glow-border {
   position: relative;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  isolation: isolate;
 }
 
-.glow-card::before {
+.glow-border::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 0.75rem;
-  padding: 1.5px;
-  background: linear-gradient(45deg, #4ade8050, #10b98150);
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(
+    45deg,
+    #10b981, /* primary color */
+    rgba(16, 185, 129, 0.2),
+    #10b981,
+    rgba(16, 185, 129, 0.4),
+    #10b981
+  );
   -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  mask: 
     linear-gradient(#fff 0 0) content-box, 
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
+  animation: glow-rotate 6s linear infinite;
 }
 
-/* Stronger glow for active cards */
-.glow-card-active::before {
-  background: linear-gradient(45deg, #4ade80, #10b981);
-  animation: border-glow 3s ease-in-out infinite alternate;
+.glow-text {
+  text-shadow: 
+    0 0 5px rgba(16, 185, 129, 0.6),
+    0 0 10px rgba(16, 185, 129, 0.4),
+    0 0 15px rgba(16, 185, 129, 0.2);
 }
 
-/* Subtle hover effect for cards */
-.glow-card:hover::before {
-  background: linear-gradient(45deg, #4ade8070, #10b98170);
+.glow-neon {
+  box-shadow: 
+    0 0 5px rgba(16, 185, 129, 0.5),
+    0 0 15px rgba(16, 185, 129, 0.3),
+    0 0 30px rgba(16, 185, 129, 0.2);
 }
 
-/* Glow for progress bars and elements */
-.glow-element {
-  box-shadow: 0 0 15px 0 rgba(74, 222, 128, 0.3);
+.glow-pulse {
+  animation: glow-pulse 2s infinite;
 }
 
-/* Text glow effect */
-.text-glow {
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+/* Hover blur effect for cards */
+.hover-blur {
+  transition: all 0.3s ease;
 }
 
-/* Custom glow for avatar borders */
-.avatar-glow {
-  box-shadow: 0 0 8px 0 rgba(74, 222, 128, 0.5);
+.hover-blur:hover {
+  filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.5));
+  transform: translateY(-3px);
 }
 
-/* Pulsing animation for important elements */
-.pulse-glow {
-  animation: pulse-glow 3s infinite;
+/* Shiny borders for achievements and special elements */
+.shiny-border {
+  position: relative;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.shiny-border::after {
+  content: '';
+  position: absolute;
+  top: -150%;
+  left: -30px;
+  height: 400%;
+  width: 60px;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: shine 6s infinite;
+  pointer-events: none;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    #10b981,
+    #0ea5e9,
+    #8b5cf6,
+    #f59e0b
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Pixelated border for game-like elements */
+.pixel-border {
+  position: relative;
+  border: 2px solid;
+  border-image-slice: 2;
+  border-width: 4px;
+  border-image-source: url("data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8' ?><svg width='8' height='8' xmlns='http://www.w3.org/2000/svg'><path d='M0 0h8v2H0zm0 2h2v2H0zm0 2h2v2H0zm0 2h2v2H0zm6-4h2v2H6zm0 2h2v2H6zm0 2h2v2H6zM2 6h4v2H2z' fill='%2310b981' /></svg>");
+  border-image-repeat: stretch;
 }
 
 /* Animations */
-@keyframes border-glow {
+@keyframes glow-rotate {
   0% {
-    opacity: 0.7;
+    background-position: 0% 50%;
   }
   100% {
-    opacity: 1;
+    background-position: 400% 50%;
   }
 }
 
-@keyframes pulse-glow {
+@keyframes glow-pulse {
   0%, 100% {
-    box-shadow: 0 0 8px 0 rgba(74, 222, 128, 0.3);
+    opacity: 1;
+    filter: brightness(1);
   }
   50% {
-    box-shadow: 0 0 15px 0 rgba(74, 222, 128, 0.7);
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100px;
+  }
+  15% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Special effects for milestone achievements */
+.milestone-achievement {
+  position: relative;
+}
+
+.milestone-achievement::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  background: linear-gradient(
+    45deg,
+    #eab308,
+    #f97316,
+    #ef4444,
+    #8b5cf6,
+    #06b6d4,
+    #10b981
+  );
+  background-size: 400% 400%;
+  z-index: -1;
+  filter: blur(12px);
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Glitter effect for celebrations */
+.glitter {
+  position: relative;
+  overflow: hidden;
+}
+
+.glitter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.8) 0.1%, transparent 0.5%),
+    radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.7) 0.15%, transparent 0.5%),
+    radial-gradient(circle at 50% 70%, rgba(255, 255, 255, 0.8) 0.1%, transparent 0.5%),
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.7) 0.1%, transparent 0.5%),
+    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.8) 0.1%, transparent 0.5%);
+  background-size: 200% 200%;
+  mix-blend-mode: overlay;
+  animation: glitter-move 10s linear infinite;
+}
+
+@keyframes glitter-move {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 50% 25%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 75%;
+  }
+  100% {
+    background-position: 0% 0%;
   }
 }

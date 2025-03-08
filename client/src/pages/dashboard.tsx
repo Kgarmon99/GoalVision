@@ -18,6 +18,11 @@ import { AnimatedComponent } from "@/components/ui/animated-component";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { Animated3DBackground } from "@/components/ui/animated-3d-background";
+import { ParticleEffect } from "@/components/ui/particle-effect";
+import { CursorEffect } from "@/components/ui/cursor-effect";
+import { XPBar, StatusBar, GameButton, QuestItem, Celebration } from "@/components/game-elements";
+import "@/components/ui/glow-effects.css";
 import { 
   RefreshCcw, 
   Plus, 
@@ -33,7 +38,12 @@ import {
   Target, 
   Rocket,
   ArrowUpRight,
-  Users
+  Users,
+  Star,
+  Sparkles,
+  Flame,
+  Trophy,
+  Heart
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
@@ -312,14 +322,47 @@ const Dashboard = () => {
     [goals.length, growthMetrics.length, revenueMetrics.length, weeks.length]
   );
   
+  // State for celebration effects
+  const [showCelebration, setShowCelebration] = useState(false);
+  
+  // Handler for triggering celebration
+  const handleTriggerCelebration = useCallback(() => {
+    setShowCelebration(true);
+  }, []);
+  
+  // Handle celebration completion
+  const handleCelebrationComplete = useCallback(() => {
+    setShowCelebration(false);
+  }, []);
+  
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
+      {/* 3D Animated Background */}
+      <Animated3DBackground 
+        color="#10b981" 
+        particleCount={150}
+        speed={0.05}
+        interactive={true}
+      />
       
-      {/* Animated Floating Orbs */}
-      <div className="absolute left-[10%] top-[20%] w-40 h-40 rounded-full bg-gradient-to-r from-green-900/10 to-green-500/5 blur-2xl float-effect-slow"></div>
-      <div className="absolute right-[15%] top-[30%] w-64 h-64 rounded-full bg-gradient-to-r from-blue-900/10 to-purple-500/5 blur-2xl float-effect"></div>
-      <div className="absolute left-[25%] bottom-[15%] w-52 h-52 rounded-full bg-gradient-to-r from-purple-900/5 to-pink-500/5 blur-2xl float-effect-fast"></div>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/40 to-black/60 pointer-events-none"></div>
+      
+      {/* Custom cursor effect */}
+      <CursorEffect 
+        cursorSize={16}
+        trailCount={8}
+        color="#10b981"
+        glowColor="rgba(16, 185, 129, 0.3)"
+        glowSize={40}
+      />
+      
+      {/* Celebration effect */}
+      <Celebration 
+        isActive={showCelebration}
+        duration={6000}
+        onComplete={handleCelebrationComplete}
+      />
       
       <Header />
       
