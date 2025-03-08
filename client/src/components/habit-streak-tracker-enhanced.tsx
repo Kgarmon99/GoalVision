@@ -409,7 +409,7 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-10 rounded-full ${habit.priority === 'high' ? 'bg-red-500' : habit.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'}`}></div>
+                    <div className={`w-2 h-10 rounded-full ${(habit.priority || 'low') === 'high' ? 'bg-red-500' : (habit.priority || 'low') === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'}`}></div>
                     <div>
                       <p className="font-medium text-white">{habit.name}</p>
                       <div className="flex items-center space-x-2 text-xs text-gray-400">
@@ -452,11 +452,11 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
                     <CardTitle className="text-xl font-bold flex items-center">
                       {selectedHabit.name}
                       <Badge 
-                        className={`ml-2 ${selectedHabit.priority === 'high' ? 'bg-red-500/20 text-red-300' : 
-                          selectedHabit.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' : 
+                        className={`ml-2 ${(selectedHabit.priority || 'low') === 'high' ? 'bg-red-500/20 text-red-300' : 
+                          (selectedHabit.priority || 'low') === 'medium' ? 'bg-yellow-500/20 text-yellow-300' : 
                           'bg-blue-500/20 text-blue-300'}`}
                       >
-                        {selectedHabit.priority.toUpperCase()}
+                        {(selectedHabit.priority || 'low').toUpperCase()}
                       </Badge>
                     </CardTitle>
                     <CardDescription className="mt-1">

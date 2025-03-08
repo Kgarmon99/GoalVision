@@ -842,6 +842,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error creating habit streak" });
     }
   });
+  
+  // Create a streak for a specific habit
+  app.post("/api/habits/:habitId/streaks", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      if (isNaN(habitId)) {
+        return res.status(400).json({ message: "Invalid habit ID" });
+      }
+      
+      const { date, completed } = req.body;
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+      
+      const streakData = {
+        habitId,
+        date,
+        completed: completed === undefined ? true : completed
+      };
+      
+      const streak = await storage.createHabitStreak(streakData);
+      res.status(200).json(streak);
+    } catch (error) {
+      console.error("Error creating habit streak:", error);
+      res.status(500).json({ message: "Error creating habit streak" });
+    }
+  });
 
   // Update a habit streak
   app.patch("/api/habit-streaks/:id", async (req, res) => {
@@ -859,6 +886,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid habit streak data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error updating habit streak" });
+    }
+  });
+  
+  // Update a streak for a specific habit
+  app.patch("/api/habits/:habitId/streaks/:streakId", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      const streakId = parseInt(req.params.streakId);
+      
+      if (isNaN(habitId) || isNaN(streakId)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      // Get the current streak to verify it belongs to this habit
+      const currentStreak = await storage.getHabitStreak(streakId);
+      if (!currentStreak) {
+        return res.status(404).json({ message: "Habit streak not found" });
+      }
+      
+      if (currentStreak.habitId !== habitId) {
+        return res.status(403).json({ message: "Streak does not belong to this habit" });
+      }
+      
+      // Update the streak
+      const { completed } = req.body;
+      const updateData = { completed };
+      
+      const updatedStreak = await storage.updateHabitStreak(streakId, updateData);
+      res.json(updatedStreak);
+    } catch (error) {
+      console.error("Error updating habit streak:", error);
       res.status(500).json({ message: "Error updating habit streak" });
     }
   });
