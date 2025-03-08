@@ -856,9 +856,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Date is required" });
       }
       
+      // Convert string date to Date object if it's not already
+      const parsedDate = typeof date === 'string' ? new Date(date) : date;
+      
       const streakData = {
         habitId,
-        date,
+        date: parsedDate,
         completed: completed === undefined ? true : completed
       };
       

@@ -230,9 +230,9 @@ export function HabitStreakTracker({ goalId }: HabitStreakTrackerProps) {
           fetchStreaksForHabit(habit.id);
         }
       } else {
-        // Create new streak
+        // Create new streak - use ISO string for date
         const response = await apiRequest("POST", `/api/habits/${habit.id}/streaks`, {
-          date: dateStr,
+          date: date.toISOString(),
           completed,
         });
         
