@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HabitStreakTracker } from "@/components/habit-streak-tracker";
+import { HabitStreakTracker } from "@/components/habit-streak-tracker-enhanced";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal, Trash2, Home, LayoutDashboard, ListTodo, Flame, ArrowLeft } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -173,7 +174,7 @@ export default function HabitTracker() {
                     <span>Tasks</span>
                   </Link>
                   
-                  <Link href="/habit-tracker-new" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
+                  <Link href="/habit-tracker" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
                     <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
                     <span>Habits</span>
                   </Link>
@@ -222,7 +223,7 @@ export default function HabitTracker() {
                   <span>Tasks</span>
                 </Link>
                 
-                <Link href="/habit-tracker-new" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
+                <Link href="/habit-tracker" className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-gray-800 text-white transition-colors border-b-2 border-green-500">
                   <Flame className="h-4 w-4 mr-1 sm:mr-2 text-orange-400" />
                   <span>Habits</span>
                 </Link>
