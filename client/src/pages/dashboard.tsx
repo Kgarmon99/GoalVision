@@ -43,11 +43,13 @@ import {
   Sparkles,
   Flame,
   Trophy,
-  Heart
+  Heart,
+  Clock
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
 import { format } from "date-fns";
+import { formatDate, getDaysUntilDescription, getUrgencyLevel } from "@/utils/date-utils";
 import { Link } from "wouter";
 
 // Memoized stat card component to prevent unnecessary re-renders
@@ -141,10 +143,103 @@ interface GoalsGridProps {
   goals: Goal[];
 }
 
+const GoalCard = memo(({ goal }: { goal: Goal }) => {
+  // Calculate percentage complete
+  const percentComplete = Math.min(Math.round((goal.current / goal.target) * 100), 100);
+  
+  // Format values with units
+  const formatValue = (value: number, unit: string | null) => {
+    if (unit === "M") {
+      return `$${value}M`;
+    } else if (unit === "K") {
+      return `$${value}K`;
+    } else {
+      return value.toLocaleString();
+    }
+  };
+  
+  return (
+    <Link href={`/add-progress?goalId=${goal.id}`} className="block">
+      <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 cursor-pointer ${
+        percentComplete >= 75 ? "border-green-600" :
+        percentComplete >= 50 ? "border-yellow-600" :
+        percentComplete >= 25 ? "border-orange-600" :
+        "border-red-600"
+      }`}>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col justify-between gap-2">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
+                  {percentComplete >= 100 ? (
+                    <Award className="h-3 w-3 text-yellow-400 ml-1" />
+                  ) : (
+                    <Target className="h-3 w-3 text-green-400 ml-1" />
+                  )}
+                </div>
+                <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  percentComplete >= 75 ? "bg-green-900/75 text-green-400 border border-green-500" :
+                  percentComplete >= 50 ? "bg-yellow-900/75 text-yellow-400 border border-yellow-500" :
+                  percentComplete >= 25 ? "bg-orange-900/75 text-orange-400 border border-orange-500" :
+                  "bg-red-900/75 text-red-400 border border-red-500"
+                }`}>
+                  {percentComplete}%
+                </div>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="mt-1 text-xl font-bold text-white">
+                  {formatValue(goal.current, goal.unit)}
+                </p>
+                <p className="text-xs text-green-400">
+                  of {formatValue(goal.target, goal.unit)}
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-2">
+              <div className="relative">
+                <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${
+                      percentComplete >= 75 ? "bg-green-500" :
+                      percentComplete >= 50 ? "bg-yellow-500" :
+                      percentComplete >= 25 ? "bg-orange-500" :
+                      "bg-red-600"
+                    }`}
+                    style={{ width: `${percentComplete}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+            
+            {goal.deadline && (
+              <div className="mt-2 flex items-center gap-1.5 text-xs">
+                <Clock className={`h-3.5 w-3.5 ${
+                  getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-500' : 
+                  getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-500' : 
+                  'text-green-500'
+                }`} />
+                <span className={`${
+                  getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-400' : 
+                  getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-400' : 
+                  'text-green-400'
+                }`}>
+                  {formatDate(goal.deadline)} ({getDaysUntilDescription(goal.deadline)})
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+});
+
 const GoalsGrid = memo(({ goals }: GoalsGridProps) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
     {goals.map(goal => (
-      <GoalProgressCard key={goal.id} goal={goal} />
+      <GoalCard key={goal.id} goal={goal} />
     ))}
   </div>
 ));
