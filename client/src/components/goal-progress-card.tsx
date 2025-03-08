@@ -1,10 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Goal, insertGoalSchema } from "@shared/schema";
 import { Link, useLocation } from "wouter";
-import { PlusCircle, ArrowUpRight, Target, Award, ChevronUp, AlertTriangle, Pencil, Trash2, MoreVertical } from "lucide-react";
+import { PlusCircle, ArrowUpRight, Target, Award, ChevronUp, AlertTriangle, Pencil, Trash2, MoreVertical, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGoalCelebrationContext } from "../context/goal-celebration-context";
+import { formatDate, getDaysUntilDescription, getUrgencyLevel } from "@/utils/date-utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 import { AnimatedComponent } from "@/components/ui/animated-component";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
@@ -61,6 +65,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       target: goal.target,
       unit: goal.unit !== null ? goal.unit : "",
       color: goal.color !== null ? goal.color : "primary",
+      deadline: goal.deadline || "",
     },
   });
   
@@ -146,6 +151,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       ...values,
       current: typeof values.current === 'string' ? Number(values.current) : values.current,
       target: typeof values.target === 'string' ? Number(values.target) : values.target,
+      deadline: values.deadline || "", // Ensure deadline is included
     };
     
     updateGoalMutation.mutate(data);
