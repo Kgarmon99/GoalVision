@@ -190,7 +190,7 @@ export default function HabitTrackerSuper() {
             <TabsContent value="tracker" className="mt-4 space-y-8">
               <AnimatedComponent animation="fadeIn" delay={0.3}>
                 <HabitStreakTracker
-                  goalId={null}
+                  goalId={undefined}
                 />
               </AnimatedComponent>
             </TabsContent>

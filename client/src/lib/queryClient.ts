@@ -74,8 +74,25 @@ export function getQueryFn<T = unknown>(options: {
       } catch (fetchError) {
         // Handle network errors specifically
         console.log("Error handled gracefully:", `Query failed (${String(queryKey[0])}): Failed to fetch`);
-        // Return an empty array as fallback data
-        return ([] as unknown) as T;
+        
+        // For debugging
+        console.log("Attempting to fetch from URL:", queryKey[0]);
+        
+        // Retry once with a delay
+        try {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          res = await fetch(queryKey[0] as string, {
+            credentials: "include",
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          });
+        } catch (retryError) {
+          console.log("Retry also failed:", retryError);
+          // Return an empty array as fallback data
+          return ([] as unknown) as T;
+        }
       }
 
       if (options.on401 === "returnNull" && res.status === 401) {
