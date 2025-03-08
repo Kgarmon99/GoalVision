@@ -363,6 +363,22 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     <p className="text-green-400">Remaining:</p>
                     <p className={percentComplete < 25 ? "text-red-500 font-semibold" : ""}>{formatValue(remaining, goal.unit)}</p>
                   </div>
+                  
+                  {goal.deadline && (
+                    <div className="col-span-2 mt-2 grid grid-cols-[20px_1fr] items-center gap-1">
+                      <Clock className={`h-4 w-4 ${getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-500' : getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-500' : 'text-green-500'}`} />
+                      <div>
+                        <p className="text-green-400 text-xs">Deadline:</p>
+                        <p className={`${
+                          getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-500 font-semibold' : 
+                          getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-500' : 
+                          'text-green-500'
+                        }`}>
+                          {formatDate(goal.deadline)} ({getDaysUntilDescription(goal.deadline)})
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -539,6 +555,44 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   )}
                 />
               </div>
+              
+              <FormField
+                control={form.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel className="text-gray-300">Deadline (optional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={`w-full pl-3 text-left font-normal bg-gray-800 border-gray-700 text-white ${!field.value ? "text-gray-400" : ""}`}
+                          >
+                            {field.value ? (
+                              formatDate(field.value)
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          initialFocus
+                          className="bg-gray-800 text-white"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage className="text-red-400" />
+                  </FormItem>
+                )}
+              />
               
               <DialogFooter className="pt-4">
                 <Button
