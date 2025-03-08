@@ -72,6 +72,10 @@
     transition: text-shadow 0.5s ease;
   }
 
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.5));
+  }
+
   .glow-card {
     box-shadow: 0 0 15px rgba(74, 222, 128, 0.1),
                 0 0 30px rgba(21, 128, 61, 0.05);
@@ -287,5 +291,225 @@
       rgba(74, 222, 128, 0.1) 100%
     );
     background-position: 100% 100%;
+  }
+
+  /* Animation for celebration card */
+  .celebration-card {
+    animation: card-pulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes card-pulse {
+    0% {
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.3),
+                  0 0 30px rgba(21, 128, 61, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 20px rgba(74, 222, 128, 0.5),
+                  0 0 40px rgba(21, 128, 61, 0.3),
+                  0 0 60px rgba(21, 128, 61, 0.1);
+    }
+  }
+
+  /* Sparkle border animation */
+  .sparkle-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.3;
+  }
+
+  .sparkle-border::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transform: rotate(45deg);
+    animation: sparkle-sweep 3s linear infinite;
+  }
+
+  @keyframes sparkle-sweep {
+    0% {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    100% {
+      transform: translate(100%, 100%) rotate(45deg);
+    }
+  }
+
+  /* Achievement rays for 100% completion */
+  .achievement-rays {
+    background-image: repeating-conic-gradient(
+      rgba(234, 179, 8, 0.2) 0deg 15deg,
+      rgba(234, 179, 8, 0) 15deg 30deg
+    );
+    animation: spin-rays 10s linear infinite;
+  }
+
+  @keyframes spin-rays {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Fireworks animation for celebrations */
+  .firework {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    box-shadow: 0 0 40px 20px rgba(234, 179, 8, 0.8),
+                0 0 60px 30px rgba(16, 185, 129, 0.8),
+                0 0 80px 40px rgba(139, 92, 246, 0.8);
+    animation: firework-explode 2s ease-out infinite;
+  }
+
+  .firework.delay-1 {
+    animation-delay: 0.4s;
+  }
+
+  .firework.delay-2 {
+    animation-delay: 0.7s;
+  }
+
+  @keyframes firework-explode {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  /* Floating reward indicators */
+  .floating-indicator {
+    position: absolute;
+    font-size: 1.2rem;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Entrance animation for page content */
+  .entrance-animation > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade-in-up 0.8s ease forwards;
+  }
+
+  .entrance-animation > *:nth-child(1) { animation-delay: 0.1s; }
+  .entrance-animation > *:nth-child(2) { animation-delay: 0.2s; }
+  .entrance-animation > *:nth-child(3) { animation-delay: 0.3s; }
+  .entrance-animation > *:nth-child(4) { animation-delay: 0.4s; }
+  .entrance-animation > *:nth-child(5) { animation-delay: 0.5s; }
+  .entrance-animation > *:nth-child(6) { animation-delay: 0.6s; }
+  .entrance-animation > *:nth-child(7) { animation-delay: 0.7s; }
+  .entrance-animation > *:nth-child(8) { animation-delay: 0.8s; }
+  .entrance-animation > *:nth-child(9) { animation-delay: 0.9s; }
+  .entrance-animation > *:nth-child(10) { animation-delay: 1s; }
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Subtle hover lift effect */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Glow on focus for input elements */
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.4),
+                0 0 0 4px rgba(74, 222, 128, 0.1);
+    outline: none;
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* Subtle typing animation for important text */
+  .typing-animation {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid transparent;
+    width: 0;
+    animation: typing 2s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+  }
+
+  @keyframes typing {
+    0% { width: 0; }
+    100% { width: 100%; }
+  }
+
+  @keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: rgba(74, 222, 128, 0.7); }
+  }
+
+  /* Success checkmark animation */
+  .success-checkmark {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+  }
+
+  .success-checkmark::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 8px;
+    border-bottom: 2px solid #10b981;
+    border-left: 2px solid #10b981;
+    transform: translate(-50%, -65%) rotate(-45deg) scale(0);
+    animation: checkmark 0.3s ease-in-out forwards;
+  }
+
+  @keyframes checkmark {
+    0% {
+      transform: translate(-50%, -65%) rotate(-45deg) scale(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -65%) rotate(-45deg) scale(1);
+      opacity: 1;
+    }
   }
 }

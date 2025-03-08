@@ -324,25 +324,43 @@ const Dashboard = () => {
       <Header />
       
       <main className="flex-1 py-6 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 entrance-animation">
           {/* Page Header */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
               <div className="flex items-center">
-                <div className="relative aura-pulse mr-3">
+                <motion.div 
+                  className="relative aura-pulse mr-3"
+                  initial={{ rotate: -10, scale: 0.8, opacity: 0 }}
+                  animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+                >
                   <Rocket className="h-8 w-8 text-green-400 float-effect" />
-                </div>
-                <h1 className="text-3xl font-bold text-white text-glow">2025 Goals Dashboard</h1>
+                </motion.div>
+                <motion.h1 
+                  className="text-3xl font-bold text-white text-glow typing-animation"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  2025 Goals Dashboard
+                </motion.h1>
               </div>
-              <div className="flex items-center space-x-3">
+              <motion.div 
+                className="flex items-center space-x-3"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+              >
                 <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block gradient-border neon-glow">
                   <span className="text-sm text-green-400">Last updated:</span>
                   <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
                 </div>
-                <Button 
+                <AnimatedButton 
                   variant="outline"
                   onClick={handleRefreshData} 
                   disabled={isRefreshing}
+                  animation="pulse"
                   className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 transition-colors neon-glow"
                 >
                   {isRefreshing ? (
@@ -356,8 +374,8 @@ const Dashboard = () => {
                       <span className="hidden sm:inline">Refresh</span>
                     </>
                   )}
-                </Button>
-              </div>
+                </AnimatedButton>
+              </motion.div>
             </div>
           </div>
           
@@ -375,7 +393,21 @@ const Dashboard = () => {
           {(isLoading || hasAnyData) && (
             <>
               {/* Stats Overview */}
-              <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <motion.div 
+                className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                      delayChildren: 0.3
+                    }
+                  }
+                }}
+              >
                 <StatCard 
                   icon={<Target className="h-8 w-8" />}
                   value={goals.length}
@@ -403,7 +435,7 @@ const Dashboard = () => {
                   label="Planning Weeks"
                   delay={0.4}
                 />
-              </div>
+              </motion.div>
             
               {/* Action Bar - Using memoized component */}
               <ActionBar />
