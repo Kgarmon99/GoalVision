@@ -12,8 +12,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon } from "lucide-react";
 import { insertGoalSchema } from "@shared/schema";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 
 export default function AddGoal() {
   const { toast } = useToast();
@@ -32,6 +35,7 @@ export default function AddGoal() {
       target: 0,
       unit: "",
       color: "primary",
+      deadline: "", // empty string as default for the deadline
     },
   });
   
@@ -77,6 +81,8 @@ export default function AddGoal() {
       ...values,
       current: Number(values.current),
       target: Number(values.target),
+      // Include deadline as ISO string or empty string if not set
+      deadline: values.deadline || "",
     };
     
     addGoalMutation.mutate(data);
@@ -204,6 +210,46 @@ export default function AddGoal() {
                     )}
                   />
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="deadline"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Deadline (optional)</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={`w-full pl-3 text-left font-normal ${!field.value && "text-muted-foreground"}`}
+                            >
+                              {field.value ? (
+                                format(new Date(field.value), "PPP")
+                              ) : (
+                                <span>Select a deadline date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={(date) => {
+                              // Convert to ISO format for storage
+                              field.onChange(date ? date.toISOString() : "");
+                            }}
+                            disabled={(date) => date < new Date("2025-01-01")}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <Button 
                   type="submit" 
