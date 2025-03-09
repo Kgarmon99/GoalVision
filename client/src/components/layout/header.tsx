@@ -8,7 +8,8 @@ import {
   Kanban, 
   LayoutDashboard,
   Target,
-  TrendingUp 
+  TrendingUp,
+  BarChart 
 } from "lucide-react";
 import MobileNav from "./mobile-nav";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -49,6 +50,15 @@ const Header = () => {
                 >
                   <Kanban className="h-4 w-4 mr-1" />
                   Task Board
+                </Button>
+              </Link>
+              <Link href="/goal-visualizations">
+                <Button 
+                  variant="ghost" 
+                  className={`text-sm ${location === '/goal-visualizations' ? 'text-green-400 bg-green-900/30' : 'text-gray-300 hover:text-white hover:bg-gray-900'}`}
+                >
+                  <BarChart className="h-4 w-4 mr-1" />
+                  Visualizations
                 </Button>
               </Link>
 

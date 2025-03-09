@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Goal } from '@shared/schema';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { AnimatedProgressChart } from '@/components/animated-progress-chart';
-import { useToast } from '@/hooks/use-toast';
-import { useGoalCelebration } from '@/hooks/use-goal-celebration';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { AnimatedProgressChart } from '../components/animated-progress-chart';
+import { useToast } from '../hooks/use-toast';
+import { useGoalCelebration } from '../hooks/use-goal-celebration';
 import { motion } from 'framer-motion';
 import { 
   BarChart, 
@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
-import { Empty } from '@/components/ui/empty';
+import { Empty } from '../components/ui/empty';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 // Container variants for animations
@@ -110,7 +110,7 @@ export default function GoalVisualizations() {
   // Update goal mutation
   const updateGoalMutation = useMutation({
     mutationFn: async (goalData: { id: number; current: number }) => {
-      return apiRequest(`/api/goals/${goalData.id}`, 'PATCH', {
+      return apiRequest('PATCH', `/api/goals/${goalData.id}`, {
         current: goalData.current,
       });
     },
