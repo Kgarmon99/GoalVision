@@ -262,8 +262,6 @@ export default function AddGoal() {
           </CardContent>
         </Card>
       </main>
-      
-      <Footer />
     </div>
   );
 }
