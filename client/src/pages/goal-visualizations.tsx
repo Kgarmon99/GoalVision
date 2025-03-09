@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../components/ui/card';
+import { SimpleNav } from '../components/layout/simple-nav';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
@@ -435,7 +436,10 @@ export default function GoalVisualizations() {
   }, []);
   
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-8 pt-20 px-6">
+      {/* Simple Nav */}
+      <SimpleNav />
+      
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
