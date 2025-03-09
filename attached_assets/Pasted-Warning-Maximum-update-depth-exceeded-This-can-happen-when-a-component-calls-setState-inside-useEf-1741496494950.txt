@@ -1,0 +1,35 @@
+Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn&#x27;t have a dependency array, or one of the dependencies changes on every render.
+    at https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NBIVFTP4.js?v=688fc4d2:1980:13
+    at https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=688fc4d2:141:13
+    at https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=688fc4d2:939:13
+    at Provider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=688fc4d2:38:15)
+    at Provider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=688fc4d2:38:15)
+    at Provider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NBIVFTP4.js?v=688fc4d2:1915:15)
+    at Popper (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NBIVFTP4.js?v=688fc4d2:1972:11)
+    at Menu (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=688fc4d2:95:11)
+    at Provider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=688fc4d2:38:15)
+    at DropdownMenu (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-dropdown-menu.js?v=688fc4d2:905:5)
+    at div
+    at div
+    at _c9 (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at MotionComponent (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=688fc4d2:6536:40)
+    at PresenceChild (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=688fc4d2:7742:24)
+    at AnimatePresence (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=688fc4d2:7800:26)
+    at AnimatedComponent (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/components/ui/animated-component.tsx:150:3)
+    at GoalProgressCard (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/components/goal-progress-card.tsx:56:36)
+    at div
+    at _c9 (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/pages/dashboard.tsx:409:12)
+    at section
+    at div
+    at main
+    at div
+    at Dashboard (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/pages/dashboard.tsx:432:21)
+    at Route (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688fc4d2:323:16)
+    at Switch (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688fc4d2:379:17)
+    at Router
+    at GoalCelebrationProvider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/src/context/goal-celebration-context.tsx:31:43)
+    at QueryClientProvider (https://5e174a57-55cd-48e2-9582-213e417871f3-00-1ylm0mcf8ndqc.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=688fc4d2:2805:3)
+    at App

@@ -169,7 +169,8 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
     // Only trigger for significant increases (25%, 50%, 75%, 100%)
     const milestones = [25, 50, 75, 100];
     
-    if (prevPercent !== null) {
+    // Only proceed if percentComplete has changed from prevPercent
+    if (prevPercent !== null && prevPercent !== percentComplete) {
       // Find the highest milestone crossed in this update
       const prevMilestone = milestones.filter(m => prevPercent < m).sort((a, b) => a - b)[0];
       const currentMilestone = milestones.filter(m => percentComplete >= m).sort((a, b) => b - a)[0];
@@ -182,9 +183,13 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           username: "Team" // Could be replaced with actual user data
         });
       }
+      
+      // Only update prevPercent when it's different from current percentComplete
+      setPrevPercent(percentComplete);
+    } else if (prevPercent === null) {
+      // Initialize prevPercent on first render
+      setPrevPercent(percentComplete);
     }
-    
-    setPrevPercent(percentComplete);
   }, [percentComplete, prevPercent, goal.name, triggerCelebration]);
   
   // Format values with units
