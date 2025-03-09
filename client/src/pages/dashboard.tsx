@@ -6,7 +6,6 @@ import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
-import { MotivationalElement } from "@/components/motivational-element";
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
@@ -578,11 +577,6 @@ const Dashboard = () => {
             
               {/* Action Bar - Using memoized component */}
               <ActionBar />
-
-              {/* Motivational Element */}
-              <div className="mb-6">
-                <MotivationalElement />
-              </div>
 
               {/* Main Goals Progress */}
               <section className="mb-8">
