@@ -28,7 +28,7 @@ import {
   Settings,
   MoreHorizontal,
   Sliders,
-  Watch as TimeIcon,
+  Clock as TimeIcon,
   PieChart,
   LineChart,
   BellRing,
