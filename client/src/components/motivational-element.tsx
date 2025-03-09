@@ -42,7 +42,7 @@ export function MotivationalElement() {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-0"></div>
             <img
-              src="/lebron-locked-in.webp"
+              src="/lebron-image.webp"
               alt="Locked in focus"
               className="w-full h-32 object-cover object-center"
             />
