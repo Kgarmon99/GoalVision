@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, Target } from "lucide-react";
 import { AnimatedComponent } from "@/components/ui/animated-component";
 import { Button } from "@/components/ui/button";
 
@@ -39,14 +39,10 @@ export function MotivationalElement() {
         </Button>
         
         <CardContent className="p-0 cursor-pointer" onClick={() => setExpanded(!expanded)}>
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-0"></div>
-            <img
-              src="/lebron-image.jpeg"
-              alt="Locked in focus"
-              className="w-full h-32 object-cover object-center"
-            />
-            <div className="absolute bottom-0 left-0 p-4 text-white z-10">
+          <div className="relative bg-gradient-to-r from-purple-900 to-blue-900 h-32 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50"></div>
+            <Target className="h-16 w-16 text-green-400 z-10 animate-pulse" />
+            <div className="absolute bottom-0 left-0 p-4 text-white z-10 w-full">
               <p className="text-sm font-semibold text-white">LOCKED IN</p>
               <p className="text-xs text-green-400 flex items-center mt-1">
                 Find your focus
