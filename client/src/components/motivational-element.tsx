@@ -43,7 +43,7 @@ export function MotivationalElement() {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-0"></div>
             <img 
-              src="/images/user-profile.jpeg" 
+              src="/lebron-locked-in.webp" 
               alt="Motivational image" 
               className="h-32 w-full object-cover"
             />
