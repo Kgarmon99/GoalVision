@@ -86,7 +86,12 @@ const ChartTypeSelector = ({
     { type: 'bar', icon: <BarChart2 size={14} />, label: 'Bar' },
     { type: 'pie', icon: <PieChartIcon size={14} />, label: 'Pie' },
     { type: 'line', icon: <Activity size={14} />, label: 'Line' },
-    { type: 'radial', icon: <Target size={14} />, label: 'Radial' }
+    { type: 'radial', icon: <Target size={14} />, label: 'Radial' },
+    { type: 'combo', icon: <Zap size={14} />, label: 'Combo' },
+    { type: 'forecast', icon: <ArrowUpRight size={14} />, label: 'Forecast' },
+    { type: 'radar', icon: <Target size={14} />, label: 'Radar' },
+    { type: 'heatmap', icon: <Activity size={14} />, label: 'Heatmap' },
+    { type: 'multiaxis', icon: <ListFilter size={14} />, label: 'Multi-Axis' }
   ];
 
   return (
@@ -478,6 +483,270 @@ const GoalChart = ({
         </motion.div>
       );
     
+    case 'radar':
+      // Radar data needs a different structure
+      const radarData = [
+        { subject: 'Start', A: data[0].value, fullMark: targetValue },
+        { subject: 'Progress 1', A: data[1]?.value || currentValue * 0.2, fullMark: targetValue },
+        { subject: 'Progress 2', A: data[2]?.value || currentValue * 0.4, fullMark: targetValue },
+        { subject: 'Progress 3', A: data[3]?.value || currentValue * 0.6, fullMark: targetValue },
+        { subject: 'Progress 4', A: data[4]?.value || currentValue * 0.8, fullMark: targetValue },
+        { subject: 'Current', A: currentValue, fullMark: targetValue },
+      ];
+      
+      return (
+        <motion.div 
+          className="h-64 w-full" 
+          variants={chartElementVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart outerRadius={90} width={730} height={250} data={radarData}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="subject" />
+              <PolarRadiusAxis angle={30} domain={[0, targetValue]} tickFormatter={valueFormatter} />
+              <Radar name="Progress" dataKey="A" stroke={goalColor} fill={goalColor} fillOpacity={0.6} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+            </RadarChart>
+          </ResponsiveContainer>
+        </motion.div>
+      );
+      
+    case 'forecast':
+      // Create forecast data extending beyond current progress
+      // This simulates a prediction of future progress
+      const forecastData = [...data];
+      
+      // Calculate estimated time to completion based on current progress
+      const progressRate = currentValue / data.length;
+      const estimatedPointsToCompletion = Math.ceil((targetValue - currentValue) / progressRate);
+      
+      // Add forecast points
+      for (let i = 1; i <= 3; i++) {
+        const forecastValue = Math.min(currentValue + (progressRate * 2 * i), targetValue);
+        forecastData.push({
+          name: `Forecast ${i}`,
+          value: forecastValue,
+          pv: forecastValue,
+          fullMark: targetValue,
+          isForecast: true
+        });
+      }
+      
+      return (
+        <motion.div 
+          className="h-64 w-full" 
+          variants={chartElementVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={forecastData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis tickFormatter={valueFormatter} className="text-xs" />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <ReferenceLine y={targetValue} label="Target" stroke="red" strokeDasharray="3 3" />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                name="Progress"
+                stroke={goalColor} 
+                fillOpacity={0.8} 
+                strokeWidth={2}
+                fill={"url(#colorValue)"}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+              />
+              <Line 
+                type="monotone" 
+                name="Forecast"
+                dataKey="value" 
+                stroke="#ff7300" 
+                strokeDasharray="5 5"
+                activeDot={{ r: 8 }}
+                strokeWidth={2}
+                dot={{ fill: "#ff7300", r: 4 }}
+                connectNulls
+                isAnimationActive={true}
+                animationDuration={1800}
+                animationEasing="ease-in-out"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </motion.div>
+      );
+      
+    case 'combo':
+      return (
+        <motion.div 
+          className="h-64 w-full" 
+          variants={chartElementVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={data}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis yAxisId="left" tickFormatter={valueFormatter} className="text-xs" />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => `${(value / targetValue * 100).toFixed(0)}%`} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <ReferenceLine y={targetValue} label="Target" stroke="red" strokeDasharray="3 3" />
+              <Area 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="value" 
+                name="Actual"
+                stroke={goalColor} 
+                fill={"url(#colorValue)"}
+                fillOpacity={0.6}
+              />
+              <Bar 
+                yAxisId="left"
+                dataKey="value" 
+                name="Progress" 
+                barSize={20} 
+                fill={goalColor}
+                fillOpacity={0.8}
+              />
+              <Line 
+                yAxisId="left"
+                type="monotone" 
+                dataKey="pv" 
+                name="Trending" 
+                stroke="#ff7300"
+                strokeWidth={2}
+                dot={{ fill: "#ff7300", r: 4 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </motion.div>
+      );
+    
+    case 'heatmap':
+      // Create heatmap data to visualize progress intensity
+      const heatMapData = data.map((point, index) => ({
+        name: point.name,
+        value: point.value,
+        intensity: point.value / targetValue * 100
+      }));
+      
+      return (
+        <motion.div 
+          className="h-64 w-full" 
+          variants={chartElementVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <ScatterChart
+              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis
+                dataKey="name"
+                name="Stage"
+                className="text-xs"
+              />
+              <YAxis 
+                dataKey="value" 
+                name="Value" 
+                tickFormatter={valueFormatter} 
+                domain={[0, targetValue * 1.1]}
+                className="text-xs"
+              />
+              <ZAxis
+                dataKey="intensity"
+                range={[20, 400]}
+                name="Intensity"
+              />
+              <Tooltip 
+                cursor={{ strokeDasharray: '3 3' }}
+                content={<CustomTooltip />}
+              />
+              <Scatter name="Progress Intensity" data={heatMapData} fill={goalColor}>
+                {heatMapData.map((entry, index) => {
+                  // Calculate color based on intensity
+                  const intensity = entry.intensity;
+                  const hue = Math.max(120 - intensity, 0); // From green (120) to red (0)
+                  const color = `hsl(${hue}, 100%, 50%)`;
+                  
+                  return <Cell key={`cell-${index}`} fill={color} />;
+                })}
+              </Scatter>
+              <ReferenceLine y={targetValue} label="Target" stroke="red" strokeDasharray="3 3" />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </motion.div>
+      );
+      
+    case 'multiaxis':
+      // Create multi-axis view to show multiple dimensions of the goal
+      return (
+        <motion.div 
+          className="h-64 w-full" 
+          variants={chartElementVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={data}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis dataKey="name" className="text-xs" />
+              <YAxis 
+                yAxisId="left" 
+                tickFormatter={valueFormatter} 
+                className="text-xs"
+                orientation="left"
+                label={{ value: 'Progress', angle: -90, position: 'insideLeft' }}
+              />
+              <YAxis 
+                yAxisId="right" 
+                orientation="right" 
+                tickFormatter={(value) => `${(value / targetValue * 100).toFixed(0)}%`}
+                className="text-xs"
+                label={{ value: 'Completion %', angle: 90, position: 'insideRight' }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <ReferenceLine y={targetValue} label="Target" stroke="red" strokeDasharray="3 3" />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="value"
+                name="Value"
+                stroke={goalColor}
+                dot={{ fill: goalColor, r: 4 }}
+                activeDot={{ r: 8 }}
+                strokeWidth={2}
+              />
+              <Bar
+                yAxisId="right"
+                dataKey="value"
+                name="% of Target"
+                barSize={10}
+                fill="#8884d8"
+                fillOpacity={0.6}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </motion.div>
+      );
+            
     default:
       return <div>Select a chart type</div>;
   }
