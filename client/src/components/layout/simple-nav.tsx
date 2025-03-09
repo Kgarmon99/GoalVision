@@ -16,24 +16,24 @@ export function SimpleNav() {
   
   // Check if current location matches the given href
   const isActive = (href: string) => {
-    if (href === '/') {
-      return location === href;
+    if (href === '/' && location === '/') {
+      return true;
     }
     // For other routes, check if location starts with the href
-    return location.startsWith(href);
+    return href !== '/' && location.startsWith(href);
   };
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-background border-b border-border z-10">
       <div className="container flex items-center justify-between h-16">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <a href="/" className="flex items-center gap-2 font-semibold">
           <Target className="h-5 w-5 text-primary" />
           <span>2025 Goals</span>
-        </Link>
+        </a>
         
         <nav className="flex items-center space-x-2">
           {navItems.map((item) => (
-            <Link
+            <a
               key={item.name}
               href={item.href}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors duration-200 ${
@@ -44,16 +44,20 @@ export function SimpleNav() {
             >
               {item.icon}
               <span className="hidden sm:inline">{item.name}</span>
-            </Link>
+            </a>
           ))}
           
-          <Link 
+          <a 
             href="/add-goal" 
-            className="ml-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors duration-200"
+            className={`ml-2 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors duration-200 ${
+              location === '/add-goal'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            }`}
           >
             <Plus size={18} />
             <span className="hidden sm:inline">Add Goal</span>
-          </Link>
+          </a>
         </nav>
       </div>
     </div>
