@@ -579,6 +579,11 @@ const Dashboard = () => {
               {/* Action Bar - Using memoized component */}
               <ActionBar />
 
+              {/* Motivational Element */}
+              <div className="mb-6">
+                <MotivationalElement />
+              </div>
+
               {/* Main Goals Progress */}
               <section className="mb-8">
                 <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
