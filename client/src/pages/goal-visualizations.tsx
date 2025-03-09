@@ -225,7 +225,7 @@ export default function GoalVisualizations() {
     });
     
     // Find goals that need attention (off-track or deadline approaching)
-    const goalsNeedingAttention = allGoals.filter((goal: Goal) => {
+    const goalsNeedingAttention = (allGoals as Goal[]).filter((goal: Goal) => {
       const status = statusMap.get(goal.id);
       const progressRatio = goal.current / goal.target;
       
@@ -247,7 +247,7 @@ export default function GoalVisualizations() {
     });
     
     // Find most and least progressed goals
-    const sortedByProgress = [...allGoals].sort((a: Goal, b: Goal) => {
+    const sortedByProgress = (allGoals as Goal[]).sort((a: Goal, b: Goal) => {
       const progressA = a.current / a.target;
       const progressB = b.current / b.target;
       return progressB - progressA;
@@ -257,7 +257,7 @@ export default function GoalVisualizations() {
     const underperformingGoals = [...sortedByProgress].reverse().slice(0, 3);
     
     // Forecast time to completion for in-progress goals
-    const forecasts = allGoals.map((goal: Goal) => {
+    const forecasts = (allGoals as Goal[]).map((goal: Goal) => {
       if (goal.current >= goal.target) {
         return { goalId: goal.id, completed: true, daysToCompletion: 0 };
       }
