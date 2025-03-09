@@ -20,12 +20,12 @@ import {
 } from 'recharts';
 import { Goal } from '@shared/schema';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ParticleEffect } from '@/components/ui/particle-effect';
-import { CursorEffect } from '@/components/ui/cursor-effect';
-import { AnimatedComponent } from '@/components/ui/animated-component';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { ParticleEffect } from './ui/particle-effect';
+import { CursorEffect } from './ui/cursor-effect';
+import { AnimatedComponent } from './ui/animated-component';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -74,15 +74,24 @@ const ChartTypeSelector = ({
   );
 };
 
-// Generate synthetic progress data points based on the current and target values
+// Generate progress data points based on the current and target values
 // This creates a more interesting visualization than just two data points
 const generateProgressData = (goal: Goal, pointCount: number = 8) => {
+  // Defensive validation to ensure goal is properly defined
+  if (!goal) {
+    return [
+      { name: 'Start', value: 0, pv: 0, fullMark: 100 },
+      { name: 'Current', value: 0, pv: 0, fullMark: 100 },
+      { name: 'Target', value: 100, pv: 100, fullMark: 100 }
+    ];
+  }
+  
   const { current, target, name } = goal;
   const result = [];
   
-  // Use actual recorded data if available, otherwise generate synthetic points
-  const currentValue = current || 0;
-  const targetValue = target || 100;
+  // Use actual recorded data if available, otherwise use safe defaults
+  const currentValue = typeof current === 'number' ? current : 0;
+  const targetValue = typeof target === 'number' && target > 0 ? target : 100;
   
   // Create the first point (starting value, which may be 0 or some initial progress)
   let initialValue = 0;
@@ -208,8 +217,9 @@ const GoalChart = ({
   goalColor?: string;
 }) => {
   // Extract first and last data points for pie chart
-  const currentValue = data[data.length - 2].value;
-  const targetValue = data[data.length - 1].value;
+  // Check if data array has sufficient elements before accessing
+  const currentValue = data && data.length >= 2 ? data[data.length - 2].value : 0;
+  const targetValue = data && data.length >= 1 ? data[data.length - 1].value : 100;
   const remainingValue = targetValue - currentValue;
   
   // Calculate progress percentage
@@ -469,7 +479,21 @@ export function AnimatedProgressChart({
   
   // Generate progress data on initial render
   useEffect(() => {
-    setData(generateProgressData(goal));
+    // Ensure we have a valid goal object to avoid errors
+    if (goal) {
+      try {
+        const progressData = generateProgressData(goal);
+        setData(progressData || []);
+      } catch (error) {
+        console.error('Error generating progress data:', error);
+        // Provide default data if generation fails
+        setData([
+          { name: 'Start', value: 0, pv: 0, fullMark: 100 },
+          { name: 'Current', value: goal.current || 0, pv: goal.current || 0, fullMark: goal.target || 100 },
+          { name: 'Target', value: goal.target || 100, pv: goal.target || 100, fullMark: goal.target || 100 }
+        ]);
+      }
+    }
   }, [goal]);
   
   // Show particles when progress is good

@@ -16,15 +16,15 @@ import {
   LayoutList,
   Target
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Input } from '../components/ui/input';
+import { Skeleton } from '../components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Empty } from '../components/ui/empty';
-import { AnimatedButton } from '@/components/ui/animated-button';
+import { AnimatedButton } from '../components/ui/animated-button';
 
 // Container variants for animations
 const containerVariants = {
