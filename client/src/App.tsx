@@ -10,6 +10,7 @@ import AddTask from "@/pages/add-task";
 import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
+import GoalVisualizations from "@/pages/goal-visualizations";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/tasks/:id" component={TaskDetails} />
       <Route path="/goal-tasks/:id" component={GoalTasks} />
       <Route path="/task-board" component={TaskBoard} />
+      <Route path="/goal-visualizations" component={GoalVisualizations} />
       <Route component={NotFound} />
     </Switch>
   );
