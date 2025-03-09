@@ -1,6 +1,6 @@
 import { Button, ButtonProps } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 interface AnimatedButtonProps extends ButtonProps {
   icon?: ReactNode;
@@ -17,7 +17,7 @@ const buttonAnimations = {
   },
   pulse: {
     initial: { scale: 1 },
-    hover: { scale: [1, 1.05, 1], transition: { duration: 0.8, repeat: Infinity, repeatType: "loop" } },
+    hover: { scale: [1, 1.05, 1], transition: { duration: 0.8, repeat: Infinity, repeatType: "loop" as const } },
     tap: { scale: 0.98 }
   },
   expand: {
@@ -52,7 +52,7 @@ const buttonAnimations = {
         "0px 0px 15px rgba(22, 163, 74, 0.5)", 
         "0px 0px 0px rgba(22, 163, 74, 0)"
       ],
-      transition: { duration: 1.5, repeat: Infinity }
+      transition: { duration: 1.5, repeat: Infinity, repeatType: "loop" as const }
     },
     tap: { scale: 0.98 }
   },
@@ -70,8 +70,32 @@ export function AnimatedButton({
   className = "",
   iconPosition = "left",
   label,
+  asChild = false,
   ...props
 }: AnimatedButtonProps) {
+  // If using asChild, we need to properly handle single children only
+  if (asChild) {
+    // When asChild is true, just pass the child directly with properties
+    return (
+      <motion.div
+        initial="initial"
+        whileHover="hover"
+        whileTap="tap"
+        variants={buttonAnimations[animation]}
+        className="inline-block"
+      >
+        <Button 
+          className={`${className} relative overflow-hidden`}
+          asChild={true}
+          {...props}
+        >
+          {React.Children.only(children)}
+        </Button>
+      </motion.div>
+    );
+  }
+  
+  // Default usage when not using asChild
   const content = label || children;
   
   return (
