@@ -164,33 +164,39 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
   // Calculate percentage complete
   const percentComplete = Math.min(Math.round((goal.current / goal.target) * 100), 100);
   
-  // Check for significant milestone achievements to trigger celebration
+  // Initialize prevPercent on first render
   useEffect(() => {
+    setPrevPercent(percentComplete);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Separate effect to check for milestone achievements
+  useEffect(() => {
+    // Skip this effect on first render or when percentComplete hasn't changed
+    if (prevPercent === null || prevPercent === percentComplete) {
+      return;
+    }
+    
     // Only trigger for significant increases (25%, 50%, 75%, 100%)
     const milestones = [25, 50, 75, 100];
     
-    // Only proceed if percentComplete has changed from prevPercent
-    if (prevPercent !== null && prevPercent !== percentComplete) {
-      // Find the highest milestone crossed in this update
-      const prevMilestone = milestones.filter(m => prevPercent < m).sort((a, b) => a - b)[0];
-      const currentMilestone = milestones.filter(m => percentComplete >= m).sort((a, b) => b - a)[0];
-      
-      if (currentMilestone && (!prevMilestone || currentMilestone > prevMilestone)) {
-        // Trigger celebration for the milestone achievement
-        triggerCelebration({
-          goalName: goal.name,
-          progressPercentage: percentComplete,
-          username: "Team" // Could be replaced with actual user data
-        });
-      }
-      
-      // Only update prevPercent when it's different from current percentComplete
-      setPrevPercent(percentComplete);
-    } else if (prevPercent === null) {
-      // Initialize prevPercent on first render
-      setPrevPercent(percentComplete);
+    // Find the highest milestone crossed in this update
+    const prevMilestone = milestones.filter(m => prevPercent < m).sort((a, b) => a - b)[0];
+    const currentMilestone = milestones.filter(m => percentComplete >= m).sort((a, b) => b - a)[0];
+    
+    if (currentMilestone && (!prevMilestone || currentMilestone > prevMilestone)) {
+      // Trigger celebration for the milestone achievement
+      triggerCelebration({
+        goalName: goal.name,
+        progressPercentage: percentComplete,
+        username: "Team" // Could be replaced with actual user data
+      });
     }
-  }, [percentComplete, prevPercent, goal.name, triggerCelebration]);
+    
+    // Update prevPercent after checking milestones
+    setPrevPercent(percentComplete);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [percentComplete, goal.name, triggerCelebration]);
   
   // Format values with units
   const formatValue = (value: number, unit: string | null) => {
