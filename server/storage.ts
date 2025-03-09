@@ -90,8 +90,7 @@ export class MemStorage implements IStorage {
   private executionTasksData: Map<number, ExecutionTask>;
   private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
-  private habitsData: Map<number, Habit>;
-  private habitStreaksData: Map<number, HabitStreak>;
+
   
   private currentUserId: number;
   private currentGoalId: number;
@@ -100,8 +99,7 @@ export class MemStorage implements IStorage {
   private currentExecutionTaskId: number;
   private currentSubtaskId: number;
   private currentWeekId: number;
-  private currentHabitId: number;
-  private currentHabitStreakId: number;
+
 
   constructor() {
     this.users = new Map();
@@ -111,8 +109,7 @@ export class MemStorage implements IStorage {
     this.executionTasksData = new Map();
     this.subtasksData = new Map();
     this.weeksData = new Map();
-    this.habitsData = new Map();
-    this.habitStreaksData = new Map();
+
     
     this.currentUserId = 1;
     this.currentGoalId = 1;
@@ -121,8 +118,7 @@ export class MemStorage implements IStorage {
     this.currentExecutionTaskId = 1;
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
-    this.currentHabitId = 1;
-    this.currentHabitStreakId = 1;
+
     
     // Call initializeData as async function
     this.initializeData().catch(console.error);
@@ -836,90 +832,7 @@ export class DatabaseStorage implements IStorage {
       
       await Promise.all(tasks.map(task => this.createTask(task)));
       
-      // Create sample habits
-      const sampleHabits: InsertHabit[] = [
-        {
-          name: "Daily Team Stand-up",
-          description: "Attend the morning stand-up meeting to discuss Revenue goals",
-          frequency: "daily",
-          goalId: goalMap.get("Revenue") || 2,
-          targetStreakDays: 21,
-          reminderTime: "09:30",
-          color: "purple"
-        },
-        {
-          name: "Investor Follow-ups",
-          description: "Send follow-up emails to potential investors",
-          frequency: "daily",
-          goalId: goalMap.get("Funding") || 1,
-          targetStreakDays: 14,
-          reminderTime: "11:00",
-          color: "blue"
-        },
-        {
-          name: "User Feedback Analysis",
-          description: "Review and analyze user feedback to improve growth metrics",
-          frequency: "weekly",
-          goalId: goalMap.get("User Growth") || 3,
-          targetStreakDays: 10,
-          reminderTime: "14:00",
-          color: "green"
-        },
-        {
-          name: "School Partner Check-ins",
-          description: "Weekly call with school partners to discuss issues and progress",
-          frequency: "weekly",
-          goalId: goalMap.get("School Expansion") || 4,
-          targetStreakDays: 12,
-          reminderTime: "15:30",
-          color: "indigo"
-        }
-      ];
-      
-      const createdHabits = await Promise.all(sampleHabits.map(habit => this.createHabit(habit)));
-      
-      // Create sample streaks for the past week
-      const today = new Date();
-      const streaks: InsertHabitStreak[] = [];
-      
-      // Create streaks for the past 10 days for each habit
-      for (const habit of createdHabits) {
-        for (let i = 0; i < 10; i++) {
-          const date = new Date(today);
-          date.setDate(today.getDate() - i);
-          
-          // Make some days completed, some not to demonstrate breaking streaks
-          // For the first habit, all days are completed
-          if (habit.id === createdHabits[0].id) {
-            streaks.push({
-              habitId: habit.id,
-              date,
-              completed: true,
-              notes: `Completed day ${i + 1}`
-            });
-          } 
-          // For the second habit, only even days completed
-          else if (habit.id === createdHabits[1].id) {
-            streaks.push({
-              habitId: habit.id,
-              date,
-              completed: i % 2 === 0,
-              notes: i % 2 === 0 ? `Completed day ${i + 1}` : "Missed this day"
-            });
-          }
-          // For others, add breaks in the streak
-          else {
-            streaks.push({
-              habitId: habit.id,
-              date,
-              completed: i !== 3 && i !== 7, // Break on days 3 and 7
-              notes: i !== 3 && i !== 7 ? `Completed day ${i + 1}` : "Missed this day"
-            });
-          }
-        }
-      }
-      
-      await Promise.all(streaks.map(streak => this.createHabitStreak(streak)));
+
     }
   }
 }
