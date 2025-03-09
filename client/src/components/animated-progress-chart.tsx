@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   AreaChart, 
   Area, 
@@ -16,16 +16,31 @@ import {
   Line,
   Legend,
   RadialBarChart,
-  RadialBar
+  RadialBar,
+  ComposedChart,
+  Scatter,
+  Brush,
+  ReferenceLine,
+  Label,
+  ReferenceArea,
+  ZAxis,
+  ScatterChart,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis
 } from 'recharts';
-import { Goal } from '@shared/schema';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Goal, GoalStatus, ExecutionTask } from '@shared/schema';
+import { motion, AnimatePresence, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { ParticleEffect } from './ui/particle-effect';
 import { CursorEffect } from './ui/cursor-effect';
 import { AnimatedComponent } from './ui/animated-component';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -33,11 +48,29 @@ import {
   PieChart as PieChartIcon, 
   TrendingUp,
   Activity,
-  Target
+  Target,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  Zap,
+  ArrowUpRight,
+  ArrowDownRight,
+  ExternalLink,
+  Share2,
+  Download,
+  Bookmark,
+  Flag,
+  Eye,
+  MessageCircle,
+  Edit,
+  Copy,
+  ListFilter,
+  Info
 } from 'lucide-react';
 
 // Chart types that user can toggle between
-type ChartType = 'area' | 'bar' | 'pie' | 'line' | 'radial';
+type ChartType = 'area' | 'bar' | 'pie' | 'line' | 'radial' | 'combo' | 'forecast' | 'radar' | 'heatmap' | 'multiaxis';
 
 // Component to display a small preview of each chart type for selection
 const ChartTypeSelector = ({ 
