@@ -9,16 +9,12 @@ import {
   insertExecutionTaskSchema, 
   insertWeekSchema,
   insertSubtaskSchema,
-  insertHabitSchema,
-  insertHabitStreakSchema,
   goals,
   metrics,
   goalStatus,
   executionTasks,
   subtasks,
-  weeks,
-  habits,
-  habitStreaks
+  weeks
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -190,8 +186,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/reset-data", async (req, res) => {
     try {
       // Clear all tables
-      await db.delete(habitStreaks);
-      await db.delete(habits);
       await db.delete(subtasks);
       await db.delete(executionTasks);
       await db.delete(goalStatus);

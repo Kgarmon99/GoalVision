@@ -19,13 +19,7 @@ import {
   type InsertWeek,
   subtasks,
   type Subtask,
-  type InsertSubtask,
-  habits,
-  type Habit,
-  type InsertHabit,
-  habitStreaks,
-  type HabitStreak,
-  type InsertHabitStreak
+  type InsertSubtask
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -296,7 +290,8 @@ export class MemStorage implements IStorage {
       ...insertGoal, 
       id,
       unit: insertGoal.unit ?? null,
-      color: insertGoal.color ?? null
+      color: insertGoal.color ?? null,
+      deadline: insertGoal.deadline ?? null
     };
     this.goalsData.set(id, goal);
     return goal;
