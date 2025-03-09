@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import { SimpleNav } from "@/components/layout/simple-nav";
 import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
@@ -432,6 +431,9 @@ const Dashboard = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
+      {/* SimpleNav for consistent navigation */}
+      <SimpleNav />
+      
       {/* 3D Animated Background */}
       <Animated3DBackground 
         color="#10b981" 
@@ -459,9 +461,7 @@ const Dashboard = () => {
         onComplete={handleCelebrationComplete}
       />
       
-      <Header />
-      
-      <main className="flex-1 py-6 relative z-10">
+      <main className="flex-1 py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 entrance-animation">
           {/* Page Header */}
           <div className="mb-6">
@@ -914,7 +914,7 @@ const Dashboard = () => {
         </div>
       </main>
       
-      <Footer />
+      {/* Footer removed and replaced with consistent navigation */}
     </div>
   );
 };

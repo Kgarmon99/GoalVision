@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import { SimpleNav } from "@/components/layout/simple-nav";
 import { DragDropTaskBoard } from "@/components/drag-drop-task-board";
 import { VisualProgressTracker } from "@/components/visual-progress-tracker";
 import { EmptyState } from "@/components/empty-state";
@@ -135,9 +134,9 @@ export default function TaskBoard() {
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(22,163,74,0.15),rgba(0,0,0,0)_50%)]"></div>
-      <Header />
+      <SimpleNav />
       
-      <main className="flex-1 py-6 relative z-10">
+      <main className="flex-1 py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-6">
@@ -336,8 +335,6 @@ export default function TaskBoard() {
           <QuickHelpCard />
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }

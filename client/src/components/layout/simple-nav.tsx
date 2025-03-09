@@ -12,7 +12,7 @@ export function SimpleNav() {
     { name: 'Dashboard', href: '/', icon: <Home size={20} /> },
     { name: 'Goals', href: '/goal-visualizations', icon: <Target size={20} /> },
     { name: 'Tasks', href: '/task-board', icon: <CheckSquare size={20} /> },
-    { name: 'Analytics', href: '/goal-tasks', icon: <BarChart2 size={20} /> },
+    // The task-board route exists in App.tsx, so this will work
   ];
 
   return (

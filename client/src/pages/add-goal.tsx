@@ -5,8 +5,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
+import { SimpleNav } from "@/components/layout/simple-nav";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -90,9 +89,9 @@ export default function AddGoal() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <SimpleNav />
       
-      <main className="flex-1 container max-w-5xl py-12">
+      <main className="flex-1 container max-w-5xl py-20">
         <Button 
           variant="ghost" 
           className="mb-6" 
