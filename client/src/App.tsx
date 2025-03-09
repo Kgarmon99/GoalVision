@@ -33,12 +33,15 @@ function Router() {
   );
 }
 
+import { ErrorBackground } from "./components/error-background";
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GoalCelebrationProvider>
         <Router />
         <Toaster />
+        <ErrorBackground />
       </GoalCelebrationProvider>
     </QueryClientProvider>
   );

@@ -63,6 +63,9 @@ export function getQueryFn<T = unknown>(options: {
       // Improved error handling for fetch that catches network errors
       let res: Response;
       try {
+        // Add error image to fetch requests as a background element
+        const imageUrl = new URL('/attached_assets/IMG_0152.jpeg', window.location.origin).toString();
+        
         res = await fetch(queryKey[0] as string, {
           credentials: "include",
           // Add cache control headers to work with our server-side caching
@@ -90,6 +93,10 @@ export function getQueryFn<T = unknown>(options: {
           });
         } catch (retryError) {
           console.log("Retry also failed:", retryError);
+          
+          // Add error background to the UI through the document
+          document.documentElement.style.setProperty('--error-background-image', `url("/attached_assets/IMG_0152.jpeg")`);
+          
           // Return an empty array as fallback data
           return ([] as unknown) as T;
         }
