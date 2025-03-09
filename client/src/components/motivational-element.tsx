@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,7 +43,7 @@ export function MotivationalElement() {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-0"></div>
             <img 
-              src="attached_assets/IMG_2738.webp" 
+              src="/images/user-profile.jpeg" 
               alt="Motivational image" 
               className="h-32 w-full object-cover"
             />
