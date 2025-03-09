@@ -1,6 +1,6 @@
 import React from 'react';
-import { Home, Target, CheckSquare, BarChart2, User } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { Home, Target, CheckSquare, BarChart2, Plus } from 'lucide-react';
+import { useLocation, Link } from 'wouter';
 
 /**
  * A simple and consistent navigation bar for the application
@@ -12,40 +12,48 @@ export function SimpleNav() {
     { name: 'Dashboard', href: '/', icon: <Home size={20} /> },
     { name: 'Goals', href: '/goal-visualizations', icon: <Target size={20} /> },
     { name: 'Tasks', href: '/task-board', icon: <CheckSquare size={20} /> },
-    // The task-board route exists in App.tsx, so this will work
   ];
+  
+  // Check if current location matches the given href
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return location === href;
+    }
+    // For other routes, check if location starts with the href
+    return location.startsWith(href);
+  };
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-background border-b border-border z-10">
-      <div className="container flex items-center justify-between h-14">
-        <div className="flex items-center gap-2 font-semibold">
+      <div className="container flex items-center justify-between h-16">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
           <Target className="h-5 w-5 text-primary" />
           <span>2025 Goals</span>
-        </div>
+        </Link>
         
-        <nav className="flex items-center space-x-1">
+        <nav className="flex items-center space-x-2">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.name}
               href={item.href}
-              className={`px-3 py-2 rounded-md text-sm flex items-center gap-1.5 ${
-                location === item.href
-                  ? 'bg-primary/10 text-primary font-medium'
+              className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors duration-200 ${
+                isActive(item.href)
+                  ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
               {item.icon}
               <span className="hidden sm:inline">{item.name}</span>
-            </a>
+            </Link>
           ))}
           
-          <a 
+          <Link 
             href="/add-goal" 
-            className="ml-2 px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm flex items-center gap-1.5 hover:bg-primary/90"
+            className="ml-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors duration-200"
           >
-            <span>+</span>
+            <Plus size={18} />
             <span className="hidden sm:inline">Add Goal</span>
-          </a>
+          </Link>
         </nav>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { SimpleNav } from "@/components/layout/simple-nav";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -92,14 +92,15 @@ export default function AddGoal() {
       <SimpleNav />
       
       <main className="flex-1 container max-w-5xl py-20">
-        <Button 
-          variant="ghost" 
-          className="mb-6" 
-          onClick={() => setLocation("/")}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
-        </Button>
+        <Link href="/">
+          <Button 
+            variant="ghost" 
+            className="mb-6" 
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
         
         <Card>
           <CardHeader>
