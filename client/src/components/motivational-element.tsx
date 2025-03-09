@@ -41,7 +41,11 @@ export function MotivationalElement() {
         <CardContent className="p-0 cursor-pointer" onClick={() => setExpanded(!expanded)}>
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-0"></div>
-            <div className="h-32 w-full bg-cover bg-center" style={{ backgroundImage: "url('/lebron-focused.webp')" }}></div>
+            <img 
+              src="/motivational-image.jpeg" 
+              alt="Motivational image" 
+              className="h-32 w-full object-cover"
+            />
             <div className="absolute bottom-0 left-0 p-4 text-white z-10 w-full">
               <p className="text-sm font-semibold text-white">LOCKED IN</p>
               <p className="text-xs text-green-400 flex items-center mt-1">
