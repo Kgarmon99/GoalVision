@@ -176,7 +176,7 @@ export default function AddGoal() {
                       <FormItem>
                         <FormLabel>Unit (optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., M, K, %, etc." {...field} />
+                          <Input placeholder="e.g., M, K, %, etc." {...field} value={field.value || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -189,7 +189,10 @@ export default function AddGoal() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Color</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value as string || "primary"}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a color" />
