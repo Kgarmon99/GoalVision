@@ -28,6 +28,7 @@ import {
   Settings,
   MoreHorizontal,
   Sliders,
+  Watch as TimeIcon,
   PieChart,
   LineChart,
   BellRing,
@@ -39,7 +40,6 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Star,
-  Clock1,
   ChevronRight,
   FileText,
   X,
@@ -146,7 +146,7 @@ const VIEW_OPTIONS: FilterOption[] = [
   { key: 'progress', label: 'Progress View', icon: <TrendingUp size={14} /> },
   { key: 'forecast', label: 'Forecast View', icon: <ArrowUpRight size={14} /> },
   { key: 'comparison', label: 'Comparison View', icon: <BarChart size={14} /> },
-  { key: 'timeline', label: 'Timeline View', icon: <Clock1 size={14} /> },
+  { key: 'timeline', label: 'Timeline View', icon: <TimeIcon size={14} /> },
 ];
 
 export default function GoalVisualizations() {
