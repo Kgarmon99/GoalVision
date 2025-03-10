@@ -8,9 +8,78 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>2025 Goals Tracking System</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Emergency fallback navigation styles */
+    #emergency-nav {
+      display: none;
+      padding: 16px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+    #emergency-nav a {
+      margin: 0 10px;
+      padding: 8px 16px;
+      text-decoration: none;
+      color: #1f2937;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    #emergency-nav a:hover {
+      background: #f3f4f6;
+    }
+    #emergency-nav a.active {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+    #emergency-nav a.add {
+      background: #0284c7;
+      color: white;
+    }
+    #emergency-nav a.add:hover {
+      background: #0369a1;
+    }
+  </style>
 </head>
 <body>
+  <!-- Emergency fallback navigation -->
+  <div id="emergency-nav">
+    <a href="/">Dashboard</a>
+    <a href="/goal-visualizations">Goals</a>
+    <a href="/task-board">Tasks</a>
+    <a href="/add-goal" class="add">Add Goal</a>
+  </div>
+
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+  
+  <!-- Emergency navigation script -->
+  <script>
+    // Show emergency nav if main app fails to load within 3 seconds
+    const emergencyNavTimeout = setTimeout(() => {
+      const root = document.getElementById('root');
+      const emergencyNav = document.getElementById('emergency-nav');
+      
+      if (root && !root.children.length) {
+        // Show emergency navigation
+        if (emergencyNav) {
+          emergencyNav.style.display = 'block';
+        }
+      }
+    }, 3000);
+
+    // Set active link based on current path
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('#emergency-nav a');
+      const currentPath = window.location.pathname;
+      
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (currentPath === href) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
