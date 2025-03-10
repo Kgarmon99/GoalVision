@@ -9,47 +9,42 @@ import "./vite-hmr-client";
 
 // Custom function to fix WebSocket URL in Replit environment
 const fixReplitWebSocketURL = () => {
-  // Get the current hostname from the page URL
-  const hostname = window.location.hostname;
-  
-  // This will be used to patch the WebSocket connection URL
-  const patchWebSocket = () => {
+  try {
+    // Get the current hostname from the page URL
+    const hostname = window.location.hostname;
+    
     // Store the original WebSocket constructor
     const OriginalWebSocket = window.WebSocket;
     
-    // Override the WebSocket constructor
-    window.WebSocket = function(url, protocols) {
-      // Check if this is a Vite HMR WebSocket connection with an invalid URL
-      if (url && typeof url === 'string' && 
-          url.includes('localhost:undefined') && 
-          url.includes('?token=')) {
-        // Extract the token from the original URL
-        const tokenMatch = url.match(/\?token=([^&]+)/);
-        const token = tokenMatch ? tokenMatch[1] : '';
-        
-        // Create a new URL using the current hostname
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const newUrl = `${protocol}//${hostname}/?token=${token}`;
-        
-        console.log('WebSocket URL corrected:', newUrl);
-        
-        // Use the corrected URL instead
-        return new OriginalWebSocket(newUrl, protocols);
+    // Create a new constructor that patches URLs
+    const PatchedWebSocket = function(url: string | URL, protocols?: string | string[]) {
+      let fixedUrl = url;
+      
+      if (typeof url === 'string') {
+        // Fix for localhost URLs in Replit environment
+        if ((url.includes('localhost:') || url.includes('127.0.0.1:')) && url.includes('?token=')) {
+          const tokenMatch = url.match(/\?token=([^&]+)/);
+          const token = tokenMatch ? tokenMatch[1] : '';
+          
+          // Create a new URL using the current hostname
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          fixedUrl = `${protocol}//${hostname}/?token=${token}`;
+          
+          console.log('WebSocket URL fixed:', fixedUrl);
+        }
       }
       
-      // For other WebSocket connections, use the original URL
-      return new OriginalWebSocket(url, protocols);
+      // Use the original constructor with the fixed URL
+      return new OriginalWebSocket(fixedUrl, protocols);
     };
     
-    // Copy prototype and properties from the original WebSocket
-    window.WebSocket.prototype = OriginalWebSocket.prototype;
-    Object.defineProperties(window.WebSocket, 
-      Object.getOwnPropertyDescriptors(OriginalWebSocket));
-  };
-  
-  // Apply the patch
-  try {
-    patchWebSocket();
+    // Copy prototype and static properties
+    PatchedWebSocket.prototype = OriginalWebSocket.prototype;
+    Object.defineProperties(PatchedWebSocket, Object.getOwnPropertyDescriptors(OriginalWebSocket));
+    
+    // Replace the WebSocket constructor
+    window.WebSocket = PatchedWebSocket as typeof WebSocket;
+    
     console.log('WebSocket patch applied for Replit environment');
   } catch (err) {
     console.error('Failed to patch WebSocket:', err);
