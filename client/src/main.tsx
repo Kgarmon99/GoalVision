@@ -51,7 +51,10 @@ const fixReplitWebSocketURL = () => {
   }
 };
 
-// Apply the WebSocket fix immediately
+// First, render the application immediately to avoid blank screen
+createRoot(document.getElementById("root")!).render(<App />);
+
+// Then apply websocket fixes and other configurations
 fixReplitWebSocketURL();
 
 // Global error handling for unhandled promise rejections
@@ -118,25 +121,13 @@ if (import.meta.hot) {
   });
 }
 
-// Add a page load event handler to help with initial connection
+// Apply WebSocket fix on page load completion
 window.addEventListener('load', () => {
-  // Apply WebSocket fix on each page load
+  // Ensure WebSocket patch is applied
   fixReplitWebSocketURL();
   
-  // Check if we need to bypass cache for a fresh load
+  // Mark first load complete
   if (sessionStorage.getItem('app_first_load') !== 'complete') {
     sessionStorage.setItem('app_first_load', 'complete');
   }
 });
-
-// Error boundary for React rendering
-try {
-  createRoot(document.getElementById("root")!).render(<App />);
-} catch (error) {
-  console.error('Error rendering application:', error);
-  // Attempt recovery
-  const rootEl = document.getElementById("root");
-  if (rootEl) {
-    rootEl.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Application Error</h2><p>Please refresh the page</p></div>';
-  }
-}
