@@ -71,10 +71,7 @@ export default function Metrics() {
   // Add metric mutation
   const addMetric = useMutation({
     mutationFn: async (metric: typeof newMetric) => {
-      return apiRequest('/api/metrics', {
-        method: 'POST',
-        body: JSON.stringify(metric),
-      });
+      return apiRequest('POST', '/api/metrics', metric);
     },
     onSuccess: () => {
       toast({
@@ -105,9 +102,7 @@ export default function Metrics() {
   // Refresh metrics mutation
   const refreshMetrics = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/metrics/refresh', {
-        method: 'POST',
-      });
+      return apiRequest('POST', '/api/metrics/refresh');
     },
     onSuccess: () => {
       toast({
@@ -439,9 +434,13 @@ export default function Metrics() {
                     <span>On Target</span>
                   </div>
                   <span className="font-semibold">
-                    {[...growthMetrics, ...revenueMetrics].filter(m => 
-                      (m.current / m.target) >= 0.9
-                    ).length}
+                    {[...growthMetrics, ...revenueMetrics].filter(m => {
+                      const currentValue = parseFloat(m.value) || 0;
+                      const previousValue = parseFloat(m.previousValue || "0") || 0;
+                      // Calculate a target based on previous value
+                      const target = previousValue > 0 ? previousValue * 1.2 : currentValue * 2; 
+                      return currentValue >= (target * 0.9);
+                    }).length}
                   </span>
                 </div>
               </CardContent>
