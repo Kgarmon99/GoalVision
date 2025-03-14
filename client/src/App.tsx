@@ -10,6 +10,7 @@ import TaskDetails from "@/pages/task-details";
 import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
 import GoalVisualizations from "@/pages/goal-visualizations";
+import Metrics from "@/pages/metrics";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 import { useState, useEffect } from "react";
 
@@ -41,6 +42,9 @@ function App() {
         break;
       case '/goal-visualizations':
         setCurrentPage(<GoalVisualizations />);
+        break;
+      case '/metrics':
+        setCurrentPage(<Metrics />);
         break;
       default:
         // Check for pattern matches
