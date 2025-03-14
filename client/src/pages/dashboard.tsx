@@ -43,7 +43,9 @@ import {
   Flame,
   Trophy,
   Heart,
-  Clock
+  Clock,
+  AlertCircle,
+  TrendingDown
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
@@ -253,6 +255,88 @@ interface MetricsGridProps {
 const MetricsGrid = memo(({ metrics, title, category }: MetricsGridProps) => (
   <MetricsCard title={title} metrics={metrics} category={category} />
 ));
+
+// Burn Rate Card Component
+interface BurnRateCardProps {
+  monthlyRate: number;
+}
+
+const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
+  // Calculate derived values
+  const weeklyRate = (monthlyRate / 4).toFixed(2);
+  const dailyRate = (monthlyRate / 30).toFixed(2);
+  
+  return (
+    <motion.div 
+      className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-red-600 p-6 gradient-border glow-card"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
+      <div className="flex items-center mb-4">
+        <div className="flex items-center text-red-400 mr-2">
+          <TrendingDown className="h-6 w-6 mr-2 aura-pulse" />
+          <h3 className="text-xl font-bold text-glow">Burn Rate</h3>
+        </div>
+        <div className="ml-auto flex items-center">
+          <AlertCircle className="h-5 w-5 text-yellow-400 mr-1.5" />
+          <span className="text-sm text-yellow-400">Needs to be exceeded in revenue</span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gray-800/70 border-red-500/50">
+          <CardContent className="p-4 flex flex-col items-center">
+            <p className="text-gray-400 mb-1 text-sm">Monthly</p>
+            <p className="text-2xl font-bold text-white">${monthlyRate.toLocaleString()}</p>
+            <AnimatedProgress 
+              value={100} 
+              maxValue={100}
+              height="h-1.5"
+              className="w-full mt-2"
+              indicatorClassName="bg-gradient-to-r from-red-600 to-red-400"
+            />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gray-800/70 border-red-500/50">
+          <CardContent className="p-4 flex flex-col items-center">
+            <p className="text-gray-400 mb-1 text-sm">Weekly</p>
+            <p className="text-2xl font-bold text-white">${weeklyRate}</p>
+            <AnimatedProgress 
+              value={75} 
+              maxValue={100}
+              height="h-1.5"
+              className="w-full mt-2"
+              indicatorClassName="bg-gradient-to-r from-orange-600 to-orange-400"
+            />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-gray-800/70 border-red-500/50">
+          <CardContent className="p-4 flex flex-col items-center">
+            <p className="text-gray-400 mb-1 text-sm">Daily</p>
+            <p className="text-2xl font-bold text-white">${dailyRate}</p>
+            <AnimatedProgress 
+              value={50} 
+              maxValue={100}
+              height="h-1.5"
+              className="w-full mt-2"
+              indicatorClassName="bg-gradient-to-r from-yellow-600 to-yellow-400"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="mt-4 text-sm text-gray-300">
+        <p className="flex items-center">
+          <Flame className="h-4 w-4 text-red-400 mr-1.5" />
+          Focus on exceeding these numbers to become profitable and scale your business.
+        </p>
+      </div>
+    </motion.div>
+  );
+});
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -574,6 +658,9 @@ const Dashboard = () => {
                   delay={0.4}
                 />
               </motion.div>
+            
+              {/* Burn Rate Section */}
+              <BurnRateCard monthlyRate={4000} />
             
               {/* Action Bar - Using memoized component */}
               <ActionBar />
