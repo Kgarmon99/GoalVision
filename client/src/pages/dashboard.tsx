@@ -268,70 +268,85 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
   
   return (
     <motion.div 
-      className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-red-600 p-6 gradient-border glow-card"
+      className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border-l-4 border border-red-600 p-6 gradient-border glow-card"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <div className="flex items-center mb-4">
-        <div className="flex items-center text-red-400 mr-2">
-          <TrendingDown className="h-6 w-6 mr-2 aura-pulse" />
-          <h3 className="text-xl font-bold text-glow">Burn Rate</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center mb-5">
+        <div className="flex items-center text-red-400 mb-2 sm:mb-0">
+          <div className="bg-red-500/20 p-2 rounded-full mr-3">
+            <TrendingDown className="h-6 w-6 aura-pulse" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-glow">Current Burn Rate</h3>
+            <p className="text-sm text-gray-300 max-w-md">Your expenses that need to be exceeded in revenue</p>
+          </div>
         </div>
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto mt-2 sm:mt-0 flex items-center">
           <AlertCircle className="h-5 w-5 text-yellow-400 mr-1.5" />
-          <span className="text-sm text-yellow-400">Needs to be exceeded in revenue</span>
+          <span className="text-sm text-yellow-400 font-medium">Revenue target: exceed these amounts</span>
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/70 border-red-500/50">
+        <Card className="bg-gray-800/70 border-l-4 border-red-500 hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
-            <p className="text-gray-400 mb-1 text-sm">Monthly</p>
-            <p className="text-2xl font-bold text-white">${monthlyRate.toLocaleString()}</p>
+            <div className="flex flex-col items-center mb-3">
+              <p className="text-red-400 font-medium">Monthly Expense</p>
+              <p className="text-3xl font-bold text-white mt-1">${monthlyRate.toLocaleString()}</p>
+            </div>
             <AnimatedProgress 
               value={100} 
               maxValue={100}
-              height="h-1.5"
-              className="w-full mt-2"
+              height="h-2"
+              className="w-full"
               indicatorClassName="bg-gradient-to-r from-red-600 to-red-400"
             />
+            <p className="text-xs text-gray-400 mt-2">Monthly target to exceed</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-800/70 border-red-500/50">
+        <Card className="bg-gray-800/70 border-l-4 border-orange-500 hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
-            <p className="text-gray-400 mb-1 text-sm">Weekly</p>
-            <p className="text-2xl font-bold text-white">${weeklyRate}</p>
+            <div className="flex flex-col items-center mb-3">
+              <p className="text-orange-400 font-medium">Weekly Expense</p>
+              <p className="text-3xl font-bold text-white mt-1">${weeklyRate}</p>
+            </div>
             <AnimatedProgress 
               value={75} 
               maxValue={100}
-              height="h-1.5"
-              className="w-full mt-2"
+              height="h-2"
+              className="w-full"
               indicatorClassName="bg-gradient-to-r from-orange-600 to-orange-400"
             />
+            <p className="text-xs text-gray-400 mt-2">Weekly target to exceed</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-800/70 border-red-500/50">
+        <Card className="bg-gray-800/70 border-l-4 border-yellow-500 hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
-            <p className="text-gray-400 mb-1 text-sm">Daily</p>
-            <p className="text-2xl font-bold text-white">${dailyRate}</p>
+            <div className="flex flex-col items-center mb-3">
+              <p className="text-yellow-400 font-medium">Daily Expense</p>
+              <p className="text-3xl font-bold text-white mt-1">${dailyRate}</p>
+            </div>
             <AnimatedProgress 
               value={50} 
               maxValue={100}
-              height="h-1.5"
-              className="w-full mt-2"
+              height="h-2"
+              className="w-full"
               indicatorClassName="bg-gradient-to-r from-yellow-600 to-yellow-400"
             />
+            <p className="text-xs text-gray-400 mt-2">Daily target to exceed</p>
           </CardContent>
         </Card>
       </div>
       
-      <div className="mt-4 text-sm text-gray-300">
-        <p className="flex items-center">
-          <Flame className="h-4 w-4 text-red-400 mr-1.5" />
-          Focus on exceeding these numbers to become profitable and scale your business.
+      <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+        <p className="flex items-center text-sm text-white">
+          <Flame className="h-5 w-5 text-red-400 mr-2.5" />
+          <span className="font-medium">Business growth target:</span>
+          <span className="ml-2">Focus on exceeding these numbers to become profitable and scale your business.</span>
         </p>
       </div>
     </motion.div>
@@ -659,18 +674,19 @@ const Dashboard = () => {
                 />
               </motion.div>
             
-              {/* Burn Rate Section */}
-              <BurnRateCard monthlyRate={4000} />
-            
               {/* Action Bar - Using memoized component */}
               <ActionBar />
+              
+              {/* Burn Rate Section */}
+              <BurnRateCard monthlyRate={4000} />
 
               {/* Main Goals Progress */}
               <section className="mb-8">
                 <div className="flex flex-col xs:flex-row justify-between xs:items-center gap-3 xs:gap-0 mb-4">
                   <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2" />
-                    Main Goals Progress
+                    <span className="mr-2">Main Goals Progress</span>
+                    <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">Track your key objectives</span>
                   </h2>
                 </div>
                 
@@ -690,6 +706,14 @@ const Dashboard = () => {
               </section>
               
               {/* Dashboard Tabs - Metrics and Execution */}
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  <span className="mr-2">Performance Tracking</span>
+                  <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">Track metrics & execution</span>
+                </h2>
+              </div>
+              
               <Tabs defaultValue="metrics" className="w-full mb-8">
                 <TabsList className="grid grid-cols-2 max-w-md mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1 gradient-border">
                   <TabsTrigger 
@@ -843,7 +867,8 @@ const Dashboard = () => {
                 <section className="mb-8">
                   <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
                     <Award className="h-5 w-5 mr-2" />
-                    Achievement Stats
+                    <span className="mr-2">Achievement Stats</span>
+                    <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">Your progress at a glance</span>
                   </h2>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
