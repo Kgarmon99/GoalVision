@@ -5,6 +5,7 @@ import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
+import { MetricsDashboard } from "@/components/metrics-dashboard";
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
