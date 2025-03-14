@@ -815,9 +815,9 @@ const Dashboard = () => {
                         ))}
                       </div>
                     </div>
-                  ) : allGoals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 ? (
+                  ) : goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 ? (
                     <MetricsDashboard 
-                      goals={allGoals}
+                      goals={goals}
                       metrics={[...growthMetrics, ...revenueMetrics]}
                       title="Performance Analytics Dashboard"
                       description="Comprehensive analysis of your goals and KPIs with advanced visualization"
