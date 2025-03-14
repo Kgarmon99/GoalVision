@@ -292,9 +292,14 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 >
                   {formatValue(goal.current, goal.unit)}
                 </motion.p>
-                <p className="text-xs sm:text-sm text-green-400">
-                  of {formatValue(goal.target, goal.unit)}
-                </p>
+                <div className="flex flex-col">
+                  <p className="text-xs sm:text-sm text-green-400">
+                    of {formatValue(goal.target, goal.unit)}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {remaining > 0 ? `${formatValue(remaining, goal.unit)} remaining` : "Target achieved!"}
+                  </p>
+                </div>
               </div>
             </div>
             

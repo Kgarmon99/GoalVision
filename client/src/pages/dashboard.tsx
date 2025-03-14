@@ -159,77 +159,118 @@ const GoalCard = memo(({ goal }: { goal: Goal }) => {
     }
   };
   
+  // Calculate remaining amount
+  const remaining = goal.target - goal.current;
+  
+  // Get background style based on progress
+  const getBackgroundStyle = (percent: number) => {
+    if (percent >= 100) return "bg-primary/10 border-primary/40";
+    if (percent >= 75) return "bg-primary/5 border-primary/30";
+    if (percent >= 50) return "bg-orange-500/5 border-orange-500/30";
+    if (percent >= 25) return "bg-orange-700/5 border-orange-700/30";
+    return "bg-red-900/5 border-red-900/30";
+  };
+  
+  // Get progress color
+  const getProgressColor = (percent: number) => {
+    if (percent >= 75) return "bg-primary";
+    if (percent >= 50) return "bg-yellow-500";
+    if (percent >= 25) return "bg-orange-500";
+    return "bg-red-600";
+  };
+  
+  // Get text describing urgency/status
+  const getStatusText = () => {
+    if (percentComplete >= 100) return { text: "Completed", color: "text-primary" };
+    
+    if (goal.deadline) {
+      const urgency = getUrgencyLevel(goal.deadline);
+      if (urgency === 'high') {
+        return { text: "Urgent", color: "text-red-500" };
+      } else if (urgency === 'medium') {
+        return { text: "Approaching deadline", color: "text-yellow-500" };
+      }
+    }
+    
+    if (percentComplete < 25) return { text: "Off track", color: "text-red-500" };
+    if (percentComplete < 50) return { text: "Needs attention", color: "text-orange-500" };
+    if (percentComplete < 75) return { text: "On track", color: "text-yellow-500" };
+    
+    return { text: "Almost there", color: "text-primary" };
+  };
+  
+  const status = getStatusText();
+  
   return (
     <Link href={`/add-progress?goalId=${goal.id}`} className="block">
-      <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 cursor-pointer ${
-        percentComplete >= 75 ? "border-green-600" :
-        percentComplete >= 50 ? "border-yellow-600" :
-        percentComplete >= 25 ? "border-orange-600" :
-        "border-red-600"
-      }`}>
+      <Card className={`bg-card hover:shadow-xl transition-all duration-300 cursor-pointer ${getBackgroundStyle(percentComplete)} border`}>
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col justify-between gap-2">
             <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
+                  <p className="text-sm font-medium">{goal.name}</p>
                   {percentComplete >= 100 ? (
                     <Award className="h-3 w-3 text-yellow-400 ml-1" />
                   ) : (
-                    <Target className="h-3 w-3 text-green-400 ml-1" />
+                    <Target className="h-3 w-3 text-primary ml-1" />
                   )}
                 </div>
                 <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  percentComplete >= 75 ? "bg-green-900/75 text-green-400 border border-green-500" :
-                  percentComplete >= 50 ? "bg-yellow-900/75 text-yellow-400 border border-yellow-500" :
-                  percentComplete >= 25 ? "bg-orange-900/75 text-orange-400 border border-orange-500" :
-                  "bg-red-900/75 text-red-400 border border-red-500"
+                  percentComplete >= 75 ? "bg-primary/20 text-primary" :
+                  percentComplete >= 50 ? "bg-yellow-500/20 text-yellow-500" :
+                  percentComplete >= 25 ? "bg-orange-500/20 text-orange-500" :
+                  "bg-red-600/20 text-red-600"
                 }`}>
                   {percentComplete}%
                 </div>
               </div>
-              <div className="flex items-baseline gap-2">
-                <p className="mt-1 text-xl font-bold text-white">
+              
+              <div className="flex items-baseline gap-2 mt-1">
+                <p className="text-xl font-bold">
                   {formatValue(goal.current, goal.unit)}
                 </p>
-                <p className="text-xs text-green-400">
-                  of {formatValue(goal.target, goal.unit)}
-                </p>
+                <div className="flex flex-col">
+                  <p className="text-xs text-muted-foreground">
+                    of {formatValue(goal.target, goal.unit)}
+                  </p>
+                  <p className="text-xs text-muted-foreground/70">
+                    {remaining > 0 ? `${formatValue(remaining, goal.unit)} remaining` : "Target achieved!"}
+                  </p>
+                </div>
               </div>
             </div>
             
             <div className="mt-2">
               <div className="relative">
-                <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${
-                      percentComplete >= 75 ? "bg-green-500" :
-                      percentComplete >= 50 ? "bg-yellow-500" :
-                      percentComplete >= 25 ? "bg-orange-500" :
-                      "bg-red-600"
-                    }`}
+                    className={`h-full ${getProgressColor(percentComplete)}`}
                     style={{ width: `${percentComplete}%` }}
                   ></div>
                 </div>
               </div>
             </div>
             
-            {goal.deadline && (
-              <div className="mt-2 flex items-center gap-1.5 text-xs">
-                <Clock className={`h-3.5 w-3.5 ${
-                  getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-500' : 
-                  getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-500' : 
-                  'text-green-500'
-                }`} />
-                <span className={`${
-                  getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-400' : 
-                  getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-400' : 
-                  'text-green-400'
-                }`}>
-                  {formatDate(goal.deadline)} ({getDaysUntilDescription(goal.deadline)})
-                </span>
+            <div className="mt-3 flex items-center justify-between text-xs">
+              <div className={`flex items-center gap-1 ${status.color}`}>
+                <span className="w-2 h-2 rounded-full bg-current"></span>
+                {status.text}
               </div>
-            )}
+              
+              {goal.deadline && (
+                <div className="flex items-center gap-1">
+                  <Clock className={`h-3.5 w-3.5 ${
+                    getUrgencyLevel(goal.deadline) === 'high' ? 'text-red-500' : 
+                    getUrgencyLevel(goal.deadline) === 'medium' ? 'text-yellow-500' : 
+                    'text-green-500'
+                  }`} />
+                  <span className="text-muted-foreground">
+                    {formatDate(goal.deadline)}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -266,88 +307,110 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
   const weeklyRate = (monthlyRate / 4).toFixed(2);
   const dailyRate = (monthlyRate / 30).toFixed(2);
   
+  // Calculate yearly rate
+  const yearlyRate = monthlyRate * 12;
+  
   return (
     <motion.div 
-      className="mb-8 bg-gray-900/80 backdrop-blur-sm rounded-lg border-l-4 border border-red-600 p-6 gradient-border glow-card"
+      className="mb-8 bg-card rounded-lg border p-6 shadow-sm"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
       <div className="flex flex-col sm:flex-row sm:items-center mb-5">
-        <div className="flex items-center text-red-400 mb-2 sm:mb-0">
-          <div className="bg-red-500/20 p-2 rounded-full mr-3">
-            <TrendingDown className="h-6 w-6 aura-pulse" />
+        <div className="flex items-center mb-2 sm:mb-0">
+          <div className="bg-red-500/20 p-3 rounded-full mr-4">
+            <TrendingDown className="h-6 w-6 text-red-500" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-glow">Current Burn Rate</h3>
-            <p className="text-sm text-gray-300 max-w-md">Your expenses that need to be exceeded in revenue</p>
+            <h3 className="text-xl font-bold">Revenue Targets</h3>
+            <p className="text-sm text-muted-foreground max-w-md">Minimum revenue needed to exceed expenses</p>
           </div>
         </div>
         <div className="ml-auto mt-2 sm:mt-0 flex items-center">
-          <AlertCircle className="h-5 w-5 text-yellow-400 mr-1.5" />
-          <span className="text-sm text-yellow-400 font-medium">Revenue target: exceed these amounts</span>
+          <div className="bg-amber-500/10 py-1 px-3 rounded-full flex items-center">
+            <AlertCircle className="h-4 w-4 text-amber-500 mr-1.5" />
+            <span className="text-xs font-medium text-amber-500">Critical for business growth</span>
+          </div>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gray-800/70 border-l-4 border-red-500 hover:shadow-md transition-all duration-300">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-card border hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
             <div className="flex flex-col items-center mb-3">
-              <p className="text-red-400 font-medium">Monthly Expense</p>
-              <p className="text-3xl font-bold text-white mt-1">${monthlyRate.toLocaleString()}</p>
+              <p className="text-muted-foreground text-sm font-medium">Yearly</p>
+              <p className="text-2xl font-bold mt-1">${yearlyRate.toLocaleString()}</p>
             </div>
-            <AnimatedProgress 
-              value={100} 
-              maxValue={100}
-              height="h-2"
-              className="w-full"
-              indicatorClassName="bg-gradient-to-r from-red-600 to-red-400"
-            />
-            <p className="text-xs text-gray-400 mt-2">Monthly target to exceed</p>
+            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-red-500"
+                style={{ width: '100%' }}
+              ></div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Annual revenue target</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-800/70 border-l-4 border-orange-500 hover:shadow-md transition-all duration-300">
+        <Card className="bg-card border hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
             <div className="flex flex-col items-center mb-3">
-              <p className="text-orange-400 font-medium">Weekly Expense</p>
-              <p className="text-3xl font-bold text-white mt-1">${weeklyRate}</p>
+              <p className="text-muted-foreground text-sm font-medium">Monthly</p>
+              <p className="text-2xl font-bold mt-1">${monthlyRate.toLocaleString()}</p>
             </div>
-            <AnimatedProgress 
-              value={75} 
-              maxValue={100}
-              height="h-2"
-              className="w-full"
-              indicatorClassName="bg-gradient-to-r from-orange-600 to-orange-400"
-            />
-            <p className="text-xs text-gray-400 mt-2">Weekly target to exceed</p>
+            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-red-500"
+                style={{ width: '100%' }}
+              ></div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Monthly revenue target</p>
           </CardContent>
         </Card>
         
-        <Card className="bg-gray-800/70 border-l-4 border-yellow-500 hover:shadow-md transition-all duration-300">
+        <Card className="bg-card border hover:shadow-md transition-all duration-300">
           <CardContent className="p-4 flex flex-col items-center">
             <div className="flex flex-col items-center mb-3">
-              <p className="text-yellow-400 font-medium">Daily Expense</p>
-              <p className="text-3xl font-bold text-white mt-1">${dailyRate}</p>
+              <p className="text-muted-foreground text-sm font-medium">Weekly</p>
+              <p className="text-2xl font-bold mt-1">${weeklyRate}</p>
             </div>
-            <AnimatedProgress 
-              value={50} 
-              maxValue={100}
-              height="h-2"
-              className="w-full"
-              indicatorClassName="bg-gradient-to-r from-yellow-600 to-yellow-400"
-            />
-            <p className="text-xs text-gray-400 mt-2">Daily target to exceed</p>
+            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-amber-500"
+                style={{ width: '75%' }}
+              ></div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Weekly revenue target</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-card border hover:shadow-md transition-all duration-300">
+          <CardContent className="p-4 flex flex-col items-center">
+            <div className="flex flex-col items-center mb-3">
+              <p className="text-muted-foreground text-sm font-medium">Daily</p>
+              <p className="text-2xl font-bold mt-1">${dailyRate}</p>
+            </div>
+            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-amber-500"
+                style={{ width: '50%' }}
+              ></div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Daily revenue target</p>
           </CardContent>
         </Card>
       </div>
       
-      <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-        <p className="flex items-center text-sm text-white">
-          <Flame className="h-5 w-5 text-red-400 mr-2.5" />
-          <span className="font-medium">Business growth target:</span>
-          <span className="ml-2">Focus on exceeding these numbers to become profitable and scale your business.</span>
-        </p>
+      <div className="mt-6 p-4 bg-muted/50 rounded-lg border">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/20 p-2 rounded-full">
+            <Flame className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Business Growth Strategy</p>
+            <p className="text-sm text-muted-foreground">Focus on exceeding these targets consistently to achieve sustainable growth and profitability.</p>
+          </div>
+        </div>
       </div>
     </motion.div>
   );
