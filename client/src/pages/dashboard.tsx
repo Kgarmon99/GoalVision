@@ -804,7 +804,37 @@ const Dashboard = () => {
                 
                 {/* Metrics Tab Content */}
                 <TabsContent value="metrics" className="mt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Advanced Metrics Dashboard */}
+                  {isLoading ? (
+                    <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-6 animate-pulse mb-8">
+                      <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                      <div className="h-64 bg-gray-800 rounded w-full mb-4"></div>
+                      <div className="grid grid-cols-3 gap-4">
+                        {[1, 2, 3].map((_, i) => (
+                          <div key={i} className="h-20 bg-gray-800 rounded w-full"></div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : allGoals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 ? (
+                    <MetricsDashboard 
+                      goals={allGoals}
+                      metrics={[...growthMetrics, ...revenueMetrics]}
+                      title="Performance Analytics Dashboard"
+                      description="Comprehensive analysis of your goals and KPIs with advanced visualization"
+                    />
+                  ) : (
+                    <EmptyState 
+                      title="No Metrics Data Available"
+                      description="Add goals and metrics to see advanced analytics visualizations"
+                      icon="chart"
+                      className="py-12 mb-8"
+                      addLink="/add-goal"
+                      addText="Add First Goal"
+                    />
+                  )}
+
+                  {/* Legacy Metrics View */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
                     {/* Growth Metrics */}
                     <div className="col-span-1">
                       {isLoading ? (

@@ -644,18 +644,15 @@ export function MetricsDashboard({ goals, metrics, title = "Performance Analytic
                         </Badge>
                       </div>
                       
-                      {metric.description && (
-                        <p className="text-xs text-muted-foreground mt-1">{metric.description}</p>
-                      )}
+                      {/* Metric description - would show here if available */}
+                      <p className="text-xs text-muted-foreground mt-1">{metric.name} trends</p>
                     </div>
                     
                     <div className="flex items-center mt-2 sm:mt-0">
-                      {metric.createdAt && (
-                        <div className="flex items-center mr-4 text-xs text-muted-foreground">
-                          <CalendarDays className="h-3 w-3 mr-1" />
-                          <span>{formatDate(metric.createdAt)}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center mr-4 text-xs text-muted-foreground">
+                        <CalendarDays className="h-3 w-3 mr-1" />
+                        <span>{format(new Date(), 'MMM d, yyyy')}</span>
+                      </div>
                       
                       <div className="font-bold text-right">
                         {metric.category === "revenue" && "$"}
