@@ -642,6 +642,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid subtask data", errors: error.errors });
       }
+
+// Get all goal templates
+app.get("/api/goal-templates", async (req, res) => {
+  try {
+    const templates = await storage.getAllGoalTemplates();
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching goal templates" });
+  }
+});
+
+// Get templates by category
+app.get("/api/goal-templates/category/:category", async (req, res) => {
+  try {
+    const category = req.params.category;
+    const templates = await storage.getGoalTemplatesByCategory(category);
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching templates by category" });
+  }
+});
+
+// Create a goal template
+app.post("/api/goal-templates", async (req, res) => {
+  try {
+    const templateData = insertGoalTemplateSchema.parse(req.body);
+    const template = await storage.createGoalTemplate(templateData);
+    res.status(201).json(template);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+    }
+    res.status(500).json({ message: "Error creating template" });
+  }
+});
+
       res.status(500).json({ message: "Error creating subtask" });
     }
   });

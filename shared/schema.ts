@@ -131,6 +131,26 @@ export const weeksRelations = relations(weeks, ({ many }) => ({
   tasks: many(executionTasks)
 }));
 
+export const goalTemplates = pgTable("goal_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // industry, best-practice, quick-start, custom
+  description: text("description").notNull(),
+  goals: text("goals").notNull(), // JSON string of goal objects
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertGoalTemplateSchema = createInsertSchema(goalTemplates).pick({
+  name: true,
+  category: true,
+  description: true,
+  goals: true,
+});
+
+export type InsertGoalTemplate = z.infer<typeof insertGoalTemplateSchema>;
+export type GoalTemplate = typeof goalTemplates.$inferSelect;
+
+
 export const insertWeekSchema = createInsertSchema(weeks).pick({
   number: true,
   dateRange: true,
