@@ -5,7 +5,7 @@ import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
-import { MetricsDashboard } from "@/components/metrics-dashboard";
+import { SimpleMetricsDashboard } from "@/components/simple-metrics-dashboard";
 
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
@@ -801,11 +801,9 @@ const Dashboard = () => {
                       </div>
                     </div>
                   ) : goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 ? (
-                    <MetricsDashboard 
+                    <SimpleMetricsDashboard 
                       goals={goals}
                       metrics={[...growthMetrics, ...revenueMetrics]}
-                      title="Performance Analytics Dashboard"
-                      description="Comprehensive analysis of your goals and KPIs with advanced visualization"
                     />
                   ) : (
                     <EmptyState 
