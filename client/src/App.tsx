@@ -12,11 +12,12 @@ import TaskBoard from "@/pages/task-board";
 import GoalVisualizations from "@/pages/goal-visualizations";
 import Metrics from "@/pages/metrics";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
+import { EnhancedNav } from "@/components/layout/enhanced-nav";
 import { useState, useEffect } from "react";
+import { Target } from "lucide-react";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
-  // Add a loading state with very short display time
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -99,68 +100,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GoalCelebrationProvider>
-        {/* Navigation Header */}
-        <header className="fixed top-0 left-0 right-0 bg-background border-b border-border z-10">
-          <div className="container flex items-center justify-between h-16">
-            <a href="/" className="flex items-center gap-2 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="12" r="6"></circle>
-                <circle cx="12" cy="12" r="2"></circle>
-              </svg>
-              <span>2025 Goals</span>
-            </a>
-            
-            <nav className="flex items-center space-x-2">
-              <a 
-                href="/"
-                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${window.location.pathname === '/' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span className="hidden sm:inline">Dashboard</span>
-              </a>
-              
-              <a 
-                href="/goal-visualizations"
-                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${window.location.pathname === '/goal-visualizations' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <circle cx="12" cy="12" r="6"></circle>
-                  <circle cx="12" cy="12" r="2"></circle>
-                </svg>
-                <span className="hidden sm:inline">Goals</span>
-              </a>
-              
-              <a 
-                href="/task-board"
-                className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${window.location.pathname === '/task-board' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                  <path d="m9 13 2 2 4-4"></path>
-                </svg>
-                <span className="hidden sm:inline">Tasks</span>
-              </a>
-              
-              <a 
-                href="/add-goal"
-                className={`ml-2 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 ${
-                  window.location.pathname === '/add-goal' ? 'bg-primary/90 text-primary-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14"></path>
-                  <path d="M5 12h14"></path>
-                </svg>
-                <span className="hidden sm:inline">Add Goal</span>
-              </a>
-            </nav>
-          </div>
-        </header>
+        {/* Navigation Header - Use Enhanced Nav */}
+        <EnhancedNav 
+          variant="enhanced"
+          brandingText="2025 Goals"
+          brandingIcon={<Target className="h-5 w-5 text-primary" />}
+          showBranding={true}
+          fixed={true}
+          quickActions={[
+            { name: 'Add Goal', path: '/add-goal', icon: <Target size={16} />, description: 'Create a new goal' },
+            { name: 'Add Task', path: '/add-task', icon: <Target size={16} />, description: 'Add a new task' },
+            { name: 'Update Progress', path: '/add-progress', icon: <Target size={16} />, description: 'Update goal progress' }
+          ]}
+        />
         
         {/* Main Content */}
         <div className="pt-16 animate-in fade-in-50 duration-300">
