@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Target, CheckSquare, Plus, BarChart2, Settings, PlusCircle } from 'lucide-react';
+import { Home, Target, CheckSquare, TrendingUp, PlusCircle, Calendar, DollarSign, LayoutDashboard, BarChart2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
 /**
- * A simple and consistent navigation bar for the application
+ * A simple navigation bar with clear, meaningful labels
  */
 export function SimpleNav() {
   const [currentPath, setCurrentPath] = useState<string>('');
@@ -28,12 +28,12 @@ export function SimpleNav() {
     };
   }, []);
 
-  // Navigation items definition
+  // Navigation items with clearer descriptions
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: <Home size={20} />, description: 'Main overview' },
-    { name: 'Goals', path: '/goal-visualizations', icon: <Target size={20} />, description: 'View and manage goals' },
-    { name: 'Tasks', path: '/task-board', icon: <CheckSquare size={20} />, description: 'View and manage tasks' },
-    { name: 'Metrics', path: '/metrics', icon: <BarChart2 size={20} />, description: 'Track performance metrics' },
+    { name: 'Overview', path: '/', icon: <LayoutDashboard size={20} />, description: 'Your main dashboard' },
+    { name: 'Goals', path: '/goal-visualizations', icon: <Target size={20} />, description: 'Track your progress' },
+    { name: 'Weekly Tasks', path: '/task-board', icon: <Calendar size={20} />, description: 'Your action items' },
+    { name: 'Money & Growth', path: '/metrics', icon: <DollarSign size={20} />, description: 'Financial performance' },
   ];
   
   // Check if current path matches the given path
@@ -55,11 +55,11 @@ export function SimpleNav() {
     }
   };
 
-  // Quick actions for adding new items
+  // Quick actions with clearer descriptions
   const quickActions = [
-    { name: 'Add Goal', path: '/add-goal', icon: <Target size={16} /> },
-    { name: 'Add Task', path: '/add-task', icon: <CheckSquare size={16} /> },
-    { name: 'Update Progress', path: '/add-progress', icon: <BarChart2 size={16} /> },
+    { name: 'Set New Goal', path: '/add-goal', icon: <Target size={16} /> },
+    { name: 'Plan Weekly Task', path: '/add-task', icon: <Calendar size={16} /> },
+    { name: 'Update Goal Progress', path: '/add-progress', icon: <TrendingUp size={16} /> },
   ];
 
   return (
@@ -72,7 +72,7 @@ export function SimpleNav() {
             onClick={(e) => handleNavigation('/', e)}
           >
             <Target className="h-5 w-5 text-primary" />
-            <span>Goals</span>
+            <span>2025 Goals Tracker</span>
           </a>
           
           <nav className="flex items-center space-x-3">
@@ -106,12 +106,13 @@ export function SimpleNav() {
                   className="ml-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   <PlusCircle size={18} className="mr-2" />
-                  <span className="hidden sm:inline">Add New</span>
+                  <span className="hidden sm:inline">Quick Actions</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="p-2 bg-card border border-border shadow-md">
+                <h4 className="text-sm font-medium pl-2 pb-2 mb-1 border-b border-border">What would you like to do?</h4>
                 {quickActions.map((action) => (
-                  <DropdownMenuItem key={action.name} asChild>
+                  <DropdownMenuItem key={action.name} asChild className="rounded-md my-1 px-2 py-1.5 hover:bg-primary/10 hover:text-primary">
                     <a
                       href={action.path}
                       className="flex items-center cursor-pointer"

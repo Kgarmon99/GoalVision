@@ -758,8 +758,8 @@ const Dashboard = () => {
               <div className="mb-4">
                 <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
                   <BarChart3 className="h-5 w-5 mr-2" />
-                  <span className="mr-2">Performance Tracking</span>
-                  <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">Track metrics & execution</span>
+                  <span className="mr-2">Goal Progress</span>
+                  <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">See how your goals are doing</span>
                 </h2>
               </div>
               
@@ -770,8 +770,8 @@ const Dashboard = () => {
                     className="flex-1 py-2 px-3 data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
                   >
                     <div className="relative group flex items-center justify-center">
-                      <BarChart3 className="h-4 w-4 mr-2 float-effect-fast" />
-                      <span className="text-sm whitespace-nowrap">Metrics Dashboard</span>
+                      <DollarSign className="h-4 w-4 mr-2 float-effect-fast" />
+                      <span className="text-sm whitespace-nowrap">Money & Growth</span>
                       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
                     </div>
                   </TabsTrigger>
@@ -780,8 +780,8 @@ const Dashboard = () => {
                     className="flex-1 py-2 px-3 data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
                   >
                     <div className="relative group flex items-center justify-center">
-                      <CheckCircle className="h-4 w-4 mr-2 float-effect-fast" />
-                      <span className="text-sm whitespace-nowrap">Execution Tracker</span>
+                      <Calendar className="h-4 w-4 mr-2 float-effect-fast" />
+                      <span className="text-sm whitespace-nowrap">Weekly Tasks</span>
                       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
                     </div>
                   </TabsTrigger>
