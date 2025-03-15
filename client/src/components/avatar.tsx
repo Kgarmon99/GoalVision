@@ -173,7 +173,7 @@ const renderSimpleAvatar = (props: EnhancedAvatarProps) => {
 
 // Profile picture renderer (simpler version)
 const renderProfileAvatar = (props: EnhancedAvatarProps) => {
-  const { className, onClick, imagePath = "/images/profiles/user-photo.jpeg" } = props;
+  const { className, onClick, imagePath = "/images/user.jpeg" } = props;
   
   return (
     <div 
