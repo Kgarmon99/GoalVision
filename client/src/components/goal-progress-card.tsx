@@ -221,16 +221,16 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
   const remaining = goal.target - goal.current;
   
   // Get achievement status text
-  const getAchievementStatusText = () => {
-    if (percentComplete >= 100) return "Achieved! 🏆";
-    if (percentComplete >= 75) return "Almost there!";
-    if (percentComplete >= 50) return "Halfway through";
-    if (percentComplete >= 25) return "Behind schedule!";
-    return "Severely lagging! 💩";
+  const getProgressStatusText = () => {
+    if (percentComplete >= 100) return "Complete! 🏆";
+    if (percentComplete >= 75) return "On track";
+    if (percentComplete >= 50) return "Making progress";
+    if (percentComplete >= 25) return "Needs attention";
+    return "Needs urgent work";
   };
   
-  // Get achievement status color
-  const getAchievementStatusColor = () => {
+  // Get progress status color
+  const getProgressStatusColor = () => {
     if (percentComplete >= 100) return "text-green-500";
     if (percentComplete >= 75) return "text-green-400";
     if (percentComplete >= 50) return "text-yellow-500";
@@ -370,12 +370,12 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                       className="text-red-500 font-medium mt-3 mb-1 text-xs col-span-2 grid grid-cols-[20px_1fr] items-center gap-1"
                     >
                       <AlertTriangle className="h-5 w-5 text-red-500" />
-                      <span>This goal needs immediate attention! You're falling far behind target.</span>
+                      <span>This goal needs your attention. Consider updating your action plan.</span>
                     </AnimatedComponent>
                   )}
                   <div>
                     <p className="text-green-400">Status:</p>
-                    <p className={getAchievementStatusColor()}>{getAchievementStatusText()}</p>
+                    <p className={getProgressStatusColor()}>{getProgressStatusText()}</p>
                   </div>
                   <div>
                     <p className="text-green-400">Remaining:</p>
