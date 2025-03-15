@@ -16,7 +16,7 @@ export function ProfilePicture({ className, onClick }: ProfilePictureProps) {
       onClick={onClick}
     >
       <img 
-        src="/images/profiles/user-photo.jpeg" 
+        src="public/images/user.jpeg" 
         alt="Profile" 
         className="w-full h-full object-cover"
       />

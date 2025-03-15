@@ -11,8 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { AnimatedComponent } from "@/components/ui/animated-component";
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { AnimatedProgress } from "@/components/ui/animated-progress";
-import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { EnhancedProgress } from "@/components/ui/enhanced-progress";
+import { EnhancedTooltip } from "@/components/ui/enhanced-tooltip";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -255,13 +255,14 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
               <div className="flex items-center">
-                <AnimatedTooltip
+                <EnhancedTooltip
                   content={`Target: ${formatValue(goal.target, goal.unit)}`}
                   position="top"
                   animation="scale"
+                  variant="animated"
                 >
                   <p className="text-sm font-medium text-green-400 text-glow">{goal.name}</p>
-                </AnimatedTooltip>
+                </EnhancedTooltip>
                 {percentComplete >= 100 && (
                   <AnimatedComponent
                     animation="bounceIn"
@@ -320,8 +321,9 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           
           <div className="mt-3 sm:mt-4">
             <div className="relative">
-              <AnimatedProgress 
+              <EnhancedProgress 
                 value={percentComplete}
+                variant="animated"
                 threshold={{ high: 75, medium: 50, low: 25 }}
                 thresholdColors={{
                   high: "bg-green-500",
