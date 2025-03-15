@@ -683,18 +683,12 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   </Button>
                   <Button 
                     type="submit"
-                    className={`text-white ${
-                      form.watch('current') > goal.current 
-                        ? "bg-green-600 hover:bg-green-700" 
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }`}
-                    disabled={updateGoalMutation.isPending}
+                    className="bg-green-600 text-white hover:bg-green-700"
+                    disabled={updateGoalMutation?.isPending}
                   >
-                    {updateGoalMutation.isPending 
+                    {updateGoalMutation?.isPending 
                       ? "Saving..." 
-                      : form.watch('current') > goal.current
-                        ? "Update Progress" 
-                        : "Save Changes"}
+                      : "Save Changes"}
                   </Button>
                 </DialogFooter>
               </div>
