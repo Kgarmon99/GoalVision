@@ -64,73 +64,55 @@ interface StatCardProps {
   delay: number;
 }
 
-const StatCard = memo(({ icon, value, label, delay }: StatCardProps) => (
-  <motion.div 
-    className="bg-card rounded-lg border border-border shadow-sm p-4 flex flex-col items-center"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3, delay }}
-    whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-  >
+const StatCard = memo(({ icon, value, label }: StatCardProps) => (
+  <div className="bg-card rounded-lg border border-border shadow-sm p-4 flex flex-col items-center hover:shadow-md transition-all duration-200">
     <div className="text-primary mb-2 bg-primary/10 p-3 rounded-full">
       {icon}
     </div>
     <h3 className="text-2xl font-bold">{value}</h3>
     <p className="text-muted-foreground text-sm">{label}</p>
-  </motion.div>
+  </div>
 ));
 
 // Memoized action bar to prevent unnecessary re-renders
 const ActionBar = memo(() => {
-  // Simplified action bar with no animation or profile picture
-  
   return (
-    <>
-      {/* Action bar with quick action buttons */}
-      <motion.div 
-        className="mb-6 bg-card rounded-lg border border-border shadow-sm p-4 flex flex-wrap gap-4 justify-end items-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex gap-3 flex-wrap">
-          <Link href="/add-progress">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2"
-              title="Update your progress on existing goals"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Update Progress
-            </Button>
-          </Link>
-          <Link href="/add-goal">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2"
-              title="Add a new goal to track"
-            >
-              <Plus className="h-4 w-4" />
-              Add Goal
-            </Button>
-          </Link>
-          <AnimatedTooltip content="Track your execution tasks" position="bottom">
-            <Link href="/add-task">
-              <Button 
-                size="sm" 
-                className="gap-2"
-              >
-                <Rocket className="h-4 w-4" />
-                Track Execution
-              </Button>
-            </Link>
-          </AnimatedTooltip>
-        </div>
-      </motion.div>
-      {/* Notification section removed */}
-    </>
+    <div className="mb-6 bg-card rounded-lg border border-border shadow-sm p-4 flex flex-wrap gap-4 justify-end items-center">
+      <div className="flex gap-3 flex-wrap">
+        <Link href="/add-progress">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2"
+            title="Update your progress on existing goals"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Update Progress
+          </Button>
+        </Link>
+        <Link href="/add-goal">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2"
+            title="Add a new goal to track"
+          >
+            <Plus className="h-4 w-4" />
+            Add Goal
+          </Button>
+        </Link>
+        <Link href="/add-task">
+          <Button 
+            size="sm" 
+            className="gap-2"
+            title="Track your execution tasks"
+          >
+            <Rocket className="h-4 w-4" />
+            Track Execution
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 });
 
@@ -320,12 +302,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
   const yearlyRate = monthlyRate * 12;
   
   return (
-    <motion.div 
-      className="mb-8 bg-card rounded-lg border p-6 shadow-sm"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
+    <div className="mb-8 bg-card rounded-lg border p-6 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex flex-col sm:flex-row sm:items-center mb-5">
         <div className="flex items-center mb-2 sm:mb-0">
           <div className="bg-red-500/20 p-3 rounded-full mr-4">
@@ -421,7 +398,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
