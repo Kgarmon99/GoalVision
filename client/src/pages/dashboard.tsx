@@ -309,14 +309,14 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
             <TrendingDown className="h-6 w-6 text-red-500" />
           </div>
           <div>
-            <h3 className="text-xl font-bold">Revenue Targets</h3>
-            <p className="text-sm text-muted-foreground max-w-md">Minimum revenue needed to exceed expenses</p>
+            <h3 className="text-xl font-bold">Burn Rate</h3>
+            <p className="text-sm text-muted-foreground max-w-md">Current spending and expense tracking</p>
           </div>
         </div>
         <div className="ml-auto mt-2 sm:mt-0 flex items-center">
           <div className="bg-amber-500/10 py-1 px-3 rounded-full flex items-center">
             <AlertCircle className="h-4 w-4 text-amber-500 mr-1.5" />
-            <span className="text-xs font-medium text-amber-500">Critical for business growth</span>
+            <span className="text-xs font-medium text-amber-500">Critical expense tracking</span>
           </div>
         </div>
       </div>
@@ -334,7 +334,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
                 style={{ width: '100%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Annual revenue target</p>
+            <p className="text-xs text-muted-foreground mt-2">Annual burn rate</p>
           </CardContent>
         </Card>
         
@@ -350,7 +350,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
                 style={{ width: '100%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Monthly revenue target</p>
+            <p className="text-xs text-muted-foreground mt-2">Monthly burn rate</p>
           </CardContent>
         </Card>
         
@@ -366,7 +366,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
                 style={{ width: '75%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Weekly revenue target</p>
+            <p className="text-xs text-muted-foreground mt-2">Weekly burn rate</p>
           </CardContent>
         </Card>
         
@@ -382,7 +382,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
                 style={{ width: '50%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Daily revenue target</p>
+            <p className="text-xs text-muted-foreground mt-2">Daily burn rate</p>
           </CardContent>
         </Card>
       </div>
@@ -393,8 +393,8 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
             <Flame className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-medium">Business Growth Strategy</p>
-            <p className="text-sm text-muted-foreground">Focus on exceeding these targets consistently to achieve sustainable growth and profitability.</p>
+            <p className="text-sm font-medium">Expense Management</p>
+            <p className="text-sm text-muted-foreground">Monitor expenses closely to extend runway and optimize operational efficiency.</p>
           </div>
         </div>
       </div>
