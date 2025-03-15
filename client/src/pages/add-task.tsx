@@ -145,9 +145,9 @@ const AddTask = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Task Details</CardTitle>
+              <CardTitle>Create a New Task</CardTitle>
               <CardDescription>
-                Fill in the information for the new task.
+                Enter the details below to create a new task for your goals.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -159,12 +159,12 @@ const AddTask = () => {
                       name="task"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Task Description</FormLabel>
+                          <FormLabel>What needs to be done?</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="Enter task description" />
+                            <Input {...field} placeholder="Example: Complete Q2 revenue forecast" />
                           </FormControl>
                           <FormDescription>
-                            Provide a clear description of the task.
+                            Be specific about what needs to be accomplished.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -177,10 +177,13 @@ const AddTask = () => {
                         name="owner"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Task Owner</FormLabel>
+                            <FormLabel>Who's responsible?</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="Enter owner name" />
+                              <Input {...field} placeholder="Example: Jane Smith" />
                             </FormControl>
+                            <FormDescription>
+                              The person who will complete this task.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -207,7 +210,7 @@ const AddTask = () => {
                         name="goalCategory"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Goal Category</FormLabel>
+                            <FormLabel>Which goal does this support?</FormLabel>
                             <Select 
                               onValueChange={(value) => {
                                 field.onChange(value);
@@ -221,7 +224,7 @@ const AddTask = () => {
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a category" />
+                                  <SelectValue placeholder="Choose a goal area" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -232,6 +235,9 @@ const AddTask = () => {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <FormDescription>
+                              Connect this task to one of your main goals.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -242,19 +248,22 @@ const AddTask = () => {
                         name="status"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Status</FormLabel>
+                            <FormLabel>Current Status</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a status" />
+                                  <SelectValue placeholder="What's the current status?" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="done">✅ Done</SelectItem>
-                                <SelectItem value="in-progress">🔄 In Progress</SelectItem>
-                                <SelectItem value="missed">❌ Missed</SelectItem>
+                                <SelectItem value="done">✅ Completed</SelectItem>
+                                <SelectItem value="in-progress">🔄 Working on it</SelectItem>
+                                <SelectItem value="missed">❌ Not started</SelectItem>
                               </SelectContent>
                             </Select>
+                            <FormDescription>
+                              You can update this later as work progresses.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -267,7 +276,7 @@ const AddTask = () => {
                         name="dueDate"
                         render={({ field }) => (
                           <FormItem className="flex flex-col">
-                            <FormLabel>Due Date</FormLabel>
+                            <FormLabel>When should this be completed?</FormLabel>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
@@ -281,7 +290,7 @@ const AddTask = () => {
                                     {field.value ? (
                                       format(field.value, "PPP")
                                     ) : (
-                                      <span>Pick a date</span>
+                                      <span>Select deadline date</span>
                                     )}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
@@ -296,6 +305,9 @@ const AddTask = () => {
                                 />
                               </PopoverContent>
                             </Popover>
+                            <FormDescription>
+                              Choose a realistic deadline for this task.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -306,11 +318,11 @@ const AddTask = () => {
                         name="weekId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Week</FormLabel>
+                            <FormLabel>Which week's plan does this belong to?</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select a week" />
+                                  <SelectValue placeholder="Choose week from calendar" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -321,6 +333,9 @@ const AddTask = () => {
                                 ))}
                               </SelectContent>
                             </Select>
+                            <FormDescription>
+                              This helps organize tasks in your weekly planning.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
