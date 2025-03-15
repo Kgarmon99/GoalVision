@@ -14,7 +14,7 @@ interface SimpleAvatarProps {
 }
 
 export function SimpleAvatar({
-  imagePath = "/images/user.svg",
+  imagePath = "/images/user.jpg",
   size = "md",
   className,
   withBorder = true,

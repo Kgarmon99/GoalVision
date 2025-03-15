@@ -17,7 +17,7 @@ interface UserPhotoAvatarProps {
 }
 
 export function UserPhotoAvatar({
-  imagePath = "/images/user.svg",
+  imagePath = "/images/user.jpg",
   size = "md",
   animation = "float",
   className,
