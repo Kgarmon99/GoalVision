@@ -19,6 +19,7 @@ import { AnimatedComponent } from "@/components/ui/animated-component";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
 import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
+import { AnimatedNotification } from "@/components/ui/animated-notification";
 import { Animated3DBackground } from "@/components/ui/animated-3d-background";
 import { ParticleEffect } from "@/components/ui/particle-effect";
 import { CursorEffect } from "@/components/ui/cursor-effect";
@@ -80,52 +81,201 @@ const StatCard = memo(({ icon, value, label, delay }: StatCardProps) => (
 ));
 
 // Memoized action bar to prevent unnecessary re-renders
-const ActionBar = memo(() => (
-  <motion.div 
-    className="mb-6 bg-card rounded-lg border border-border shadow-sm p-4 flex flex-wrap gap-4 justify-between items-center"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    <div className="flex items-center">
-      <div className="mr-2 bg-primary/10 p-2 rounded-full">
-        <Target className="h-6 w-6 text-primary" />
-      </div>
-      <h2 className="text-lg font-semibold">2025 Goals Tracker</h2>
-    </div>
-    <div className="flex gap-3 flex-wrap">
-      <Link href="/add-progress">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-2"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Update Progress
-        </Button>
-      </Link>
-      <Link href="/add-goal">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Goal
-        </Button>
-      </Link>
-      <Link href="/add-task">
-        <Button 
-          size="sm" 
-          className="gap-2"
-        >
-          <Rocket className="h-4 w-4" />
-          Track Execution
-        </Button>
-      </Link>
-    </div>
-  </motion.div>
-));
+const ActionBar = memo(() => {
+  // State to control animation type
+  const [photoAnimation, setPhotoAnimation] = useState<"float" | "pulse" | "spin" | "glow" | "morph" | "bounce">("float");
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationKey, setNotificationKey] = useState(0);
+  const [showParticles, setShowParticles] = useState(false);
+  const [particleType, setParticleType] = useState<"confetti" | "sparkles" | "bubbles" | "atoms">("sparkles");
+  
+  // Animation name mapping for display
+  const animationNames = {
+    float: "Floating",
+    pulse: "Pulsing",
+    spin: "Spinning",
+    glow: "Glowing",
+    morph: "Morphing",
+    bounce: "Bouncing"
+  };
+  
+  // Cycle through animations on click
+  const cycleAnimation = () => {
+    const animations: Array<"float" | "pulse" | "spin" | "glow" | "morph" | "bounce"> = ["float", "pulse", "spin", "glow", "morph", "bounce"];
+    const currentIndex = animations.indexOf(photoAnimation);
+    const nextIndex = (currentIndex + 1) % animations.length;
+    const newAnimation = animations[nextIndex];
+    
+    setPhotoAnimation(newAnimation);
+    setShowNotification(true);
+    setNotificationKey(prevKey => prevKey + 1);
+    
+    // Show particles for a short duration
+    setParticleType(getParticleTypeForAnimation(newAnimation));
+    setShowParticles(true);
+    setTimeout(() => {
+      setShowParticles(false);
+    }, 2000);
+    
+    // Auto-hide notification after 3 seconds
+    setTimeout(() => {
+      setShowNotification(false);
+    }, 3000);
+  };
+  
+  // Get particle type based on animation
+  const getParticleTypeForAnimation = (animation: "float" | "pulse" | "spin" | "glow" | "morph" | "bounce"): "confetti" | "sparkles" | "bubbles" | "atoms" => {
+    switch(animation) {
+      case "float":
+        return "bubbles";
+      case "pulse":
+        return "atoms";
+      case "spin":
+        return "confetti";
+      case "glow":
+        return "sparkles";
+      case "morph":
+        return "atoms";
+      case "bounce":
+        return "confetti";
+      default:
+        return "sparkles";
+    }
+  };
+  
+  // Get particle colors based on animation
+  const getParticleColors = (): string[] => {
+    switch(photoAnimation) {
+      case "float":
+        return ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
+      case "pulse":
+        return ["#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"];
+      case "spin":
+        return ["#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"];
+      case "glow":
+        return ["#10b981", "#34d399", "#047857", "#a7f3d0"];
+      case "morph":
+        return ["#8b5cf6", "#a78bfa", "#c4b5fd", "#ddd6fe"];
+      case "bounce":
+        return ["#ec4899", "#f472b6", "#f9a8d4", "#fbcfe8"];
+      default:
+        return ["#10b981", "#3b82f6", "#ec4899", "#f59e0b"];
+    }
+  };
+  
+  // Select appropriate notification type based on animation
+  const getNotificationType = (): "success" | "info" | "warning" | "error" => {
+    switch(photoAnimation) {
+      case "float":
+      case "glow":
+        return "success";
+      case "pulse":
+      case "morph":
+        return "info";
+      case "spin":
+        return "warning";
+      case "bounce":
+        return "success";
+      default:
+        return "info";
+    }
+  };
+  
+  return (
+    <>
+      <motion.div 
+        className="mb-6 bg-card rounded-lg border border-border shadow-sm p-4 flex flex-wrap gap-4 justify-between items-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center relative">
+          {/* Particle effects around the avatar */}
+          {showParticles && (
+            <div className="absolute -inset-2 z-10">
+              <ParticleEffect
+                type={particleType}
+                count={30}
+                colors={getParticleColors()}
+                autoPlay={true}
+                duration={2000}
+                speed={1.5}
+                particleSize={[3, 8]}
+              />
+            </div>
+          )}
+          
+          <UserPhotoAvatar 
+            size="md" 
+            animation={photoAnimation} 
+            className="mr-3 z-20 relative"
+            onClick={cycleAnimation}
+            withBorder={true}
+            borderColor="border-green-400"
+            withShadow={true}
+          />
+          <div>
+            <h2 className="text-lg font-semibold">2025 Goals Tracker</h2>
+            <p className="text-xs text-muted-foreground">Your personal achievement dashboard</p>
+          </div>
+        </div>
+        <div className="flex gap-3 flex-wrap">
+          <AnimatedTooltip content="Update your progress on existing goals" position="bottom">
+            <Link href="/add-progress">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+              >
+                <PlusCircle className="h-4 w-4" />
+                Update Progress
+              </Button>
+            </Link>
+          </AnimatedTooltip>
+          <AnimatedTooltip content="Add a new goal to track" position="bottom">
+            <Link href="/add-goal">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Goal
+              </Button>
+            </Link>
+          </AnimatedTooltip>
+          <AnimatedTooltip content="Track your execution tasks" position="bottom">
+            <Link href="/add-task">
+              <Button 
+                size="sm" 
+                className="gap-2"
+              >
+                <Rocket className="h-4 w-4" />
+                Track Execution
+              </Button>
+            </Link>
+          </AnimatedTooltip>
+        </div>
+      </motion.div>
+      
+      {/* Animated notification for animation changes */}
+      {showNotification && (
+        <div className="fixed top-4 right-4 z-50">
+          <AnimatedNotification
+            key={notificationKey}
+            type={getNotificationType()}
+            title={`Animation: ${animationNames[photoAnimation]}`}
+            message="Click on your photo to try more animations!"
+            duration={3000}
+            position="top-right"
+            showIcon={true}
+            onClose={() => setShowNotification(false)}
+          />
+        </div>
+      )}
+    </>
+  );
+});
 
 // Loading skeletons for goals and metrics as memoized components
 const GoalsSkeleton = memo(() => (
