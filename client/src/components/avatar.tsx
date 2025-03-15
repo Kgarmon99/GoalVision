@@ -137,7 +137,7 @@ const getHoverAnimation = (isInteractive: boolean, animation: string) => {
 // Simple avatar renderer
 const renderSimpleAvatar = (props: EnhancedAvatarProps) => {
   const {
-    imagePath = "/images/user.jpeg",
+    imagePath = "/images/user.svg",
     size = "md",
     className,
     withBorder = true,
@@ -173,7 +173,7 @@ const renderSimpleAvatar = (props: EnhancedAvatarProps) => {
 
 // Profile picture renderer (simpler version)
 const renderProfileAvatar = (props: EnhancedAvatarProps) => {
-  const { className, onClick, imagePath = "/images/user.jpeg" } = props;
+  const { className, onClick, imagePath = "/images/user.svg" } = props;
   
   return (
     <div 
@@ -195,7 +195,7 @@ const renderProfileAvatar = (props: EnhancedAvatarProps) => {
 // Animated avatar renderer
 const renderAnimatedAvatar = (props: EnhancedAvatarProps) => {
   const {
-    imagePath = "/images/user.jpeg",
+    imagePath = "/images/user.svg",
     size = "md",
     animation = "float",
     className,
