@@ -27,7 +27,6 @@ const Header = () => {
             <Link href="/">
               <div className="flex-shrink-0 flex items-center cursor-pointer">
                 <CalendarIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold text-white hidden sm:inline">2025 Goals Tracker</span>
                 <span className="ml-2 text-lg font-bold text-white sm:hidden">Goals</span>
               </div>
             </Link>
