@@ -6,7 +6,7 @@ import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
-import { UserPhotoAvatar } from "@/components/user-photo-avatar";
+import { SimpleAvatar } from "@/components/simple-avatar";
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
@@ -205,10 +205,9 @@ const ActionBar = memo(() => {
             </div>
           )}
           
-          <UserPhotoAvatar 
+          <SimpleAvatar 
             size="md" 
-            imagePath="/user.jpeg"
-            animation={photoAnimation} 
+            imagePath="/images/user.jpeg"
             className="mr-3 z-20 relative"
             onClick={cycleAnimation}
             withBorder={true}
