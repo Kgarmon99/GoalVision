@@ -20,7 +20,7 @@ export function NavBar() {
           className="flex items-center gap-2 font-semibold"
         >
           <Target className="h-5 w-5 text-primary" />
-          <span>2025 Goals</span>
+          <span>Goals</span>
         </a>
         
         <nav className="flex items-center space-x-2">

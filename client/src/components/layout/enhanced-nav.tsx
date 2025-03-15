@@ -147,7 +147,7 @@ const renderEnhancedNav = (props: EnhancedNavProps) => {
   const { 
     className, 
     showBranding = true, 
-    brandingText = "2025 Goals Tracker",
+    brandingText = "Goals",
     brandingIcon = <Target className="h-5 w-5 text-primary" />,
     additionalNavItems = [],
     quickActions = getDefaultQuickActions(),

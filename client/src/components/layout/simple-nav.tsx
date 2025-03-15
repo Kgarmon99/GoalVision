@@ -72,7 +72,7 @@ export function SimpleNav() {
             onClick={(e) => handleNavigation('/', e)}
           >
             <Target className="h-5 w-5 text-primary" />
-            <span>2025 Goals Tracker</span>
+            <span>Goals</span>
           </a>
           
           <nav className="flex items-center space-x-3">
