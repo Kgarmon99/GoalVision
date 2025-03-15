@@ -334,7 +334,7 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
                 style={{ width: '100%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Annual burn rate</p>
+            <p className="text-xs text-muted-foreground mt-2">Annual expense projection</p>
           </CardContent>
         </Card>
         
@@ -347,10 +347,10 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-red-500"
-                style={{ width: '100%' }}
+                style={{ width: '80%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Monthly burn rate</p>
+            <p className="text-xs text-muted-foreground mt-2">Monthly spending level</p>
           </CardContent>
         </Card>
         
@@ -363,10 +363,10 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-amber-500"
-                style={{ width: '75%' }}
+                style={{ width: '60%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Weekly burn rate</p>
+            <p className="text-xs text-muted-foreground mt-2">Average weekly cost</p>
           </CardContent>
         </Card>
         
@@ -378,11 +378,11 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
             </div>
             <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-amber-500"
-                style={{ width: '50%' }}
+                className="h-full bg-green-500"
+                style={{ width: '40%' }}
               ></div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Daily burn rate</p>
+            <p className="text-xs text-muted-foreground mt-2">Per day expense</p>
           </CardContent>
         </Card>
       </div>
