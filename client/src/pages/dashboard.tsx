@@ -6,7 +6,7 @@ import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
-import { ProfilePicture } from "@/components/profile-picture";
+
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
@@ -94,30 +94,28 @@ const ActionBar = memo(() => {
         transition={{ duration: 0.5 }}
       >
         <div className="flex gap-3 flex-wrap">
-          <AnimatedTooltip content="Update your progress on existing goals" position="bottom">
-            <Link href="/add-progress">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-              >
-                <PlusCircle className="h-4 w-4" />
-                Update Progress
-              </Button>
-            </Link>
-          </AnimatedTooltip>
-          <AnimatedTooltip content="Add a new goal to track" position="bottom">
-            <Link href="/add-goal">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Goal
-              </Button>
-            </Link>
-          </AnimatedTooltip>
+          <Link href="/add-progress">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              title="Update your progress on existing goals"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Update Progress
+            </Button>
+          </Link>
+          <Link href="/add-goal">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              title="Add a new goal to track"
+            >
+              <Plus className="h-4 w-4" />
+              Add Goal
+            </Button>
+          </Link>
           <AnimatedTooltip content="Track your execution tasks" position="bottom">
             <Link href="/add-task">
               <Button 

@@ -103,7 +103,7 @@ function App() {
         {/* Navigation Header - Use Enhanced Nav */}
         <EnhancedNav 
           variant="enhanced"
-          brandingText="2025 Goals"
+          brandingText="Goals"
           brandingIcon={<Target className="h-5 w-5 text-primary" />}
           showBranding={true}
           fixed={true}
