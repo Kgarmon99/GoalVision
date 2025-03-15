@@ -6,7 +6,7 @@ import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { MetricsDashboard } from "@/components/metrics-dashboard";
-import { SimpleAvatar } from "@/components/simple-avatar";
+import { ProfilePicture } from "@/components/profile-picture";
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
@@ -205,14 +205,9 @@ const ActionBar = memo(() => {
             </div>
           )}
           
-          <SimpleAvatar 
-            size="md" 
-            imagePath="/images/user.jpeg"
+          <ProfilePicture 
             className="mr-3 z-20 relative"
             onClick={cycleAnimation}
-            withBorder={true}
-            borderColor="border-green-400"
-            withShadow={true}
           />
           <div>
             <h2 className="text-lg font-semibold">2025 Goals Tracker</h2>
