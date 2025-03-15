@@ -195,7 +195,7 @@ const renderProfileAvatar = (props: EnhancedAvatarProps) => {
 // Animated avatar renderer
 const renderAnimatedAvatar = (props: EnhancedAvatarProps) => {
   const {
-    imagePath = "/images/profiles/user-photo.jpeg",
+    imagePath = "/images/user.jpeg",
     size = "md",
     animation = "float",
     className,
