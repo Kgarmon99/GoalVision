@@ -403,20 +403,6 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           </AnimatePresence>
           
           <div className="mt-3 flex justify-end gap-2">
-            <Link href={`/add-progress?goalId=${goal.id}`}>
-              <AnimatedButton
-                animation="hover"
-                variant="outline"
-                size="sm"
-                className="text-xs border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400 group"
-                icon={<PlusCircle className="h-3 w-3 group-hover:text-white transition-colors" />}
-                iconPosition="left"
-              >
-                <span className="hidden xs:inline">Update</span> Progress
-                <ArrowUpRight className="h-3 w-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </AnimatedButton>
-            </Link>
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -428,6 +414,24 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700 text-gray-200">
+                <DropdownMenuItem 
+                  className="flex items-center cursor-pointer text-green-400 hover:text-green-300 hover:bg-gray-800"
+                  onClick={() => {
+                    // Focus on current value in the edit form
+                    setIsEditDialogOpen(true);
+                    setTimeout(() => {
+                      // Use setTimeout to ensure DOM is updated before focusing
+                      const currentValueInput = document.querySelector('input[name="current"]');
+                      if (currentValueInput instanceof HTMLInputElement) {
+                        currentValueInput.focus();
+                        currentValueInput.select();
+                      }
+                    }, 100);
+                  }}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Update Progress
+                </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center cursor-pointer hover:text-green-400 hover:bg-gray-800"
                   onClick={() => setIsEditDialogOpen(true)}
@@ -451,13 +455,40 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       
       {/* Edit Goal Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-900 border-gray-700 text-white sm:max-w-[425px]">
+        <DialogContent className="bg-gray-900 border-gray-700 text-white sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-green-400">Edit Goal</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Update your goal details and progress.
+              Update your goal details and track your progress.
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Current Progress Indicator */}
+          <div className="mb-4 p-4 bg-gray-800 rounded-md border border-gray-700">
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm text-green-400">Current Progress</p>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                percentComplete >= 75 ? "bg-green-900/75 text-green-400 border border-green-500" :
+                percentComplete >= 50 ? "bg-yellow-900/75 text-yellow-400 border border-yellow-500" :
+                percentComplete >= 25 ? "bg-orange-900/75 text-orange-400 border border-orange-500" :
+                "bg-red-900/75 text-red-400 border border-red-500"
+              }`}>
+                {percentComplete}% complete
+              </span>
+            </div>
+            <EnhancedProgress 
+              value={percentComplete}
+              variant="animated"
+              threshold={{ high: 75, medium: 50, low: 25 }}
+              thresholdColors={{
+                high: "bg-green-500",
+                medium: "bg-yellow-500",
+                low: "bg-orange-500",
+                veryLow: "bg-red-600"
+              }}
+              className="bg-gray-900"
+            />
+          </div>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -485,17 +516,30 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   name="current"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-300">Current Value</FormLabel>
+                      <FormLabel className="text-green-400 font-medium flex items-center">
+                        <PlusCircle className="h-3 w-3 mr-1" />
+                        Current Progress
+                      </FormLabel>
                       <FormControl>
-                        <Input 
-                          className="bg-gray-800 border-gray-700 text-white"
-                          type="number" 
-                          step="any"
-                          placeholder="0" 
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
+                        <div className="relative">
+                          <Input 
+                            className="bg-gray-800 border-green-600 text-white focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                            type="number" 
+                            step="any"
+                            placeholder="0" 
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          />
+                          {goal.unit && (
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                              <span className="text-gray-400">{goal.unit}</span>
+                            </div>
+                          )}
+                        </div>
                       </FormControl>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Update this value to track your goal progress
+                      </div>
                       <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
@@ -508,14 +552,21 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     <FormItem>
                       <FormLabel className="text-gray-300">Target Value</FormLabel>
                       <FormControl>
-                        <Input 
-                          className="bg-gray-800 border-gray-700 text-white"
-                          type="number" 
-                          step="any"
-                          placeholder="100" 
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
+                        <div className="relative">
+                          <Input 
+                            className="bg-gray-800 border-gray-700 text-white"
+                            type="number" 
+                            step="any"
+                            placeholder="100" 
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          />
+                          {goal.unit && (
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                              <span className="text-gray-400">{goal.unit}</span>
+                            </div>
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage className="text-red-400" />
                     </FormItem>
@@ -612,23 +663,41 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 )}
               />
               
-              <DialogFooter className="pt-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsEditDialogOpen(false)}
-                  className="text-gray-300 hover:text-white hover:bg-gray-800"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  className="bg-green-600 text-white hover:bg-green-700"
-                  disabled={updateGoalMutation.isPending}
-                >
-                  {updateGoalMutation.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
+              <div className="pt-4 flex flex-col space-y-2">
+                {/* Help text */}
+                <div className="text-xs text-green-400 bg-gray-800 p-2 rounded border border-gray-700 mb-2">
+                  <p className="flex items-center">
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    <span>Tip: Update your progress regularly to stay on track and celebrate milestones!</span>
+                  </p>
+                </div>
+                
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsEditDialogOpen(false)}
+                    className="text-gray-300 hover:text-white hover:bg-gray-800"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit"
+                    className={`text-white ${
+                      form.watch('current') > goal.current 
+                        ? "bg-green-600 hover:bg-green-700" 
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                    disabled={updateGoalMutation.isPending}
+                  >
+                    {updateGoalMutation.isPending 
+                      ? "Saving..." 
+                      : form.watch('current') > goal.current
+                        ? "Update Progress" 
+                        : "Save Changes"}
+                  </Button>
+                </DialogFooter>
+              </div>
             </form>
           </Form>
         </DialogContent>
