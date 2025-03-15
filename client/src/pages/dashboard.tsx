@@ -207,6 +207,7 @@ const ActionBar = memo(() => {
           
           <UserPhotoAvatar 
             size="md" 
+            imagePath="/user.jpeg"
             animation={photoAnimation} 
             className="mr-3 z-20 relative"
             onClick={cycleAnimation}
