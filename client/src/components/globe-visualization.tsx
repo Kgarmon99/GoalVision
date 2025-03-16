@@ -192,10 +192,10 @@ export function GlobeVisualization({
     equator.rotation.x = Math.PI / 2;
     globeGroup.add(equator);
     
-    // Add grid lines
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI;
-      const gridGeometry = new THREE.RingGeometry(50.2, 50.8, 128);
+    // Add grid lines (longitude lines)
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2;
+      const gridGeometry = new THREE.RingGeometry(50, 50.2, 128);
       const gridMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xffffff, 
         transparent: true, 
@@ -207,12 +207,147 @@ export function GlobeVisualization({
       // Position grid line
       grid.rotation.y = angle;
       globeGroup.add(grid);
+    }
+    
+    // Add latitude lines
+    for (let i = 1; i < 18; i++) {
+      // Skip equator as we already have it
+      if (i === 9) continue;
       
-      // Add perpendicular grid line
-      const gridPerp = new THREE.Mesh(gridGeometry, gridMaterial);
-      gridPerp.rotation.x = Math.PI / 2;
-      gridPerp.rotation.z = angle;
-      globeGroup.add(gridPerp);
+      const lat = (i - 9) * 10 * Math.PI / 180;
+      const radius = 50 * Math.cos(lat);
+      
+      const latGeometry = new THREE.RingGeometry(radius - 0.1, radius + 0.1, 128);
+      const latMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.1,
+        side: THREE.DoubleSide
+      });
+      
+      const latRing = new THREE.Mesh(latGeometry, latMaterial);
+      latRing.rotation.x = Math.PI / 2;
+      latRing.position.y = 50 * Math.sin(lat);
+      
+      globeGroup.add(latRing);
+    }
+    
+    // Add continent outlines (simplified)
+    const addContinent = (points: THREE.Vector3[], name: string) => {
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ 
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.3
+      });
+      
+      const continent = new THREE.Line(geometry, material);
+      continent.userData = { continentName: name };
+      globeGroup.add(continent);
+    };
+    
+    // North America (simplified outline)
+    const northAmerica = [
+      getPositionOnGlobe(60, -125), // Alaska
+      getPositionOnGlobe(55, -110), // Canada West
+      getPositionOnGlobe(50, -100), // Canada Central
+      getPositionOnGlobe(45, -80),  // Great Lakes
+      getPositionOnGlobe(40, -75),  // US East Coast
+      getPositionOnGlobe(30, -85),  // US South
+      getPositionOnGlobe(25, -100), // Mexico
+      getPositionOnGlobe(15, -90),  // Central America
+      getPositionOnGlobe(10, -80),  // Panama
+      getPositionOnGlobe(30, -120), // US West Coast
+      getPositionOnGlobe(50, -130), // Canada West Coast
+      getPositionOnGlobe(60, -125)  // Back to Alaska
+    ];
+    addContinent(northAmerica, "North America");
+    
+    // South America (simplified outline)
+    const southAmerica = [
+      getPositionOnGlobe(10, -80),  // Panama
+      getPositionOnGlobe(5, -75),   // Colombia
+      getPositionOnGlobe(0, -78),   // Ecuador
+      getPositionOnGlobe(-10, -75), // Peru
+      getPositionOnGlobe(-20, -65), // Bolivia
+      getPositionOnGlobe(-30, -70), // Chile
+      getPositionOnGlobe(-35, -65), // Argentina
+      getPositionOnGlobe(-25, -45), // Brazil South
+      getPositionOnGlobe(-10, -40), // Brazil East
+      getPositionOnGlobe(0, -50),   // Brazil North
+      getPositionOnGlobe(10, -65),  // Venezuela
+      getPositionOnGlobe(10, -80)   // Back to Panama
+    ];
+    addContinent(southAmerica, "South America");
+    
+    // Europe (simplified outline)
+    const europe = [
+      getPositionOnGlobe(60, 0),    // Norway
+      getPositionOnGlobe(55, 15),   // Sweden
+      getPositionOnGlobe(50, 30),   // Eastern Europe
+      getPositionOnGlobe(45, 25),   // Romania
+      getPositionOnGlobe(40, 20),   // Greece
+      getPositionOnGlobe(38, 10),   // Italy
+      getPositionOnGlobe(43, 5),    // France
+      getPositionOnGlobe(40, -5),   // Spain
+      getPositionOnGlobe(48, -5),   // France West
+      getPositionOnGlobe(50, 0),    // UK
+      getPositionOnGlobe(60, 0)     // Back to Norway
+    ];
+    addContinent(europe, "Europe");
+    
+    // Africa (simplified outline)
+    const africa = [
+      getPositionOnGlobe(30, 0),    // Morocco
+      getPositionOnGlobe(25, 30),   // Egypt
+      getPositionOnGlobe(10, 45),   // Somalia
+      getPositionOnGlobe(0, 40),    // Kenya
+      getPositionOnGlobe(-20, 35),  // Mozambique
+      getPositionOnGlobe(-30, 25),  // South Africa
+      getPositionOnGlobe(-20, 15),  // Namibia
+      getPositionOnGlobe(0, 10),    // Congo
+      getPositionOnGlobe(10, 0),    // Nigeria
+      getPositionOnGlobe(30, 0)     // Back to Morocco
+    ];
+    addContinent(africa, "Africa");
+    
+    // Asia (simplified outline)
+    const asia = [
+      getPositionOnGlobe(65, 80),   // Siberia
+      getPositionOnGlobe(55, 125),  // Russia East
+      getPositionOnGlobe(40, 125),  // China East
+      getPositionOnGlobe(22, 115),  // Vietnam
+      getPositionOnGlobe(15, 100),  // Thailand
+      getPositionOnGlobe(5, 100),   // Malaysia
+      getPositionOnGlobe(20, 80),   // India
+      getPositionOnGlobe(30, 60),   // Middle East
+      getPositionOnGlobe(40, 45),   // Turkey
+      getPositionOnGlobe(50, 50),   // Russia South
+      getPositionOnGlobe(65, 80)    // Back to Siberia
+    ];
+    addContinent(asia, "Asia");
+    
+    // Australia (simplified outline)
+    const australia = [
+      getPositionOnGlobe(-20, 120), // Australia North
+      getPositionOnGlobe(-25, 135), // Australia East
+      getPositionOnGlobe(-35, 145), // Australia Southeast
+      getPositionOnGlobe(-35, 135), // Australia South
+      getPositionOnGlobe(-30, 115), // Australia West
+      getPositionOnGlobe(-20, 120)  // Back to Australia North
+    ];
+    addContinent(australia, "Australia");
+    
+    // Helper function to get position on globe
+    function getPositionOnGlobe(lat: number, lng: number): THREE.Vector3 {
+      const phi = (90 - lat) * Math.PI / 180;
+      const theta = (lng + 180) * Math.PI / 180;
+      
+      const x = -50 * Math.sin(phi) * Math.cos(theta);
+      const y = 50 * Math.cos(phi);
+      const z = 50 * Math.sin(phi) * Math.sin(theta);
+      
+      return new THREE.Vector3(x, y, z);
     }
     
     // Handle window resize
@@ -273,13 +408,11 @@ export function GlobeVisualization({
     users.forEach(user => {
       if (!user.latitude || !user.longitude) return;
       
-      // Convert lat/lng to 3D position
-      const lat = (user.latitude * Math.PI) / 180;
-      const lng = (user.longitude * Math.PI) / 180;
-      
-      const x = -50 * Math.cos(lat) * Math.sin(lng);
-      const y = 50 * Math.sin(lat);
-      const z = 50 * Math.cos(lat) * Math.cos(lng);
+      // Convert lat/lng to 3D position using same function as the continents
+      const position = getPositionOnGlobe(user.latitude, user.longitude);
+      const x = position.x;
+      const y = position.y;
+      const z = position.z;
       
       // Create marker
       const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
