@@ -1,0 +1,160 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { z } from "zod";
+import { 
+  insertGoalSchema, 
+  insertMetricSchema, 
+  insertGoalStatusSchema, 
+  insertExecutionTaskSchema, 
+  insertWeekSchema,
+  insertSubtaskSchema,
+  insertUserSchema,
+  goals,
+  metrics,
+  goalStatus,
+  executionTasks,
+  subtasks,
+  weeks,
+  users
+} from "@shared/schema";
+import { db } from "./db";
+
+// Simple server-side cache implementation to reduce database load
+// Cache entries expire after specified time to ensure data freshness
+type CacheEntry<T> = {
+  data: T;
+  timestamp: number;
+};
+
+// Cache configuration constants
+const CACHE_TTL = {
+  GOALS: 5 * 60 * 1000,         // 5 minutes for goals data
+  METRICS: 10 * 60 * 1000,      // 10 minutes for metrics (changes less frequently)
+  TASKS: 2 * 60 * 1000,         // 2 minutes for tasks (changes more frequently)
+  USERS: 15 * 60 * 1000,        // 15 minutes for users data
+  GOAL_STATUSES: 5 * 60 * 1000, // 5 minutes for goal statuses
+  DEFAULT: 60 * 1000            // 1 minute default
+};
+
+class ServerCache {
+  private cache: Map<string, CacheEntry<any>> = new Map();
+  private defaultTTL: number = CACHE_TTL.DEFAULT;
+  private cacheHits: number = 0;
+  private cacheMisses: number = 0;
+  private cacheSize: number = 0;
+  private maxCacheSize: number = 100; // Maximum number of entries to store
+  
+  constructor() {
+    // Periodically clean up expired entries
+    setInterval(() => this.cleanup(), 5 * 60 * 1000); // Clean every 5 minutes
+  }
+
+  set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
+    // If cache is full, remove the oldest entry
+    if (this.cache.size >= this.maxCacheSize) {
+      const oldestKey = this.getOldestCacheKey();
+      if (oldestKey) this.cache.delete(oldestKey);
+    }
+    
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now() + ttl
+    });
+    
+    this.cacheSize = this.cache.size;
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    
+    if (!entry) {
+      this.cacheMisses++;
+      return null;
+    }
+    
+    // Check if cache entry has expired
+    if (Date.now() > entry.timestamp) {
+      this.cache.delete(key);
+      this.cacheMisses++;
+      this.cacheSize = this.cache.size;
+      return null;
+    }
+    
+    this.cacheHits++;
+    return entry.data as T;
+  }
+
+  invalidate(key: string): void {
+    this.cache.delete(key);
+    this.cacheSize = this.cache.size;
+  }
+
+  invalidateByPrefix(prefix: string): void {
+    // Convert keys iterator to array before iterating to fix LSP error
+    const keys = Array.from(this.cache.keys());
+    for (const key of keys) {
+      if (key.startsWith(prefix)) {
+        this.cache.delete(key);
+      }
+    }
+    this.cacheSize = this.cache.size;
+  }
+  
+  private getOldestCacheKey(): string | null {
+    if (this.cache.size === 0) return null;
+    
+    let oldestKey: string | null = null;
+    let oldestTimestamp = Infinity;
+    
+    this.cache.forEach((entry, key) => {
+      if (entry.timestamp < oldestTimestamp) {
+        oldestTimestamp = entry.timestamp;
+        oldestKey = key;
+      }
+    });
+    
+    return oldestKey;
+  }
+  
+  private cleanup(): void {
+    const now = Date.now();
+    let expiredCount = 0;
+    
+    this.cache.forEach((entry, key) => {
+      if (now > entry.timestamp) {
+        this.cache.delete(key);
+        expiredCount++;
+      }
+    });
+    
+    this.cacheSize = this.cache.size;
+    console.log(`Cache cleanup: removed ${expiredCount} expired entries. Current cache size: ${this.cacheSize}`);
+  }
+  
+  // Get cache statistics
+  getStats() {
+    const hitRate = this.cacheHits + this.cacheMisses > 0 
+      ? (this.cacheHits / (this.cacheHits + this.cacheMisses) * 100).toFixed(2) 
+      : '0';
+      
+    return {
+      size: this.cacheSize,
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      hitRate: `${hitRate}%`
+    };
+  }
+}
+
+const serverCache = new ServerCache();
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // API Routes
+  // All routes are prefixed with /api
+  
+  // Update metrics based on goal data
+  app.post("/api/metrics/refresh", async (req, res) => {
+    try {
+      const goals = await storage.getAllGoals();
+      const existingGrowthMetrics = await storage.getMetricsByCategory("growth");

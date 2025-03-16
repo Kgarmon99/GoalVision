@@ -27,33 +27,67 @@ type CacheEntry<T> = {
   timestamp: number;
 };
 
+// Cache configuration constants
+const CACHE_TTL = {
+  GOALS: 5 * 60 * 1000,         // 5 minutes for goals data
+  METRICS: 10 * 60 * 1000,      // 10 minutes for metrics (changes less frequently)
+  TASKS: 2 * 60 * 1000,         // 2 minutes for tasks (changes more frequently)
+  USERS: 15 * 60 * 1000,        // 15 minutes for users data
+  GOAL_STATUSES: 5 * 60 * 1000, // 5 minutes for goal statuses
+  DEFAULT: 60 * 1000            // 1 minute default
+};
+
 class ServerCache {
   private cache: Map<string, CacheEntry<any>> = new Map();
-  private defaultTTL: number = 60 * 1000; // Default 60 seconds TTL
+  private defaultTTL: number = CACHE_TTL.DEFAULT;
+  private cacheHits: number = 0;
+  private cacheMisses: number = 0;
+  private cacheSize: number = 0;
+  private maxCacheSize: number = 100; // Maximum number of entries to store
+  
+  constructor() {
+    // Periodically clean up expired entries
+    setInterval(() => this.cleanup(), 5 * 60 * 1000); // Clean every 5 minutes
+  }
 
   set<T>(key: string, data: T, ttl: number = this.defaultTTL): void {
+    // If cache is full, remove the oldest entry
+    if (this.cache.size >= this.maxCacheSize) {
+      const oldestKey = this.getOldestCacheKey();
+      if (oldestKey) this.cache.delete(oldestKey);
+    }
+    
     this.cache.set(key, {
       data,
       timestamp: Date.now() + ttl
     });
+    
+    this.cacheSize = this.cache.size;
   }
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
     
-    if (!entry) return null;
+    if (!entry) {
+      this.cacheMisses++;
+      return null;
+    }
     
     // Check if cache entry has expired
     if (Date.now() > entry.timestamp) {
       this.cache.delete(key);
+      this.cacheMisses++;
+      this.cacheSize = this.cache.size;
       return null;
     }
     
+    this.cacheHits++;
     return entry.data as T;
   }
 
   invalidate(key: string): void {
     this.cache.delete(key);
+    this.cacheSize = this.cache.size;
   }
 
   invalidateByPrefix(prefix: string): void {
@@ -64,6 +98,52 @@ class ServerCache {
         this.cache.delete(key);
       }
     }
+    this.cacheSize = this.cache.size;
+  }
+  
+  private getOldestCacheKey(): string | null {
+    if (this.cache.size === 0) return null;
+    
+    let oldestKey: string | null = null;
+    let oldestTimestamp = Infinity;
+    
+    this.cache.forEach((entry, key) => {
+      if (entry.timestamp < oldestTimestamp) {
+        oldestTimestamp = entry.timestamp;
+        oldestKey = key;
+      }
+    });
+    
+    return oldestKey;
+  }
+  
+  private cleanup(): void {
+    const now = Date.now();
+    let expiredCount = 0;
+    
+    this.cache.forEach((entry, key) => {
+      if (now > entry.timestamp) {
+        this.cache.delete(key);
+        expiredCount++;
+      }
+    });
+    
+    this.cacheSize = this.cache.size;
+    console.log(`Cache cleanup: removed ${expiredCount} expired entries. Current cache size: ${this.cacheSize}`);
+  }
+  
+  // Get cache statistics
+  getStats() {
+    const hitRate = this.cacheHits + this.cacheMisses > 0 
+      ? (this.cacheHits / (this.cacheHits + this.cacheMisses) * 100).toFixed(2) 
+      : '0';
+      
+    return {
+      size: this.cacheSize,
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      hitRate: `${hitRate}%`
+    };
   }
 }
 
@@ -100,80 +180,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               trendDirection: trend >= 0 ? "up" : "down"
             });
           }
-          
-          // Update User Growth Rate
-          const growthRateMetric = existingGrowthMetrics.find(m => m.name === "User Retention Rate");
-          if (growthRateMetric) {
-            const completionPercentage = (userGrowthGoal.current / userGrowthGoal.target) * 100;
-            const current = `${completionPercentage.toFixed(1)}%`;
-            const previous = growthRateMetric.value;
-            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
-            const trend = ((completionPercentage - previousValue) / previousValue) * 100;
-            
-            await storage.updateMetric(growthRateMetric.id, {
-              value: current,
-              previousValue: previous,
-              trend: Math.abs(trend),
-              trendDirection: trend >= 0 ? "up" : "down"
-            });
-          }
-        }
-        
-        // Find school related goal if it exists
-        const schoolGoal = goals.find(g => g.name.toLowerCase().includes("school"));
-        if (schoolGoal) {
-          // Update School Onboarding Rate
-          const schoolMetric = existingGrowthMetrics.find(m => m.name === "School Onboarding Rate");
-          if (schoolMetric) {
-            const current = `${schoolGoal.current}/month`;
-            const previous = schoolMetric.value;
-            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
-            const trend = ((schoolGoal.current - previousValue) / previousValue) * 100;
-            
-            await storage.updateMetric(schoolMetric.id, {
-              value: current,
-              previousValue: previous,
-              trend: Math.abs(trend),
-              trendDirection: trend >= 0 ? "up" : "down"
-            });
-          }
-        }
-        
-        // Find Revenue goal if it exists
-        const revenueGoal = goals.find(g => g.name.toLowerCase().includes("revenue"));
-        if (revenueGoal) {
-          // Update Monthly Recurring Revenue
-          const mrrMetric = existingRevenueMetrics.find(m => m.name === "Monthly Recurring Revenue");
-          if (mrrMetric) {
-            const current = `$${(revenueGoal.current / 12).toFixed(2)}M`;
-            const previous = mrrMetric.value;
-            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
-            const monthlyValue = revenueGoal.current / 12;
-            const trend = ((monthlyValue - previousValue) / previousValue) * 100;
-            
-            await storage.updateMetric(mrrMetric.id, {
-              value: current,
-              previousValue: previous,
-              trend: Math.abs(trend),
-              trendDirection: trend >= 0 ? "up" : "down"
-            });
-          }
-          
-          // Update Annual Recurring Revenue
-          const arrMetric = existingRevenueMetrics.find(m => m.name === "Annual Recurring Revenue");
-          if (arrMetric) {
-            const current = `$${revenueGoal.current.toFixed(1)}M`;
-            const previous = arrMetric.value;
-            const previousValue = parseFloat(previous.replace(/[^\d.-]/g, ''));
-            const trend = ((revenueGoal.current - previousValue) / previousValue) * 100;
-            
-            await storage.updateMetric(arrMetric.id, {
-              value: current,
-              previousValue: previous,
-              trend: Math.abs(trend),
-              trendDirection: trend >= 0 ? "up" : "down"
-            });
-          }
         }
       }
       
@@ -181,24 +187,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating metrics:", error);
       res.status(500).json({ message: "Error updating metrics", error: String(error) });
-    }
-  });
-  
-  // Clear all sample data
-  app.post("/api/reset-data", async (req, res) => {
-    try {
-      // Clear all tables
-      await db.delete(subtasks);
-      await db.delete(executionTasks);
-      await db.delete(goalStatus);
-      await db.delete(metrics);
-      await db.delete(goals);
-      await db.delete(weeks);
-      
-      res.status(200).json({ message: "All sample data cleared successfully" });
-    } catch (error) {
-      console.error("Error clearing sample data:", error);
-      res.status(500).json({ message: "Error clearing data", error: String(error) });
     }
   });
   
@@ -219,13 +207,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const goals = await storage.getAllGoals();
       
       // Cache for 30 seconds - goals don't change that frequently but we need fresh data
-      serverCache.set(cacheKey, goals, 30 * 1000);
+      serverCache.set(cacheKey, goals, CACHE_TTL.GOALS);
       
       // Set cache header
       res.set('X-Cache', 'MISS');
       res.json(goals);
     } catch (error) {
       res.status(500).json({ message: "Error fetching goals" });
+    }
+  });
+  
+  // Get a specific goal
+  app.get("/api/goals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const goal = await storage.getGoal(id);
+      
+      if (!goal) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
+      res.json(goal);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching goal" });
     }
   });
   
@@ -297,7 +301,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all metrics
   app.get("/api/metrics", async (req, res) => {
     try {
+      // Try to get metrics from cache first
+      const cacheKey = "metrics:all";
+      const cachedMetrics = serverCache.get(cacheKey);
+      
+      if (cachedMetrics) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedMetrics);
+      }
+      
+      // Cache miss, fetch from database
       const metrics = await storage.getAllMetrics();
+      
+      // Cache for configured TTL
+      serverCache.set(cacheKey, metrics, CACHE_TTL.METRICS);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(metrics);
     } catch (error) {
       res.status(500).json({ message: "Error fetching metrics" });
@@ -308,7 +329,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/metrics/category/:category", async (req, res) => {
     try {
       const category = req.params.category;
+      
+      // Try to get metrics from cache first
+      const cacheKey = `metrics:category:${category}`;
+      const cachedMetrics = serverCache.get(cacheKey);
+      
+      if (cachedMetrics) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedMetrics);
+      }
+      
+      // Cache miss, fetch from database
       const metrics = await storage.getMetricsByCategory(category);
+      
+      // Cache for configured TTL
+      serverCache.set(cacheKey, metrics, CACHE_TTL.METRICS);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(metrics);
     } catch (error) {
       res.status(500).json({ message: "Error fetching metrics by category" });
@@ -325,6 +364,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedMetric) {
         return res.status(404).json({ message: "Metric not found" });
       }
+      
+      // Invalidate caches
+      serverCache.invalidate("metrics:all");
+      serverCache.invalidateByPrefix("metrics:category:");
       
       res.json(updatedMetric);
     } catch (error) {
@@ -352,170 +395,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all goal statuses
   app.get("/api/goal-statuses", async (req, res) => {
     try {
-      const statuses = await storage.getAllGoalStatuses();
-      res.json(statuses);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching goal statuses" });
-    }
-  });
-  
-  // Update a goal status
-  app.patch("/api/goal-statuses/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const statusData = insertGoalStatusSchema.partial().parse(req.body);
-      const updatedStatus = await storage.updateGoalStatus(id, statusData);
+      // Try to get goal statuses from cache first
+      const cacheKey = "goal-statuses:all";
+      const cachedStatuses = serverCache.get(cacheKey);
       
-      if (!updatedStatus) {
-        return res.status(404).json({ message: "Goal status not found" });
-      }
-      
-      res.json(updatedStatus);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid goal status data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error updating goal status" });
-    }
-  });
-  
-  // Create a goal status
-  app.post("/api/goal-statuses", async (req, res) => {
-    try {
-      const statusData = insertGoalStatusSchema.parse(req.body);
-      const status = await storage.createGoalStatus(statusData);
-      res.status(201).json(status);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid goal status data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating goal status" });
-    }
-  });
-  
-  // Get tasks by week with specific weekId
-  app.get("/api/tasks/week/:weekId", async (req, res) => {
-    try {
-      const weekId = parseInt(req.params.weekId);
-      const tasks = await storage.getTasksByWeek(weekId);
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching tasks by week" });
-    }
-  });
-  
-  // Get tasks by week (default to the first week if no id specified)
-  app.get("/api/tasks/week", async (req, res) => {
-    try {
-      // Get the first week from the database, or default to week with ID 1
-      const weeks = await storage.getAllWeeks();
-      
-      if (weeks.length === 0) {
-        return res.status(404).json({ message: "No weeks found" });
-      }
-      
-      const firstWeek = weeks[0];
-      const tasks = await storage.getTasksByWeek(firstWeek.id);
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching task" });
-    }
-  });
-  
-  // Get all tasks
-  app.get("/api/tasks", async (req, res) => {
-    try {
-      // Try to get tasks from cache first
-      const cacheKey = "tasks:all";
-      const cachedTasks = serverCache.get(cacheKey);
-      
-      if (cachedTasks) {
+      if (cachedStatuses) {
         // Set cache header to inform client
         res.set('X-Cache', 'HIT');
-        return res.json(cachedTasks);
+        return res.json(cachedStatuses);
       }
       
       // Cache miss, fetch from database
-      const tasks = await storage.getAllTasks();
+      const statuses = await storage.getAllGoalStatuses();
       
-      // Cache for 30 seconds - tasks are frequently accessed
-      serverCache.set(cacheKey, tasks, 30 * 1000);
+      // Cache for configured TTL
+      serverCache.set(cacheKey, statuses, CACHE_TTL.GOAL_STATUSES);
       
       // Set cache header
       res.set('X-Cache', 'MISS');
-      res.json(tasks);
+      res.json(statuses);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching tasks" });
-    }
-  });
-  
-  // Get a specific task
-  app.get("/api/tasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const task = await storage.getTask(id);
-      
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.json(task);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching task" });
-    }
-  });
-  
-  // Create a task
-  app.post("/api/tasks", async (req, res) => {
-    try {
-      const taskData = insertExecutionTaskSchema.parse(req.body);
-      const task = await storage.createTask(taskData);
-      res.status(201).json(task);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid task data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating task" });
-    }
-  });
-  
-  // Update a task
-  app.patch("/api/tasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const taskData = insertExecutionTaskSchema.partial().parse(req.body);
-      const updatedTask = await storage.updateTask(id, taskData);
-      
-      if (!updatedTask) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      // Invalidate task cache to ensure data consistency
-      serverCache.invalidate("tasks:all");
-      serverCache.invalidateByPrefix(`tasks:week:${updatedTask.weekId}`);
-      
-      res.json(updatedTask);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid task data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error updating task" });
-    }
-  });
-  
-  // Delete a task
-  app.delete("/api/tasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteTask(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting task" });
+      res.status(500).json({ message: "Error fetching goal statuses" });
     }
   });
   
@@ -535,8 +435,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Cache miss, fetch from database
       const weeks = await storage.getAllWeeks();
       
-      // Cache for 60 seconds - weeks rarely change
-      serverCache.set(cacheKey, weeks, 60 * 1000);
+      // Cache for 30 minutes - weeks don't change frequently
+      serverCache.set(cacheKey, weeks, 30 * 60 * 1000);
       
       // Set cache header
       res.set('X-Cache', 'MISS');
@@ -546,285 +446,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get a specific week
-  app.get("/api/weeks/:id", async (req, res) => {
+  // Get tasks by week with specific weekId
+  app.get("/api/tasks/week/:weekId", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const week = await storage.getWeek(id);
+      const weekId = parseInt(req.params.weekId);
       
-      if (!week) {
-        return res.status(404).json({ message: "Week not found" });
-      }
+      // Try to get tasks from cache first
+      const cacheKey = `tasks:week:${weekId}`;
+      const cachedTasks = serverCache.get(cacheKey);
       
-      res.json(week);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching week" });
-    }
-  });
-  
-  // Create a week
-  app.post("/api/weeks", async (req, res) => {
-    try {
-      const weekData = insertWeekSchema.parse(req.body);
-      const week = await storage.createWeek(weekData);
-      res.status(201).json(week);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid week data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating week" });
-    }
-  });
-  
-  // Update a week
-  app.patch("/api/weeks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const weekData = insertWeekSchema.partial().parse(req.body);
-      const updatedWeek = await storage.updateWeek(id, weekData);
-      
-      if (!updatedWeek) {
-        return res.status(404).json({ message: "Week not found" });
-      }
-      
-      res.json(updatedWeek);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid week data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error updating week" });
-    }
-  });
-
-  // Subtask routes
-  // Get all subtasks
-  app.get("/api/subtasks", async (req, res) => {
-    try {
-      const subtasks = await storage.getAllSubtasks();
-      res.json(subtasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching subtasks" });
-    }
-  });
-
-  // Get subtasks for a specific parent task
-  app.get("/api/tasks/:taskId/subtasks", async (req, res) => {
-    try {
-      const parentTaskId = parseInt(req.params.taskId);
-      const subtasks = await storage.getSubtasksByParentId(parentTaskId);
-      res.json(subtasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching subtasks for task" });
-    }
-  });
-
-  // Get a specific subtask
-  app.get("/api/subtasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const subtask = await storage.getSubtask(id);
-      
-      if (!subtask) {
-        return res.status(404).json({ message: "Subtask not found" });
-      }
-      
-      res.json(subtask);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching subtask" });
-    }
-  });
-
-  // Create a subtask
-  app.post("/api/subtasks", async (req, res) => {
-    try {
-      const subtaskData = insertSubtaskSchema.parse(req.body);
-      const subtask = await storage.createSubtask(subtaskData);
-      res.status(201).json(subtask);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid subtask data", errors: error.errors });
-      }
-
-// Get all goal templates
-app.get("/api/goal-templates", async (req, res) => {
-  try {
-    const templates = await storage.getAllGoalTemplates();
-    res.json(templates);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching goal templates" });
-  }
-});
-
-// Get templates by category
-app.get("/api/goal-templates/category/:category", async (req, res) => {
-  try {
-    const category = req.params.category;
-    const templates = await storage.getGoalTemplatesByCategory(category);
-    res.json(templates);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching templates by category" });
-  }
-});
-
-// Create a goal template
-app.post("/api/goal-templates", async (req, res) => {
-  try {
-    const templateData = insertGoalTemplateSchema.parse(req.body);
-    const template = await storage.createGoalTemplate(templateData);
-    res.status(201).json(template);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: "Invalid template data", errors: error.errors });
-    }
-    res.status(500).json({ message: "Error creating template" });
-  }
-});
-
-      res.status(500).json({ message: "Error creating subtask" });
-    }
-  });
-
-  // Update a subtask
-  app.patch("/api/subtasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const subtaskData = insertSubtaskSchema.partial().parse(req.body);
-      const updatedSubtask = await storage.updateSubtask(id, subtaskData);
-      
-      if (!updatedSubtask) {
-        return res.status(404).json({ message: "Subtask not found" });
-      }
-      
-      res.json(updatedSubtask);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid subtask data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error updating subtask" });
-    }
-  });
-
-  // Delete a subtask
-  app.delete("/api/subtasks/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteSubtask(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Subtask not found" });
-      }
-      
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Error deleting subtask" });
-    }
-  });
-
-  // User routes
-  // Get all users (with caching for better performance)
-  app.get("/api/users", async (req, res) => {
-    try {
-      // Try to get users from cache first for faster load times
-      const cacheKey = "users:all";
-      const cachedUsers = serverCache.get(cacheKey);
-      
-      if (cachedUsers) {
+      if (cachedTasks) {
         // Set cache header to inform client
         res.set('X-Cache', 'HIT');
-        return res.json(cachedUsers);
+        return res.json(cachedTasks);
       }
       
       // Cache miss, fetch from database
-      const users = await storage.getAllUsers();
+      const tasks = await storage.getTasksByWeek(weekId);
       
-      // Cache for 5 minutes - user data doesn't change that frequently
-      serverCache.set(cacheKey, users, 5 * 60 * 1000);
+      // Cache for configured TTL
+      serverCache.set(cacheKey, tasks, CACHE_TTL.TASKS);
       
       // Set cache header
       res.set('X-Cache', 'MISS');
-      res.json(users);
+      res.json(tasks);
     } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Error fetching users" });
+      res.status(500).json({ message: "Error fetching tasks by week" });
     }
   });
-
-  // Get a specific user
-  app.get("/api/users/:id", async (req, res) => {
+  
+  // Get tasks by week (default to the first week if no id specified)
+  app.get("/api/tasks/week", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const user = await storage.getUser(id);
+      // Get the first week from the database, or default to week with ID 1
+      const weeks = await storage.getAllWeeks();
       
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      if (weeks.length === 0) {
+        return res.status(404).json({ message: "No weeks found" });
       }
       
-      res.json(user);
+      const firstWeek = weeks[0];
+      
+      // Try to get tasks from cache first
+      const cacheKey = `tasks:week:${firstWeek.id}`;
+      const cachedTasks = serverCache.get(cacheKey);
+      
+      if (cachedTasks) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedTasks);
+      }
+      
+      // Cache miss, fetch from database
+      const tasks = await storage.getTasksByWeek(firstWeek.id);
+      
+      // Cache for configured TTL
+      serverCache.set(cacheKey, tasks, CACHE_TTL.TASKS);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
+      res.json(tasks);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching user" });
+      res.status(500).json({ message: "Error fetching tasks" });
     }
   });
-
-  // Create a user
-  app.post("/api/users", async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
-      res.status(201).json(user);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating user" });
-    }
-  });
-
-  // Update a user
-  app.patch("/api/users/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const userData = insertUserSchema.partial().parse(req.body);
-      const updatedUser = await storage.updateUser(id, userData);
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      res.json(updatedUser);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error updating user" });
-    }
-  });
-
-  // Update user location
-  app.patch("/api/users/:id/location", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { latitude, longitude, country, city } = req.body;
-      
-      if (typeof latitude !== 'number' || typeof longitude !== 'number' || 
-          typeof country !== 'string' || typeof city !== 'string') {
-        return res.status(400).json({ 
-          message: "Invalid location data",
-          errors: "All location fields (latitude, longitude, country, city) are required"
-        });
-      }
-      
-      const updatedUser = await storage.updateUserLocation(id, latitude, longitude, country, city);
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      res.json(updatedUser);
-    } catch (error) {
-      res.status(500).json({ message: "Error updating user location" });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
+  
+  // Create the server
+  const server = createServer(app);
+  return server;
 }

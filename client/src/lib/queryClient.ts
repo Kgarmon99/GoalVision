@@ -1,5 +1,21 @@
 import { QueryClient, QueryFunction, QueryKey } from "@tanstack/react-query";
 
+// Constants for performance optimization
+const STALE_TIME = 5 * 60 * 1000;      // 5 minutes 
+const CACHE_TIME = 30 * 60 * 1000;      // 30 minutes
+const MAX_RETRIES = 2;
+const DEFAULT_PAGE_SIZE = 50;
+
+// Cache key prefixes for better organization
+export const QueryKeys = {
+  GOALS: '/api/goals',
+  METRICS: '/api/metrics',
+  TASKS: '/api/tasks',
+  USERS: '/api/users',
+  WEEKS: '/api/weeks',
+  GOAL_STATUSES: '/api/goal-statuses'
+};
+
 // Improved error handling for API responses
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -118,13 +134,15 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: true,  // Only refetch when window regains focus
-      staleTime: 5 * 60 * 1000,    // Data remains fresh for 5 minutes
-      gcTime: 30 * 60 * 1000,      // Keep unused data in cache for 30 minutes
-      retry: 3,                    // Retry failed requests up to 3 times
+      staleTime: STALE_TIME,       // Use constants for consistency
+      gcTime: CACHE_TIME,          // Use constants for consistency 
+      retry: MAX_RETRIES,          // Use constants for consistency
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
       // Performance optimizations for React Query v5
       placeholderData: (previousData: unknown) => previousData, // Similar to keepPreviousData in v4
-      refetchOnMount: true,        // Fetch fresh data when component mounts if stale
+      refetchOnMount: "always",    // Always fetch fresh data when component mounts
+      // New optimizations
+      structuralSharing: true,     // Reduce rerenders by preserving reference equality
     },
     mutations: {
       retry: false,
@@ -135,3 +153,41 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Helper for creating optimistic mutations
+export function createOptimisticMutation<T, R>(
+  mutationFn: (data: T) => Promise<R>,
+  queryKey: string | string[],
+  optimisticUpdate: (oldData: any, newData: T) => any
+) {
+  return {
+    mutationFn,
+    onMutate: async (newData: T) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: Array.isArray(queryKey) ? queryKey : [queryKey] });
+      
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(Array.isArray(queryKey) ? queryKey : [queryKey]);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(Array.isArray(queryKey) ? queryKey : [queryKey], (old: any) => 
+        optimisticUpdate(old, newData)
+      );
+      
+      return { previousData };
+    },
+    onError: (_err: any, _variables: T, context: any) => {
+      // On error, roll back to the previous value
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          Array.isArray(queryKey) ? queryKey : [queryKey], 
+          context.previousData
+        );
+      }
+    },
+    onSettled: () => {
+      // Always invalidate the cache to refetch the latest data
+      queryClient.invalidateQueries({ queryKey: Array.isArray(queryKey) ? queryKey : [queryKey] });
+    },
+  };
+}

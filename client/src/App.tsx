@@ -1,21 +1,23 @@
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
-import AddGoal from "@/pages/add-goal";
-import AddProgress from "@/pages/add-progress";
-import AddTask from "@/pages/add-task";
-import TaskDetails from "@/pages/task-details";
-import GoalTasks from "@/pages/goal-tasks";
-import TaskBoard from "@/pages/task-board";
-import GoalVisualizations from "@/pages/goal-visualizations";
-import Metrics from "@/pages/metrics";
-import GlobalImpact from "@/pages/global-impact";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 import { EnhancedNav } from "@/components/layout/enhanced-nav";
-import { useState, useEffect } from "react";
-import { Target, Globe } from "lucide-react";
+import { Suspense, lazy, useState, useEffect } from "react";
+import { Target, Globe, Loader2 } from "lucide-react";
+
+// Lazily load components for better performance
+const NotFound = lazy(() => import("@/pages/not-found"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const AddGoal = lazy(() => import("@/pages/add-goal"));
+const AddProgress = lazy(() => import("@/pages/add-progress"));
+const AddTask = lazy(() => import("@/pages/add-task"));
+const TaskDetails = lazy(() => import("@/pages/task-details"));
+const GoalTasks = lazy(() => import("@/pages/goal-tasks"));
+const TaskBoard = lazy(() => import("@/pages/task-board"));
+const GoalVisualizations = lazy(() => import("@/pages/goal-visualizations"));
+const Metrics = lazy(() => import("@/pages/metrics"));
+const GlobalImpact = lazy(() => import("@/pages/global-impact"));
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
@@ -118,9 +120,18 @@ function App() {
           ]}
         />
         
-        {/* Main Content */}
+        {/* Main Content with Suspense for lazy loading */}
         <div className="pt-16 animate-in fade-in-50 duration-300">
-          {currentPage}
+          <Suspense fallback={
+            <div className="h-[calc(100vh-4rem)] w-full flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Loading content...</p>
+              </div>
+            </div>
+          }>
+            {currentPage}
+          </Suspense>
         </div>
         
         <Toaster />
