@@ -721,10 +721,27 @@ app.post("/api/goal-templates", async (req, res) => {
   });
 
   // User routes
-  // Get all users
+  // Get all users (with caching for better performance)
   app.get("/api/users", async (req, res) => {
     try {
+      // Try to get users from cache first for faster load times
+      const cacheKey = "users:all";
+      const cachedUsers = serverCache.get(cacheKey);
+      
+      if (cachedUsers) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedUsers);
+      }
+      
+      // Cache miss, fetch from database
       const users = await storage.getAllUsers();
+      
+      // Cache for 5 minutes - user data doesn't change that frequently
+      serverCache.set(cacheKey, users, 5 * 60 * 1000);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);

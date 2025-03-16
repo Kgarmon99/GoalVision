@@ -214,6 +214,7 @@ export function GlobeVisualization({
       scene.add(directionalLight);
       
       // Create starfield background
+      // Reduced star count for better performance
       const starGeometry = new THREE.BufferGeometry();
       const starMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
@@ -223,7 +224,8 @@ export function GlobeVisualization({
       });
       
       const starVertices = [];
-      for (let i = 0; i < 3000; i++) {
+      // Reduce number of stars from 3000 to 1000 for better performance
+      for (let i = 0; i < 1000; i++) {
         const x = (Math.random() - 0.5) * 2000;
         const y = (Math.random() - 0.5) * 2000;
         const z = (Math.random() - 0.5) * 2000;
@@ -239,7 +241,8 @@ export function GlobeVisualization({
       scene.add(globeGroup);
       
       // Earth texture would be ideal, but for simplicity using colors
-      const globeGeometry = new THREE.SphereGeometry(50, 64, 64);
+      // Reduced polygon count for better performance (from 64x64 to 36x36)
+      const globeGeometry = new THREE.SphereGeometry(50, 36, 36);
       
       // Enhanced material for better looking globe
       const globeMaterial = new THREE.MeshPhongMaterial({
@@ -253,8 +256,8 @@ export function GlobeVisualization({
       globeGroup.add(globe);
       globeRef.current = globe;
       
-      // Add atmosphere glow
-      const atmosphereGeometry = new THREE.SphereGeometry(52, 64, 64);
+      // Add atmosphere glow - also reduced polygons
+      const atmosphereGeometry = new THREE.SphereGeometry(52, 32, 32);
       const atmosphereMaterial = new THREE.MeshPhongMaterial({
         color: 0x2196f3,
         transparent: true,
@@ -269,8 +272,8 @@ export function GlobeVisualization({
       globeGroup.add(userPointsGroup);
       userPointsRef.current = userPointsGroup;
       
-      // Create equator line
-      const equatorGeometry = new THREE.RingGeometry(50.2, 51, 128);
+      // Create equator line - reduced segment count for better performance 
+      const equatorGeometry = new THREE.RingGeometry(50.2, 51, 64); // Reduced from 128 segments
       const equatorMaterial = new THREE.MeshBasicMaterial({ 
         color: 0xffffff, 
         transparent: true, 
@@ -281,10 +284,11 @@ export function GlobeVisualization({
       equator.rotation.x = Math.PI / 2;
       globeGroup.add(equator);
       
-      // Add grid lines (longitude lines)
-      for (let i = 0; i < 24; i++) {
-        const angle = (i / 24) * Math.PI * 2;
-        const gridGeometry = new THREE.RingGeometry(50, 50.2, 128);
+      // Add grid lines (longitude lines) - reduced count for better performance
+      // Add fewer longitude lines (12 instead of 24)
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const gridGeometry = new THREE.RingGeometry(50, 50.2, 64); // Reduced from 128 segments
         const gridMaterial = new THREE.MeshBasicMaterial({ 
           color: 0xffffff, 
           transparent: true, 
@@ -298,15 +302,16 @@ export function GlobeVisualization({
         globeGroup.add(grid);
       }
       
-      // Add latitude lines
-      for (let i = 1; i < 18; i++) {
+      // Add latitude lines - reduced count for better performance
+      // Add fewer latitude lines (9 instead of 17)
+      for (let i = 1; i < 9; i += 2) { 
         // Skip equator as we already have it
-        if (i === 9) continue;
+        if (i === 4) continue;
         
-        const lat = (i - 9) * 10 * Math.PI / 180;
+        const lat = (i - 4) * 20 * Math.PI / 180; // 20 degree increments instead of 10
         const radius = 50 * Math.cos(lat);
         
-        const latGeometry = new THREE.RingGeometry(radius - 0.1, radius + 0.1, 128);
+        const latGeometry = new THREE.RingGeometry(radius - 0.1, radius + 0.1, 64); // Reduced from 128 segments
         const latMaterial = new THREE.MeshBasicMaterial({
           color: 0xffffff,
           transparent: true,
@@ -494,55 +499,56 @@ export function GlobeVisualization({
     };
   }, [initializeScene, cleanupScene]);
 
-  // Add markers for user locations
+  // Add markers for user locations with TypeScript safety
   useEffect(() => {
     // Skip if scene isn't ready or no user data
     if (!sceneRef.current || !userPointsRef.current || users.length === 0) return;
     
     try {
+      // Store reference to avoid TypeScript errors
+      const pointsGroup = userPointsRef.current;
+      
       // Clear existing points
-      const userPoints = userPointsRef.current;
-      while (userPoints.children.length > 0) {
-        userPoints.remove(userPoints.children[0]);
+      while (pointsGroup.children.length > 0) {
+        pointsGroup.remove(pointsGroup.children[0]);
       }
       
+      // Reduce marker polygon count for better performance
+      const markerGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+      
       // Add new points
-      if (userPointsRef.current) {
-        users.forEach(user => {
-          if (!user.latitude || !user.longitude) return;
+      users.forEach(user => {
+        if (!user.latitude || !user.longitude) return;
+        
+        // Convert lat/lng to 3D position
+        const position = getPositionOnGlobe(user.latitude, user.longitude);
+        
+        // Different colors based on activity
+        let markerColor = 0xff0000; // Red for inactive
+        
+        if (user.lastActive) {
+          const lastActive = new Date(user.lastActive);
+          const now = new Date();
+          const diff = now.getTime() - lastActive.getTime();
+          const days = diff / (1000 * 60 * 60 * 24);
           
-          // Convert lat/lng to 3D position
-          const position = getPositionOnGlobe(user.latitude, user.longitude);
-          
-          // Create marker
-          const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-          
-          // Different colors based on activity
-          let markerColor = 0xff0000; // Red for inactive
-          
-          if (user.lastActive) {
-            const lastActive = new Date(user.lastActive);
-            const now = new Date();
-            const diff = now.getTime() - lastActive.getTime();
-            const days = diff / (1000 * 60 * 60 * 24);
-            
-            if (days <= 1) {
-              markerColor = 0x00ff00; // Green for active
-            } else if (days <= 7) {
-              markerColor = 0xffff00; // Yellow for recent
-            }
+          if (days <= 1) {
+            markerColor = 0x00ff00; // Green for active
+          } else if (days <= 7) {
+            markerColor = 0xffff00; // Yellow for recent
           }
-          
-          const markerMaterial = new THREE.MeshBasicMaterial({
-            color: markerColor
-          });
-          
-          const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-          marker.position.set(position.x, position.y, position.z);
-          
-          userPointsRef.current.add(marker);
+        }
+        
+        const markerMaterial = new THREE.MeshBasicMaterial({
+          color: markerColor
         });
-      }
+        
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.position.set(position.x, position.y, position.z);
+        
+        // Safe to add because we already checked above and stored reference
+        pointsGroup.add(marker);
+      });
     } catch (error) {
       console.error("Error adding user markers:", error);
     }
