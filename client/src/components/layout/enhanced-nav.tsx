@@ -6,7 +6,8 @@ import {
   Plus, 
   BarChart2, 
   Settings, 
-  PlusCircle 
+  PlusCircle,
+  Globe
 } from 'lucide-react';
 import { 
   Tooltip, 
@@ -50,6 +51,7 @@ const getDefaultNavItems = (): NavItem[] => [
   { name: 'Goals', path: '/goal-visualizations', icon: <Target size={20} />, description: 'View and manage goals' },
   { name: 'Tasks', path: '/task-board', icon: <CheckSquare size={20} />, description: 'View and manage tasks' },
   { name: 'Metrics', path: '/metrics', icon: <BarChart2 size={20} />, description: 'Track performance metrics' },
+  { name: 'Global Impact', path: '/global-impact', icon: <Globe size={20} />, description: 'Worldwide user tracking' },
 ];
 
 // Default quick actions

@@ -11,10 +11,11 @@ import GoalTasks from "@/pages/goal-tasks";
 import TaskBoard from "@/pages/task-board";
 import GoalVisualizations from "@/pages/goal-visualizations";
 import Metrics from "@/pages/metrics";
+import GlobalImpact from "@/pages/global-impact";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 import { EnhancedNav } from "@/components/layout/enhanced-nav";
 import { useState, useEffect } from "react";
-import { Target } from "lucide-react";
+import { Target, Globe } from "lucide-react";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
@@ -46,6 +47,9 @@ function App() {
         break;
       case '/metrics':
         setCurrentPage(<Metrics />);
+        break;
+      case '/global-impact':
+        setCurrentPage(<GlobalImpact />);
         break;
       default:
         // Check for pattern matches
