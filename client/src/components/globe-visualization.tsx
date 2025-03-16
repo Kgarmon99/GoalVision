@@ -369,7 +369,9 @@ export function GlobeVisualization({
         const mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         const mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         
-        raycasterRef.current.setFromCamera({ x: mouseX, y: mouseY }, cameraRef.current);
+        // Create a Vector2 for the raycaster
+        const mousePosition = new THREE.Vector2(mouseX, mouseY);
+        raycasterRef.current.setFromCamera(mousePosition, cameraRef.current);
         
         // Get all the markers from the user points group
         const markers: THREE.Object3D[] = [];
@@ -405,7 +407,9 @@ export function GlobeVisualization({
         const mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         const mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         
-        raycasterRef.current.setFromCamera({ x: mouseX, y: mouseY }, cameraRef.current);
+        // Create a Vector2 for the raycaster
+        const mousePosition = new THREE.Vector2(mouseX, mouseY);
+        raycasterRef.current.setFromCamera(mousePosition, cameraRef.current);
         
         // Get all the markers from the user points group
         const markers: THREE.Object3D[] = [];
@@ -473,293 +477,326 @@ export function GlobeVisualization({
           );
           
           if (
-            Math.abs(globeRef.current.rotation.y - targetRotationY) > 0.01 ||
-            Math.abs(globeRef.current.rotation.x - targetRotationX) > 0.01
+            Math.abs(globeRef.current.rotation.y - targetRotationY) < 0.01 &&
+            Math.abs(globeRef.current.rotation.x - targetRotationX) < 0.01
           ) {
-            requestAnimationFrame(animate);
+            return;
           }
-        };
-        
-        animate();
-      }
-    };
-    
-    // Zoom out
-    const zoomOut = () => {
-      setIsZoomedIn(false);
-      setIsAutoRotating(true);
-    };
-    
-    // Add pan controls for touch devices
-    let touchStartX = 0;
-    let touchStartY = 0;
-    
-    const handleTouchStart = (event: TouchEvent) => {
-      touchStartX = event.touches[0].clientX;
-      touchStartY = event.touches[0].clientY;
-    };
-    
-    const handleTouchMove = (event: TouchEvent) => {
-      if (!globeRef.current) return;
-      
-      const touchX = event.touches[0].clientX;
-      const touchY = event.touches[0].clientY;
-      
-      const deltaX = (touchX - touchStartX) * 0.01;
-      const deltaY = (touchY - touchStartY) * 0.01;
-      
-      globeRef.current.rotation.y += deltaX;
-      globeRef.current.rotation.x += deltaY;
-      
-      touchStartX = touchX;
-      touchStartY = touchY;
-    };
-    
-    // Handle mouse wheel for zoom
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      
-      if (!cameraRef.current) return;
-      
-      // Adjust zoom level based on wheel direction
-      const newZoom = Math.max(0.7, Math.min(2, zoomLevel + event.deltaY * -0.001));
-      setZoomLevel(newZoom);
-      
-      // Update camera position
-      cameraRef.current.position.z = 180 / newZoom;
-    };
-    
-    // Animation loop
-    const animate = () => {
-      if (!globeRef.current || !sceneRef.current || !cameraRef.current || !rendererRef.current) return;
-      
-      // Auto-rotate globe if enabled
-      if (isAutoRotating) {
-        globeRef.current.rotation.y += rotationSpeed;
-      }
-      
-      // Make globe respond subtly to mouse position when not zoomed in
-      if (!isZoomedIn) {
-        const targetRotationX = mousePosition.current.y * 0.2;
-        
-        globeRef.current.rotation.x = THREE.MathUtils.lerp(
-          globeRef.current.rotation.x,
-          targetRotationX,
-          0.01
-        );
-      }
-      
-      // Render scene
-      rendererRef.current.render(sceneRef.current, cameraRef.current);
-      
-      requestAnimationFrame(animate);
-    };
-    
-    // Start animation
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('click', handleMouseClick);
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchmove', handleTouchMove);
-    
-    handleResize();
-    animate();
-    setIsReady(true);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('click', handleMouseClick);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      
-      if (containerRef.current && rendererRef.current) {
-        try {
-          containerRef.current.removeChild(rendererRef.current.domElement);
-        } catch (e) {
-          console.warn('Error removing renderer from DOM:', e);
-        }
-      }
-      
-      // Clean up all THREE.js objects
-      if (sceneRef.current) {
-        sceneRef.current.traverse((object) => {
-          if (object instanceof THREE.Mesh) {
-            if (object.geometry) object.geometry.dispose();
-            
-            if (object.material) {
-              if (Array.isArray(object.material)) {
-                object.material.forEach(material => material.dispose());
-              } else {
-                object.material.dispose();
-              }
-            }
-          }
-        });
-      }
-      
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-      }
-      
-      // Reset cursor
-      document.body.style.cursor = 'default';
-    };
-  }, [interactive, zoomLevel, isAutoRotating, isZoomedIn, rotationSpeed]);
-  
-  // Update user points on the globe whenever user locations change
-  useEffect(() => {
-    if (!sceneRef.current || !userPointsRef.current || userLocations.length === 0) return;
-    
-    // Clear existing points
-    while (userPointsRef.current.children.length > 0) {
-      const child = userPointsRef.current.children[0];
-      
-      if (child instanceof THREE.Mesh || child instanceof THREE.Points) {
-        if (child.geometry) child.geometry.dispose();
-        
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach(m => m.dispose());
-          } else {
-            child.material.dispose();
-          }
-        }
-      }
-      
-      userPointsRef.current.remove(child);
-    }
-    
-    // Add user location markers
-    userLocations.forEach(location => {
-      // Convert lat/long to 3D coordinates on sphere
-      const lat = (location.lat * Math.PI) / 180;
-      const lng = (location.lng * Math.PI) / 180;
-      
-      // Calculate position on globe
-      const x = -55 * Math.cos(lat) * Math.sin(lng);
-      const y = 55 * Math.sin(lat);
-      const z = 55 * Math.cos(lat) * Math.cos(lng);
-      
-      // Create marker based on activity status
-      let markerColor;
-      let markerSize;
-      
-      switch(location.status) {
-        case 'active':
-          markerColor = 0x4ade80; // Green
-          markerSize = 1.2;
-          break;
-        case 'recent':
-          markerColor = 0xfacc15; // Yellow
-          markerSize = 0.8;
-          break;
-        default:
-          markerColor = 0xef4444; // Red
-          markerSize = 0.6;
-      }
-      
-      // Create marker
-      const markerGeometry = new THREE.SphereGeometry(markerSize, 16, 16);
-      const markerMaterial = new THREE.MeshBasicMaterial({ color: markerColor });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      
-      marker.position.set(x, y, z);
-      
-      // Add user data for raycasting
-      marker.userData = {
-        isMarker: true,
-        userLocation: location
-      };
-      
-      userPointsRef.current.add(marker);
-      
-      // Add pulsing effect for active users
-      if (location.status === 'active') {
-        const pulseGeometry = new THREE.SphereGeometry(markerSize * 1.2, 16, 16);
-        const pulseMaterial = new THREE.MeshBasicMaterial({ 
-          color: markerColor,
-          transparent: true,
-          opacity: 0.3
-        });
-        
-        const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
-        pulse.position.set(x, y, z);
-        
-        // Animate pulse
-        const animate = () => {
-          pulse.scale.x = 1 + 0.2 * Math.sin(Date.now() * 0.005);
-          pulse.scale.y = 1 + 0.2 * Math.sin(Date.now() * 0.005);
-          pulse.scale.z = 1 + 0.2 * Math.sin(Date.now() * 0.005);
           
           requestAnimationFrame(animate);
         };
         
         animate();
-        
-        userPointsRef.current.add(pulse);
       }
       
-      // Add connection line to nearby users
-      if (yourLocation && location.status === 'active') {
-        // Check if this user is near your location
-        const distance = getDistanceFromLatLonInKm(
-          yourLocation.lat, yourLocation.lng,
-          location.lat, location.lng
+      // Zoom camera
+      const targetZoom = 120;
+      const currentZoom = cameraRef.current.position.z;
+      
+      // Animate zoom
+      const animateZoom = () => {
+        if (!cameraRef.current) return;
+        
+        cameraRef.current.position.z = THREE.MathUtils.lerp(
+          cameraRef.current.position.z,
+          targetZoom,
+          0.05
         );
         
-        if (distance < 1000) { // Less than 1000km
-          // Convert your location to 3D coordinates
-          const yourLat = (yourLocation.lat * Math.PI) / 180;
-          const yourLng = (yourLocation.lng * Math.PI) / 180;
-          
-          const yourX = -55 * Math.cos(yourLat) * Math.sin(yourLng);
-          const yourY = 55 * Math.sin(yourLat);
-          const yourZ = 55 * Math.cos(yourLat) * Math.cos(yourLng);
-          
-          // Create connection line
-          const points = [
-            new THREE.Vector3(x, y, z),
-            new THREE.Vector3(yourX, yourY, yourZ)
-          ];
-          
-          const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-          const lineMaterial = new THREE.LineBasicMaterial({ 
-            color: 0x4ade80,
-            transparent: true,
-            opacity: 0.4
-          });
-          
-          const line = new THREE.Line(lineGeometry, lineMaterial);
+        if (Math.abs(cameraRef.current.position.z - targetZoom) < 0.5) {
+          setZoomLevel(2);
+          return;
+        }
+        
+        requestAnimationFrame(animateZoom);
+      };
+      
+      animateZoom();
+    };
+    
+    // Handle zoom out
+    const zoomOut = () => {
+      if (!cameraRef.current) return;
+      
+      setIsZoomedIn(false);
+      setIsAutoRotating(true);
+      
+      // Target zoom
+      const targetZoom = 180;
+      
+      // Animate zoom
+      const animateZoom = () => {
+        if (!cameraRef.current) return;
+        
+        cameraRef.current.position.z = THREE.MathUtils.lerp(
+          cameraRef.current.position.z,
+          targetZoom,
+          0.1
+        );
+        
+        if (Math.abs(cameraRef.current.position.z - targetZoom) < 0.5) {
+          setZoomLevel(1);
+          return;
+        }
+        
+        requestAnimationFrame(animateZoom);
+      };
+      
+      animateZoom();
+    };
+    
+    // Start animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      if (globeRef.current && isAutoRotating) {
+        globeRef.current.rotation.y += rotationSpeed;
+      }
+      
+      // Use the stored references
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+    };
+    
+    animate();
+    
+    // Add event listeners
+    window.addEventListener('resize', handleResize);
+    containerRef.current.addEventListener('mousemove', handleMouseMove);
+    containerRef.current.addEventListener('click', handleMouseClick);
+    
+    // Handle touch events for mobile
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        handleMouseMove(touch as unknown as MouseEvent);
+      }
+    };
+    
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        handleMouseMove(touch as unknown as MouseEvent);
+      }
+    };
+    
+    containerRef.current.addEventListener('touchstart', handleTouchStart);
+    containerRef.current.addEventListener('touchmove', handleTouchMove);
+    containerRef.current.addEventListener('touchend', () => {
+      setActiveLocation(null);
+    });
+    
+    // Handle scroll wheel for zoom
+    const handleWheel = (event: WheelEvent) => {
+      if (!cameraRef.current) return;
+      
+      // Prevent default behavior
+      event.preventDefault();
+      
+      // Calculate new zoom level
+      const zoomSpeed = 5;
+      const newZoom = cameraRef.current.position.z + (event.deltaY > 0 ? zoomSpeed : -zoomSpeed);
+      
+      // Clamp between min and max zoom
+      cameraRef.current.position.z = Math.max(80, Math.min(250, newZoom));
+      
+      // Update zoom level state
+      if (cameraRef.current.position.z < 120) {
+        setZoomLevel(2);
+        setIsZoomedIn(true);
+        setIsAutoRotating(false);
+      } else {
+        setZoomLevel(1);
+        setIsZoomedIn(false);
+        setIsAutoRotating(true);
+      }
+    };
+    
+    containerRef.current.addEventListener('wheel', handleWheel);
+    
+    // Set ready state
+    setIsReady(true);
+    
+    // Cleanup function
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (containerRef.current) {
+        containerRef.current.removeEventListener('mousemove', handleMouseMove);
+        containerRef.current.removeEventListener('click', handleMouseClick);
+        containerRef.current.removeEventListener('touchstart', handleTouchStart);
+        containerRef.current.removeEventListener('touchmove', handleTouchMove);
+        containerRef.current.removeEventListener('wheel', handleWheel);
+      }
+      
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+    };
+  }, []);
+  
+  // Add markers for user locations
+  useEffect(() => {
+    // If scene isn't ready or no user locations, return
+    if (!sceneRef.current || !userPointsRef.current) return;
+    if (userLocations.length === 0) return;
+    
+    // Clear existing points
+    while (userPointsRef.current.children.length > 0) {
+      const child = userPointsRef.current.children[0];
+      if (child instanceof THREE.Mesh) {
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(material => material.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      }
+      userPointsRef.current.remove(child);
+    }
+    
+    // Add new points
+    userLocations.forEach(location => {
+      // Convert lat/lng to 3D position
+      const lat = (location.lat * Math.PI) / 180;
+      const lng = (location.lng * Math.PI) / 180;
+      
+      const x = -50 * Math.cos(lat) * Math.sin(lng);
+      const y = 50 * Math.sin(lat);
+      const z = 50 * Math.cos(lat) * Math.cos(lng);
+      
+      // Create marker
+      const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+      
+      // Different colors for different activity levels
+      let markerColor = 0xff0000; // Red for inactive
+      
+      if (location.status === 'active') {
+        markerColor = 0x00ff00; // Green for active
+      } else if (location.status === 'recent') {
+        markerColor = 0xffff00; // Yellow for recent
+      }
+      
+      const markerMaterial = new THREE.MeshPhongMaterial({
+        color: markerColor,
+        emissive: markerColor,
+        emissiveIntensity: 0.5,
+        shininess: 50
+      });
+      
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.set(x, y, z);
+      
+      // Store user data with the marker
+      marker.userData = {
+        isMarker: true,
+        userLocation: location
+      };
+      
+      if (userPointsRef.current) {
+        userPointsRef.current.add(marker);
+      }
+      
+      // Add pulsing effect for active users
+      if (location.status === 'active') {
+        const pulseGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+        const pulseMaterial = new THREE.MeshBasicMaterial({
+          color: 0x00ff00,
+          transparent: true,
+          opacity: 0.4
+        });
+        
+        const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
+        pulse.position.set(x, y, z);
+        
+        // Animation for pulse
+        const pulseScale = { value: 1 };
+        
+        const animatePulse = () => {
+          pulseScale.value = 1 + Math.sin(Date.now() * 0.005) * 0.5;
+          pulse.scale.set(pulseScale.value, pulseScale.value, pulseScale.value);
+          requestAnimationFrame(animatePulse);
+        };
+        
+        animatePulse();
+        
+        if (userPointsRef.current) {
+          userPointsRef.current.add(pulse);
+        }
+      }
+      
+      // Create line to the surface for better visibility
+      if (location.status === 'active' || location.status === 'recent') {
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(x, y, z)
+        ]);
+        
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: location.status === 'active' ? 0x00ff00 : 0xffff00,
+          transparent: true,
+          opacity: 0.3
+        });
+        
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+        
+        if (userPointsRef.current) {
           userPointsRef.current.add(line);
         }
       }
     });
     
-    // Add your location if available
-    if (yourLocation) {
+    // Add your location marker if available
+    if (yourLocation && showYourLocation) {
       const lat = (yourLocation.lat * Math.PI) / 180;
       const lng = (yourLocation.lng * Math.PI) / 180;
       
-      const x = -55 * Math.cos(lat) * Math.sin(lng);
-      const y = 55 * Math.sin(lat);
-      const z = 55 * Math.cos(lat) * Math.cos(lng);
+      const x = -50 * Math.cos(lat) * Math.sin(lng);
+      const y = 50 * Math.sin(lat);
+      const z = 50 * Math.cos(lat) * Math.cos(lng);
       
-      // Create your location marker
-      const yourMarkerGeometry = new THREE.SphereGeometry(2, 16, 16);
-      const yourMarkerMaterial = new THREE.MeshBasicMaterial({ color: 0x3b82f6 }); // Blue
+      // Create your marker (larger and different color)
+      const yourMarkerGeometry = new THREE.SphereGeometry(1, 16, 16);
+      const yourMarkerMaterial = new THREE.MeshPhongMaterial({
+        color: 0x3498db,
+        emissive: 0x3498db,
+        emissiveIntensity: 0.5,
+        shininess: 80
+      });
+      
       const yourMarker = new THREE.Mesh(yourMarkerGeometry, yourMarkerMaterial);
-      
       yourMarker.position.set(x, y, z);
-      userPointsRef.current.add(yourMarker);
       
-      // Add pulse effect
-      const pulseGeometry = new THREE.SphereGeometry(3, 16, 16);
-      const pulseMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0x3b82f6,
+      // Store your location data with the marker
+      yourMarker.userData = {
+        isMarker: true,
+        isYourLocation: true,
+        userLocation: {
+          lat: yourLocation.lat,
+          lng: yourLocation.lng,
+          country: "Your Location",
+          city: "Current Position",
+          username: "You",
+          lastActive: new Date(),
+          status: 'active' as ActivityStatus,
+          goalsCreated: 0,
+          tasksCompleted: 0
+        }
+      };
+      
+      if (userPointsRef.current) {
+        userPointsRef.current.add(yourMarker);
+      }
+      
+      // Add pulsing effect
+      const pulseGeometry = new THREE.SphereGeometry(1, 16, 16);
+      const pulseMaterial = new THREE.MeshBasicMaterial({
+        color: 0x3498db,
         transparent: true,
         opacity: 0.3
       });
@@ -767,304 +804,299 @@ export function GlobeVisualization({
       const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
       pulse.position.set(x, y, z);
       
-      // Animate pulse
-      const animate = () => {
-        pulse.scale.x = 1 + 0.3 * Math.sin(Date.now() * 0.003);
-        pulse.scale.y = 1 + 0.3 * Math.sin(Date.now() * 0.003);
-        pulse.scale.z = 1 + 0.3 * Math.sin(Date.now() * 0.003);
-        
-        requestAnimationFrame(animate);
+      // Animation for pulse
+      const pulseScale = { value: 1 };
+      
+      const animatePulse = () => {
+        pulseScale.value = 1 + Math.sin(Date.now() * 0.005) * 1.5;
+        pulse.scale.set(pulseScale.value, pulseScale.value, pulseScale.value);
+        requestAnimationFrame(animatePulse);
       };
       
-      animate();
+      animatePulse();
       
-      userPointsRef.current.add(pulse);
+      if (userPointsRef.current) {
+        userPointsRef.current.add(pulse);
+      }
     }
     
-  }, [userLocations, yourLocation]);
-  
-  // Toggle auto-rotation
-  const toggleRotation = useCallback(() => {
-    setIsAutoRotating(prev => !prev);
-  }, []);
-  
-  // Format date to relative time
-  const formatRelativeTime = (date: Date | null) => {
-    if (!date) return 'Never';
-    
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-    
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} hours ago`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`;
-    
-    const diffInMonths = Math.floor(diffInDays / 30);
-    return `${diffInMonths} months ago`;
-  };
-  
-  // Get status badge color
-  const getStatusBadgeColor = (status: ActivityStatus) => {
-    switch(status) {
-      case 'active': return 'bg-green-500 hover:bg-green-600';
-      case 'recent': return 'bg-yellow-500 hover:bg-yellow-600';
-      default: return 'bg-red-500 hover:bg-red-600';
-    }
-  };
+  }, [userLocations, yourLocation, showYourLocation]);
   
   return (
-    <Card className={`overflow-hidden border shadow-md ${className}`}>
-      <CardHeader className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white z-10 relative pb-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="flex items-center text-2xl font-bold">
-              <MapPin className="mr-2 h-6 w-6" />
-              {title}
-            </CardTitle>
-            <CardDescription className="text-blue-100 mt-1">
-              {description}
-            </CardDescription>
-          </div>
-          
-          <div className="flex space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-white hover:bg-white/10"
-                    onClick={toggleRotation}
-                  >
-                    {isAutoRotating ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Activity className="h-5 w-5" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {isAutoRotating ? 'Pause Rotation' : 'Resume Rotation'}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-white hover:bg-white/10"
-                    onClick={() => window.location.reload()}
-                  >
-                    <MapIcon className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Refresh Map Data
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-        
-        {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-2 mt-3">
-          <div className="bg-white/10 rounded-md p-2 flex flex-col items-center">
-            <Users className="h-5 w-5 text-blue-300 mb-1" />
-            <div className="text-lg font-bold">{userStats.totalUsers}</div>
-            <div className="text-xs text-blue-200">Total Users</div>
-          </div>
-          
-          <div className="bg-white/10 rounded-md p-2 flex flex-col items-center">
-            <Activity className="h-5 w-5 text-green-300 mb-1" />
-            <div className="text-lg font-bold">{userStats.activeUsers}</div>
-            <div className="text-xs text-blue-200">Active Users</div>
-          </div>
-          
-          <div className="bg-white/10 rounded-md p-2 flex flex-col items-center">
-            <MapPin className="h-5 w-5 text-yellow-300 mb-1" />
-            <div className="text-lg font-bold">{userStats.countries}</div>
-            <div className="text-xs text-blue-200">Countries</div>
-          </div>
-          
-          <div className="bg-white/10 rounded-md p-2 flex flex-col items-center">
-            <Clock className="h-5 w-5 text-purple-300 mb-1" />
-            <div className="text-lg font-bold">{userStats.recentActivity}</div>
-            <div className="text-xs text-blue-200">Recent Users</div>
-          </div>
-        </div>
-      </CardHeader>
+    <div className={`relative h-full ${className}`}>
+      <div 
+        ref={containerRef} 
+        className="h-full w-full overflow-hidden rounded-lg"
+      />
       
-      <CardContent className="p-0 relative min-h-[600px]">
-        {usersLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <div className="bg-black/70 p-5 rounded-lg flex flex-col items-center">
-              <Loader2 className="h-10 w-10 animate-spin text-blue-500 mb-3" />
-              <p className="text-white">Loading global user data...</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <motion.div 
-              ref={containerRef} 
-              className="absolute inset-0 z-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isReady ? 1 : 0 }}
-              transition={{ duration: 1.5 }}
-            />
-            
-            {/* User location details */}
-            <AnimatePresence>
-              {activeLocation && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute bottom-4 left-4 p-4 bg-black/70 backdrop-blur-sm rounded-lg text-white z-20 w-80"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold">{activeLocation.username}</h3>
-                    <Badge className={getStatusBadgeColor(activeLocation.status)}>
-                      {activeLocation.status === 'active' ? 'Active Now' : 
-                       activeLocation.status === 'recent' ? 'Recently Active' : 'Inactive'}
-                    </Badge>
+      {usersLoading ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
+          <Loader2 className="h-8 w-8 animate-spin mb-4" />
+          <p>Loading global data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Overlay Stats */}
+          <div className="absolute bottom-6 left-6">
+            <Card className="bg-black/50 text-white border-0 shadow-2xl backdrop-blur-md w-64">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-lg text-white flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-400" />
+                  <span>Global Stats</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm text-gray-300">Users</span>
                   </div>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center text-gray-200">
-                      <MapPin className="h-4 w-4 mr-2 text-blue-400" />
-                      <span>
+                  <span className="font-medium">{userStats.totalUsers}</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-green-400" />
+                    <span className="text-sm text-gray-300">Active Users</span>
+                  </div>
+                  <span className="font-medium">{userStats.activeUsers}</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapIcon className="h-4 w-4 text-amber-400" />
+                    <span className="text-sm text-gray-300">Countries</span>
+                  </div>
+                  <span className="font-medium">{userStats.countries}</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-purple-400" />
+                    <span className="text-sm text-gray-300">Recent Activity</span>
+                  </div>
+                  <span className="font-medium">{userStats.recentActivity}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Location Info Popup */}
+          <AnimatePresence>
+            {activeLocation && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-6 right-6"
+              >
+                <Card className="bg-black/60 text-white border-0 shadow-2xl backdrop-blur-md w-72">
+                  <CardHeader className="p-4 pb-2">
+                    <CardTitle className="text-base text-white flex justify-between items-center">
+                      <span className="truncate">{activeLocation.username}</span>
+                      <Badge className={`text-xs px-2 py-0 h-5 ${
+                        activeLocation.status === 'active' ? 'bg-green-500' : 
+                        activeLocation.status === 'recent' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}>
+                        {activeLocation.status === 'active' ? 'Active' : 
+                         activeLocation.status === 'recent' ? 'Recent' : 'Inactive'}
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription className="text-sm text-gray-300">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
                         {activeLocation.city}, {activeLocation.country}
-                      </span>
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2 space-y-3">
+                    <div className="text-sm">
+                      <div className="mb-1 text-gray-400">Last Active</div>
+                      <div className="font-medium">
+                        {activeLocation.lastActive 
+                          ? activeLocation.lastActive.toLocaleDateString() 
+                          : 'Never'}
+                      </div>
                     </div>
                     
-                    <div className="flex items-center text-gray-200">
-                      <Clock className="h-4 w-4 mr-2 text-blue-400" />
-                      <span>Last active: {formatRelativeTime(activeLocation.lastActive)}</span>
-                    </div>
-                    
-                    <div className="bg-white/10 rounded-md p-2 mt-2 grid grid-cols-2 gap-2">
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-green-400">
-                          {activeLocation.goalsCreated}
-                        </div>
-                        <div className="text-xs text-gray-300">Goals Created</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="text-sm">
+                        <div className="mb-1 text-gray-400">Goals Created</div>
+                        <div className="font-medium">{activeLocation.goalsCreated}</div>
                       </div>
                       
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-yellow-400">
-                          {activeLocation.tasksCompleted}
-                        </div>
-                        <div className="text-xs text-gray-300">Tasks Completed</div>
+                      <div className="text-sm">
+                        <div className="mb-1 text-gray-400">Tasks Completed</div>
+                        <div className="font-medium">{activeLocation.tasksCompleted}</div>
                       </div>
                     </div>
                     
-                    <div className="flex justify-end mt-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-xs h-8 text-blue-400 hover:text-blue-300 hover:bg-blue-950/50"
-                      >
-                        View Profile <ExternalLink className="h-3 w-3 ml-1" />
-                      </Button>
+                    <div className="flex justify-end gap-2 mt-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20"
+                            >
+                              <Github className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Github Profile</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20"
+                            >
+                              <Linkedin className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View LinkedIn Profile</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Full Profile</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            {/* Nearby users panel */}
-            {yourLocation && nearbyUsers.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 1 }}
-                className="absolute top-4 right-4 p-3 bg-black/70 backdrop-blur-sm rounded-lg text-white z-20 w-64"
-              >
-                <h4 className="text-sm font-semibold flex items-center mb-2">
-                  <Users className="h-4 w-4 mr-2 text-blue-400" />
-                  Users Near You ({nearbyUsers.length})
-                </h4>
-                
-                <div className="max-h-40 overflow-y-auto pr-1 space-y-2">
-                  {nearbyUsers.slice(0, 5).map((user, index) => (
-                    <div 
-                      key={index} 
-                      className="bg-white/10 rounded-md p-2 text-xs flex justify-between items-center"
-                    >
-                      <div className="flex items-center">
-                        <div className={`h-2 w-2 rounded-full mr-2 ${
-                          user.status === 'active' ? 'bg-green-500' : 
-                          user.status === 'recent' ? 'bg-yellow-500' : 'bg-red-500'
-                        }`} />
-                        <span>{user.username}</span>
-                      </div>
-                      <span className="text-gray-400 text-xs">{user.country}</span>
-                    </div>
-                  ))}
-                  
-                  {nearbyUsers.length > 5 && (
-                    <div className="text-center text-xs text-blue-300 mt-1">
-                      + {nearbyUsers.length - 5} more users nearby
-                    </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
-            
-            {/* Info panel */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 2 }}
-              className="absolute bottom-4 right-4 text-xs text-white/60 flex flex-col items-end space-y-1"
-            >
-              <div className="flex items-center">
-                <span className="mr-1">Drag to rotate</span>
-                <span className="inline-block w-3 h-3 border border-white/60 rounded-full"></span>
-              </div>
-              <div className="flex items-center">
-                <span className="mr-1">Scroll to zoom</span>
-                <span className="inline-block w-3 h-3 border border-white/60 rounded-full"></span>
-              </div>
-              <div className="flex items-center">
-                <span className="mr-1">Click for details</span>
-                <span className="inline-block w-3 h-3 border border-white/60 rounded-full"></span>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </CardContent>
-      
-      <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t">
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Last updated: {new Date().toLocaleTimeString()}
-          </div>
+          </AnimatePresence>
           
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" className="h-8">
-              <Github className="h-4 w-4 mr-1" /> GitHub
-            </Button>
-            <Button variant="outline" size="sm" className="h-8">
-              <Linkedin className="h-4 w-4 mr-1" /> LinkedIn
-            </Button>
+          {/* Your Location Card */}
+          {yourLocation && showYourLocation && nearbyUsers.length > 0 && (
+            <div className="absolute bottom-6 right-6 w-64">
+              <Card className="bg-black/50 text-white border-0 shadow-2xl backdrop-blur-md">
+                <CardHeader className="p-4 pb-2">
+                  <CardTitle className="text-sm text-white flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-blue-400" />
+                    <span>Users Near You</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 space-y-2 max-h-48 overflow-y-auto">
+                  {nearbyUsers.map((user, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between py-1"
+                    >
+                      <div className="truncate text-sm">{user.username}</div>
+                      <Badge className={`text-xs px-2 py-0 h-5 ${
+                        user.status === 'active' ? 'bg-green-500' : 
+                        user.status === 'recent' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}>
+                        {getDistanceFromLatLonInKm(
+                          yourLocation.lat, yourLocation.lng,
+                          user.lat, user.lng
+                        ).toFixed(0)}km
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {/* Controls */}
+          <div className="absolute top-6 left-6">
+            <Card className="bg-black/50 border-0 backdrop-blur-md text-white p-2">
+              <CardContent className="p-0 flex space-x-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={() => setIsAutoRotating(!isAutoRotating)}
+                      >
+                        {isAutoRotating ? (
+                          <span className="h-4 w-4">■</span>
+                        ) : (
+                          <span className="h-4 w-4">▶</span>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isAutoRotating ? 'Pause Rotation' : 'Resume Rotation'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={() => zoomOut()}
+                        disabled={!isZoomedIn}
+                      >
+                        <span className="h-4 w-4">🔍-</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Zoom Out</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
+      
+      {/* Loading overlay */}
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-12 w-12 animate-spin mb-4" />
+            <div className="text-2xl font-bold">Loading Globe</div>
+            <div className="text-sm mt-2 text-gray-400">Please wait while we initialize the 3D world...</div>
           </div>
         </div>
-      </div>
-    </Card>
+      )}
+      
+      {/* Error message if WebGL not supported */}
+      {isReady && !rendererRef.current && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-900/80 text-white">
+          <div className="flex flex-col items-center max-w-md text-center p-6">
+            <AlertTriangle className="h-12 w-12 mb-4" />
+            <div className="text-xl font-bold">WebGL Not Supported</div>
+            <div className="text-sm mt-2">
+              Your browser or device doesn't support WebGL, which is required to display this 3D visualization.
+              Please try using a different browser or updating your graphics drivers.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
