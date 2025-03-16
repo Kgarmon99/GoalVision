@@ -32,6 +32,9 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>; 
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserLocation(id: number, latitude: number, longitude: number, country: string, city: string): Promise<User | undefined>;
   
   // Goal methods
   getAllGoals(): Promise<Goal[]>;
@@ -270,9 +273,51 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      fullName: insertUser.fullName ?? null,
+      email: insertUser.email ?? null,
+      avatar: insertUser.avatar ?? null,
+      latitude: insertUser.latitude ?? null,
+      longitude: insertUser.longitude ?? null,
+      country: insertUser.country ?? null,
+      city: insertUser.city ?? null,
+      lastActive: new Date(),
+      goalsCreated: insertUser.goalsCreated ?? null,
+      tasksCompleted: insertUser.tasksCompleted ?? null
+    };
     this.users.set(id, user);
     return user;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+  
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const existingUser = this.users.get(id);
+    if (!existingUser) return undefined;
+    
+    const updatedUser = { ...existingUser, ...user };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserLocation(id: number, latitude: number, longitude: number, country: string, city: string): Promise<User | undefined> {
+    const existingUser = this.users.get(id);
+    if (!existingUser) return undefined;
+    
+    const updatedUser = { 
+      ...existingUser, 
+      latitude, 
+      longitude, 
+      country, 
+      city,
+      lastActive: new Date() 
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
   
   // Goal methods
@@ -486,6 +531,34 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+  
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(user)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+  
+  async updateUserLocation(id: number, latitude: number, longitude: number, country: string, city: string): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        latitude,
+        longitude,
+        country,
+        city,
+        lastActive: new Date()
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
   
   // Goal methods

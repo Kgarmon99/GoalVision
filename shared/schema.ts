@@ -175,16 +175,36 @@ export type Subtask = typeof subtasks.$inferSelect;
 export type InsertWeek = z.infer<typeof insertWeekSchema>;
 export type Week = typeof weeks.$inferSelect;
 
-// Original schema
+// User schema with location data for globe visualization
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  fullName: text("full_name").default(""),
+  email: text("email").default(""),
+  avatar: text("avatar").default(""),
+  // Location data for globe visualization
+  latitude: real("latitude").default(0),
+  longitude: real("longitude").default(0),
+  country: text("country").default(""),
+  city: text("city").default(""),
+  lastActive: timestamp("last_active").defaultNow(),
+  goalsCreated: integer("goals_created").default(0),
+  tasksCompleted: integer("tasks_completed").default(0),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  fullName: true,
+  email: true,
+  avatar: true,
+  latitude: true,
+  longitude: true,
+  country: true,
+  city: true,
+  goalsCreated: true,
+  tasksCompleted: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
