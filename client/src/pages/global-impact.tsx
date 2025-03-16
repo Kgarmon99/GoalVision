@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { User } from '@shared/schema';
-import { GlobeVisualization } from '@/components/globe-visualization-fixed';
+import { GlobeVisualization } from '@/components/globe-visualization-unified';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -450,7 +450,13 @@ export default function GlobalImpact() {
         <AnimatedComponent animation="fadeIn" duration={0.8}>
           <TabsContent value="globe" className="m-0">
             <div className="h-[750px] rounded-xl overflow-hidden border">
-              <GlobeVisualization className="h-full" />
+              <GlobeVisualization 
+                className="h-full" 
+                variant="performance"
+                showStats={true}
+                autoRotate={true}
+                polygonDetail="medium"
+              />
             </div>
           </TabsContent>
         </AnimatedComponent>

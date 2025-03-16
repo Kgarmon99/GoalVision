@@ -381,8 +381,8 @@ export function GlobeVisualization({
         const handleResize = () => {
           if (!cameraRef.current || !rendererRef.current || !containerRef.current) return;
           
-          const width = containerRef.current.clientWidth;
-          const height = containerRef.current.clientHeight;
+          const width = containerRef.current.clientWidth || 300;
+          const height = containerRef.current.clientHeight || 300;
           
           cameraRef.current.aspect = width / height;
           cameraRef.current.updateProjectionMatrix();
