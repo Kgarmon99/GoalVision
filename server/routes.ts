@@ -9,12 +9,14 @@ import {
   insertExecutionTaskSchema, 
   insertWeekSchema,
   insertSubtaskSchema,
+  insertUserSchema,
   goals,
   metrics,
   goalStatus,
   executionTasks,
   subtasks,
-  weeks
+  weeks,
+  users
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -715,6 +717,93 @@ app.post("/api/goal-templates", async (req, res) => {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Error deleting subtask" });
+    }
+  });
+
+  // User routes
+  // Get all users
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users" });
+    }
+  });
+
+  // Get a specific user
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user" });
+    }
+  });
+
+  // Create a user
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating user" });
+    }
+  });
+
+  // Update a user
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userData = insertUserSchema.partial().parse(req.body);
+      const updatedUser = await storage.updateUser(id, userData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating user" });
+    }
+  });
+
+  // Update user location
+  app.patch("/api/users/:id/location", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { latitude, longitude, country, city } = req.body;
+      
+      if (typeof latitude !== 'number' || typeof longitude !== 'number' || 
+          typeof country !== 'string' || typeof city !== 'string') {
+        return res.status(400).json({ 
+          message: "Invalid location data",
+          errors: "All location fields (latitude, longitude, country, city) are required"
+        });
+      }
+      
+      const updatedUser = await storage.updateUserLocation(id, latitude, longitude, country, city);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating user location" });
     }
   });
 
