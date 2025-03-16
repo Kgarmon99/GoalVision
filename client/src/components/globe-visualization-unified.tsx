@@ -145,7 +145,7 @@ export function GlobeVisualization({
         // Create camera
         const camera = new THREE.PerspectiveCamera(
           60, 
-          containerRef.current.clientWidth / containerRef.current.clientHeight || 2, 
+          (containerRef.current?.clientWidth || 800) / (containerRef.current?.clientHeight || 600), 
           0.1, 
           1000
         );
@@ -158,17 +158,20 @@ export function GlobeVisualization({
         });
         
         // Set size based on container
-        const width = containerRef.current.clientWidth || window.innerWidth;
-        const height = containerRef.current.clientHeight || window.innerHeight;
+        const width = containerRef.current?.clientWidth || window.innerWidth;
+        const height = containerRef.current?.clientHeight || window.innerHeight;
         renderer.setSize(width, height);
         renderer.setPixelRatio(window.devicePixelRatio);
         
         // Clear any previous children
-        while (containerRef.current.firstChild) {
-          containerRef.current.removeChild(containerRef.current.firstChild);
+        const container = containerRef.current;
+        if (container) {
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+          
+          container.appendChild(renderer.domElement);
         }
-        
-        containerRef.current.appendChild(renderer.domElement);
         rendererRef.current = renderer;
         
         // Create lights
@@ -440,8 +443,11 @@ export function GlobeVisualization({
     if (!sceneRef.current || !userPointsRef.current || users.length === 0) return;
     
     // Clear existing points
-    while (userPointsRef.current.children.length > 0) {
-      userPointsRef.current.remove(userPointsRef.current.children[0]);
+    const userPoints = userPointsRef.current;
+    if (userPoints) {
+      while (userPoints.children.length > 0) {
+        userPoints.remove(userPoints.children[0]);
+      }
     }
     
     // Add new points
@@ -477,7 +483,7 @@ export function GlobeVisualization({
       marker.userData = { userId: user.id };
       
       // Add marker to the group
-      userPointsRef.current.add(marker);
+      userPointsRef.current?.add(marker);
     });
   }, [users]);
 
@@ -485,6 +491,11 @@ export function GlobeVisualization({
   const handleRestartVisualization = () => {
     setLoadingState('initializing');
     setInitAttempts(0);
+  };
+  
+  // Handler for refresh button
+  const handleRefreshData = () => {
+    refetchUsers();
   };
 
   return (
@@ -522,7 +533,7 @@ export function GlobeVisualization({
             </Badge>
             
             <button 
-              onClick={refetchUsers}
+              onClick={handleRefreshData}
               className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
