@@ -37,7 +37,9 @@ export function GlobeVisualization({
   const globeRef = useRef<THREE.Mesh | null>(null);
   const userPointsRef = useRef<THREE.Group | null>(null);
 
-  const [isReady, setIsReady] = useState(false);
+  // Enhanced loading state handling with preloading for globe assets
+  const [loadingState, setLoadingState] = useState<'initializing' | 'preloading' | 'ready' | 'error'>('initializing');
+  const [initAttempts, setInitAttempts] = useState(0);
   const [userStats, setUserStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -45,11 +47,43 @@ export function GlobeVisualization({
     recentActivity: 0
   });
   
-  // Fetch users data
-  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({ 
+  // Detect WebGL support early
+  useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const hasWebGL = !!(window.WebGLRenderingContext && 
+        (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      
+      if (!hasWebGL) {
+        console.error("WebGL not supported in this browser");
+        setLoadingState('error');
+      }
+    } catch (e) {
+      console.error("Error detecting WebGL support:", e);
+      setLoadingState('error');
+    }
+  }, []);
+  
+  // Fetch users data with more robust loading and error handling
+  const { data: users = [], isLoading: usersLoading, isError: usersError, refetch: refetchUsers } = useQuery<User[]>({ 
     queryKey: ['/api/users'],
-    staleTime: 30000 // 30 seconds
+    staleTime: 30000, // 30 seconds
+    retry: 5, // Retry up to 5 times
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff strategy
   });
+  
+  // Auto-retry logic for data loading errors
+  useEffect(() => {
+    if (usersError) {
+      console.log("Error loading users data, auto-retrying in 3 seconds...");
+      const timer = setTimeout(() => {
+        console.log("Auto-retrying users data fetch...");
+        refetchUsers();
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [usersError, refetchUsers]);
 
   // Process user data for stats display
   useEffect(() => {
@@ -383,8 +417,8 @@ export function GlobeVisualization({
     // Add event listeners
     window.addEventListener('resize', handleResize);
     
-    // Set ready state
-    setIsReady(true);
+    // Set loading state to ready
+    setLoadingState('ready');
     
     // Cleanup function
     return () => {
@@ -463,6 +497,22 @@ useEffect(() => {
           <Loader2 className="h-8 w-8 animate-spin mb-4" />
           <p>Loading global data...</p>
         </div>
+      ) : usersError ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white">
+          <AlertTriangle className="h-10 w-10 text-amber-500 mb-4" />
+          <h3 className="text-xl font-semibold mb-2">Data Loading Error</h3>
+          <p className="text-gray-300 mb-4 text-center max-w-md">
+            There was a problem loading user location data. 
+            The visualization will retry automatically in a few seconds.
+          </p>
+          <button 
+            onClick={() => refetchUsers()} 
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md flex items-center gap-2 transition-colors"
+          >
+            <span>Retry Now</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </button>
+        </div>
       ) : (
         <>
           {/* Overlay Stats */}
@@ -513,8 +563,8 @@ useEffect(() => {
       )}
       
       {/* Loading overlay */}
-      {!isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
+      {loadingState !== 'ready' && loadingState !== 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white">
           <div className="flex flex-col items-center">
             <Loader2 className="h-12 w-12 animate-spin mb-4" />
             <div className="text-2xl font-bold">Loading Globe</div>
@@ -524,7 +574,7 @@ useEffect(() => {
       )}
       
       {/* Error message if WebGL not supported */}
-      {isReady && !rendererRef.current && (
+      {loadingState === 'error' && (
         <div className="absolute inset-0 flex items-center justify-center bg-red-900/80 text-white">
           <div className="flex flex-col items-center max-w-md text-center p-6">
             <AlertTriangle className="h-12 w-12 mb-4" />

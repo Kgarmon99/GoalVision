@@ -120,16 +120,8 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: true,  // Only refetch when window regains focus
       staleTime: 5 * 60 * 1000,    // Data remains fresh for 5 minutes
       gcTime: 30 * 60 * 1000,      // Keep unused data in cache for 30 minutes
-      retry: (failureCount, error) => {
-        // Only retry network errors, not API errors
-        if (error instanceof Error) {
-          const isNetworkError = !error.message.includes("API Error") && 
-                                 (error.message.includes("network") || 
-                                  error.message.includes("Failed to fetch"));
-          return failureCount < 2 && isNetworkError;
-        }
-        return false;
-      },
+      retry: 3,                    // Retry failed requests up to 3 times
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff
       // Performance optimizations for React Query v5
       placeholderData: (previousData: unknown) => previousData, // Similar to keepPreviousData in v4
       refetchOnMount: true,        // Fetch fresh data when component mounts if stale
