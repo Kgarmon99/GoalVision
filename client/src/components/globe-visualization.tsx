@@ -50,7 +50,7 @@ export function GlobeVisualization({
     // Create camera
     const camera = new THREE.PerspectiveCamera(
       60, 
-      window.innerWidth / window.innerHeight, 
+      containerRef.current.clientWidth / containerRef.current.clientHeight || 2, 
       0.1, 
       1000
     );
@@ -62,8 +62,18 @@ export function GlobeVisualization({
       alpha: true,
       antialias: true 
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    // Set initial size based on container
+    const width = containerRef.current.clientWidth || window.innerWidth;
+    const height = containerRef.current.clientHeight || window.innerHeight;
+    renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
+    
+    // Clear any previous children
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild);
+    }
+    
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
     
