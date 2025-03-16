@@ -7,6 +7,18 @@ import { Loader2, MapPin, Users, Activity, Clock, MapIcon, AlertTriangle } from 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+// Helper function to get position on globe - global scope so it's available everywhere
+const getPositionOnGlobe = (lat: number, lng: number): THREE.Vector3 => {
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+  
+  const x = -50 * Math.sin(phi) * Math.cos(theta);
+  const y = 50 * Math.cos(phi);
+  const z = 50 * Math.sin(phi) * Math.sin(theta);
+  
+  return new THREE.Vector3(x, y, z);
+};
+
 interface GlobeVisualizationProps {
   title?: string;
   description?: string;
@@ -338,17 +350,7 @@ export function GlobeVisualization({
     ];
     addContinent(australia, "Australia");
     
-    // Helper function to get position on globe
-    function getPositionOnGlobe(lat: number, lng: number): THREE.Vector3 {
-      const phi = (90 - lat) * Math.PI / 180;
-      const theta = (lng + 180) * Math.PI / 180;
-      
-      const x = -50 * Math.sin(phi) * Math.cos(theta);
-      const y = 50 * Math.cos(phi);
-      const z = 50 * Math.sin(phi) * Math.sin(theta);
-      
-      return new THREE.Vector3(x, y, z);
-    }
+    // Using the helper function defined earlier for consistent positioning
     
     // Handle window resize
     const handleResize = () => {
@@ -394,25 +396,27 @@ export function GlobeVisualization({
     };
   }, []);
   
-  // Add markers for user locations
-  useEffect(() => {
-    // If scene isn't ready or no user data, return
-    if (!sceneRef.current || !userPointsRef.current || !userPointsRef.current || users.length === 0) return;
+  // We're using the global getPositionOnGlobe function defined at the top of this file
+
+// Add markers for user locations
+useEffect(() => {
+  // If scene isn't ready or no user data, return
+  if (!sceneRef.current || !userPointsRef.current || !userPointsRef.current || users.length === 0) return;
+  
+  // Clear existing points (keeping this part simple to avoid TypeScript errors)
+  while (userPointsRef.current.children.length > 0) {
+    userPointsRef.current.remove(userPointsRef.current.children[0]);
+  }
+  
+  // Add new points
+  users.forEach(user => {
+    if (!user.latitude || !user.longitude) return;
     
-    // Clear existing points (keeping this part simple to avoid TypeScript errors)
-    while (userPointsRef.current.children.length > 0) {
-      userPointsRef.current.remove(userPointsRef.current.children[0]);
-    }
-    
-    // Add new points
-    users.forEach(user => {
-      if (!user.latitude || !user.longitude) return;
-      
-      // Convert lat/lng to 3D position using same function as the continents
-      const position = getPositionOnGlobe(user.latitude, user.longitude);
-      const x = position.x;
-      const y = position.y;
-      const z = position.z;
+    // Convert lat/lng to 3D position using the helper function
+    const position = getPositionOnGlobe(user.latitude, user.longitude);
+    const x = position.x;
+    const y = position.y;
+    const z = position.z;
       
       // Create marker
       const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
