@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { User } from '@shared/schema';
-import { GlobeVisualization } from '@/components/globe-visualization';
+import { GlobeVisualization } from '@/components/globe-visualization-fixed';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
