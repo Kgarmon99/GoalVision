@@ -180,9 +180,6 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  fullName: text("full_name").default(""),
-  email: text("email").default(""),
-  avatar: text("avatar").default(""),
   // Location data for globe visualization
   latitude: real("latitude").default(0),
   longitude: real("longitude").default(0),
@@ -196,9 +193,6 @@ export const users = pgTable("users", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
-  fullName: true,
-  email: true,
-  avatar: true,
   latitude: true,
   longitude: true,
   country: true,

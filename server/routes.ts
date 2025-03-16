@@ -727,6 +727,7 @@ app.post("/api/goal-templates", async (req, res) => {
       const users = await storage.getAllUsers();
       res.json(users);
     } catch (error) {
+      console.error("Error fetching users:", error);
       res.status(500).json({ message: "Error fetching users" });
     }
   });
