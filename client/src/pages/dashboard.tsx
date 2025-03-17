@@ -975,11 +975,11 @@ const Dashboard = () => {
                   </h2>
                   
                   <div className="dashboard-3d grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
                       <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
                           <Icon3D>
-                            <Target className="h-6 w-6 text-green-400" />
+                            <Target className="h-6 w-6 text-green-400 glow-pulse" />
                           </Icon3D>
                         </div>
                         <div>
@@ -989,11 +989,11 @@ const Dashboard = () => {
                       </Card3DContent>
                     </Card3D>
                     
-                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
                       <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
                           <Icon3D>
-                            <TrendingUp className="h-6 w-6 text-green-400" />
+                            <TrendingUp className="h-6 w-6 text-green-400 glow-pulse" />
                           </Icon3D>
                         </div>
                         <div>
@@ -1006,11 +1006,11 @@ const Dashboard = () => {
                       </Card3DContent>
                     </Card3D>
                     
-                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
                       <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
                           <Icon3D>
-                            <CheckCircle className="h-6 w-6 text-green-400" />
+                            <CheckCircle className="h-6 w-6 text-green-400 glow-pulse" />
                           </Icon3D>
                         </div>
                         <div>
@@ -1022,11 +1022,11 @@ const Dashboard = () => {
                       </Card3DContent>
                     </Card3D>
                     
-                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
                       <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
                           <Icon3D>
-                            <Users className="h-6 w-6 text-green-400" />
+                            <Users className="h-6 w-6 text-green-400 glow-pulse" />
                           </Icon3D>
                         </div>
                         <div>
