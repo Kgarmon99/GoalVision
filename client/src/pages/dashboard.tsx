@@ -323,66 +323,74 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col items-center">
-            <div className="flex flex-col items-center mb-3">
-              <p className="text-muted-foreground text-sm font-medium">Yearly</p>
-              <p className="text-2xl font-bold mt-1">${yearlyRate.toLocaleString()}</p>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
+                Daily
+              </div>
             </div>
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-red-500"
-                style={{ width: '100%' }}
-              ></div>
+            <h3 className="text-2xl font-bold mt-1">${dailyRate}</h3>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Per day spending</span>
+              <span className="text-xs font-medium text-red-500">-${dailyRate}/day</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Annual expense projection</p>
           </CardContent>
         </Card>
         
         <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col items-center">
-            <div className="flex flex-col items-center mb-3">
-              <p className="text-muted-foreground text-sm font-medium">Monthly</p>
-              <p className="text-2xl font-bold mt-1">${monthlyRate.toLocaleString()}</p>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-amber-500" />
+              </div>
+              <div className="text-xs font-medium px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">
+                Weekly
+              </div>
             </div>
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-red-500"
-                style={{ width: '80%' }}
-              ></div>
+            <h3 className="text-2xl font-bold mt-1">${weeklyRate}</h3>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Weekly projection</span>
+              <span className="text-xs font-medium text-amber-500">-${weeklyRate}/week</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Monthly spending level</p>
           </CardContent>
         </Card>
         
         <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col items-center">
-            <div className="flex flex-col items-center mb-3">
-              <p className="text-muted-foreground text-sm font-medium">Weekly</p>
-              <p className="text-2xl font-bold mt-1">${weeklyRate}</p>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-orange-50 dark:bg-orange-900/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-orange-500" />
+              </div>
+              <div className="text-xs font-medium px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 rounded-full">
+                Monthly
+              </div>
             </div>
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-amber-500"
-                style={{ width: '60%' }}
-              ></div>
+            <h3 className="text-2xl font-bold mt-1">${monthlyRate.toLocaleString()}</h3>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Current burn rate</span>
+              <span className="text-xs font-medium text-orange-500">-${monthlyRate.toLocaleString()}/month</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Average weekly cost</p>
           </CardContent>
         </Card>
         
         <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col items-center">
-            <div className="flex flex-col items-center mb-3">
-              <p className="text-muted-foreground text-sm font-medium">Daily</p>
-              <p className="text-2xl font-bold mt-1">${dailyRate}</p>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-red-600" />
+              </div>
+              <div className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
+                Yearly
+              </div>
             </div>
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-green-500"
-                style={{ width: '40%' }}
-              ></div>
+            <h3 className="text-2xl font-bold mt-1">${yearlyRate.toLocaleString()}</h3>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Annual projection</span>
+              <span className="text-xs font-medium text-red-600">-${yearlyRate.toLocaleString()}/year</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Per day expense</p>
           </CardContent>
         </Card>
       </div>
