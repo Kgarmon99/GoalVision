@@ -128,24 +128,35 @@ const Progress3D = React.forwardRef<
     );
   };
   
-  // Extreme 3D light refraction effects
+  // Extreme 3D light refraction effects - Pokemon-styled enhanced version
   const renderLightRefractions = () => {
-    if (!extreme3D) return null;
-    
+    // Make it always visible for maximum 3D effect
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 3 }).map((_, i) => (
+        {/* Increased number of light refractions for more dramatic effect */}
+        {Array.from({ length: 5 }).map((_, i) => (
           <div 
             key={i}
             className="absolute inset-0 mix-blend-overlay"
             style={{ 
               clipPath: `inset(0 ${100 - numberValue}% 0 0)`,
-              background: `radial-gradient(circle at ${20 + i * 25}% 50%, rgba(255, 255, 255, 0.8) 0%, transparent ${5 + i * 8}%)`,
-              opacity: 0.4,
-              transform: `translateZ(${5 + i}px)`,
+              background: `radial-gradient(circle at ${15 + i * 20}% 50%, rgba(255, 255, 255, 1) 0%, transparent ${4 + i * 6}%)`,
+              opacity: 0.6,
+              transform: `translateZ(${8 + i * 3}px)`, // More extreme Z-positioning
             }}
           />
         ))}
+        
+        {/* Add horizontal light streaks for additional dimensional effect */}
+        <div 
+          className="absolute h-[3px] top-1/2 transform -translate-y-1/2 z-10"
+          style={{
+            width: `${numberValue}%`,
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent)',
+            transform: 'translateZ(20px) rotateX(5deg)',
+            boxShadow: '0 0 15px rgba(255, 255, 255, 0.8)'
+          }}
+        />
       </div>
     );
   };
@@ -204,12 +215,23 @@ const Progress3D = React.forwardRef<
           {renderLightRefractions()}
         </ProgressPrimitive.Root>
         
-        {/* Shadow under the progress bar for enhanced 3D effect */}
+        {/* Shadow under the progress bar for enhanced 3D effect - no blur */}
         <div 
-          className="absolute w-full h-3 bottom-[-8px] left-0 rounded-full opacity-30 blur-md z-[-1]"
+          className="absolute w-full h-3 bottom-[-8px] left-0 rounded-full opacity-50 z-[-1]"
           style={{ 
-            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, transparent 70%)',
-            transform: 'scaleY(0.3) rotateX(40deg)',
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)',
+            transform: 'scaleY(0.3) rotateX(40deg) translateZ(-10px)',
+            transformOrigin: 'center bottom',
+            boxShadow: '0 10px 15px rgba(0,0,0,0.5)'
+          }}
+        />
+        
+        {/* Multi-layered shadows for enhanced 3D effect */}
+        <div 
+          className="absolute w-[95%] h-2 bottom-[-12px] left-[2.5%] rounded-full opacity-40 z-[-2]"
+          style={{ 
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)',
+            transform: 'scaleY(0.2) rotateX(50deg) translateZ(-15px)',
             transformOrigin: 'center bottom'
           }}
         />
@@ -229,14 +251,15 @@ const Progress3D = React.forwardRef<
           </div>
         )}
         
-        {/* 3D marker at current progress */}
+        {/* 3D marker at current progress - no blur, extreme depth */}
         {extreme3D && numberValue > 5 && numberValue < 98 && (
           <div 
-            className="absolute top-1/2 transform -translate-y-1/2 w-1 h-4 rounded-full bg-white/40 blur-[1px] pointer-events-none"
+            className="absolute top-1/2 transform -translate-y-1/2 w-1.5 h-6 rounded-full bg-white/80 pointer-events-none"
             style={{ 
               left: `${numberValue}%`,
-              boxShadow: '0 0 8px rgba(255,255,255,0.8)',
-              transform: 'translateY(-50%) translateZ(12px)',
+              boxShadow: '0 0 15px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.4)',
+              transform: 'translateY(-50%) translateZ(25px)', // More extreme depth
+              border: '1px solid rgba(255,255,255,0.9)'
             }}
           />
         )}
