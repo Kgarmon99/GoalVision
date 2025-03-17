@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { AnimatedComponent } from "@/components/ui/animated-component";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { EnhancedProgress } from "@/components/ui/enhanced-progress";
+import { Progress3D } from "@/components/ui/progress-3d";
 import { EnhancedTooltip } from "@/components/ui/enhanced-tooltip";
 import { 
   DropdownMenu, 
@@ -321,19 +322,15 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           
           <div className="mt-3 sm:mt-4">
             <div className="relative">
-              <EnhancedProgress 
+              <Progress3D 
                 value={percentComplete}
-                variant="animated"
-                threshold={{ high: 75, medium: 50, low: 25 }}
-                thresholdColors={{
-                  high: "bg-green-500",
-                  medium: "bg-yellow-500",
-                  low: "bg-orange-500",
-                  veryLow: "bg-red-600"
-                }}
-                height="h-2.5"
-                className="bg-gray-800 glow-element"
-                animationDuration={1}
+                extreme3D={true}
+                showParticles={percentComplete > 80}
+                particleCount={5}
+                pulseEffect={percentComplete >= 100}
+                showValue={false}
+                height="h-3"
+                className="bg-gray-800/60"
               />
             </div>
             <div className="flex items-center justify-between text-xs mt-1">
@@ -476,17 +473,16 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 {percentComplete}% complete
               </span>
             </div>
-            <EnhancedProgress 
+            <Progress3D 
               value={percentComplete}
-              variant="animated"
-              threshold={{ high: 75, medium: 50, low: 25 }}
-              thresholdColors={{
-                high: "bg-green-500",
-                medium: "bg-yellow-500",
-                low: "bg-orange-500",
-                veryLow: "bg-red-600"
-              }}
-              className="bg-gray-900"
+              extreme3D={true}
+              showParticles={percentComplete > 80}
+              particleCount={5}
+              pulseEffect={percentComplete >= 100}
+              showValue={true}
+              showLabel={false}
+              height="h-3"
+              className="bg-gray-900/60"
             />
           </div>
           
