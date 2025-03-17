@@ -387,7 +387,7 @@
   opacity: 0.7;
 }
 
-/* Dashboard-specific 3D enhancements */
+/* Dashboard-specific 3D enhancements - Enhanced extreme version */
 .dashboard-card-3d {
   transform-style: preserve-3d;
   transform: translateZ(20px) rotateX(3deg);
@@ -397,6 +397,22 @@
     0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: visible;
+}
+
+/* Extreme 3D card for Pokemon-style UI with no blur effects */
+.extreme-3d-card {
+  background: rgb(23, 23, 35);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  transform-style: preserve-3d;
+  transform: translateZ(30px) rotateX(5deg);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 10px 25px rgba(0, 0, 0, 0.2),
+    0 0 15px rgba(59, 130, 246, 0.2);
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
 }
 
 .dashboard-card-3d::before {

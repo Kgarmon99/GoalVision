@@ -168,7 +168,7 @@ const Progress3D = React.forwardRef<
         <ProgressPrimitive.Root
           ref={ref}
           className={cn(
-            "relative overflow-visible rounded-full bg-gray-800/60 backdrop-blur-sm",
+            "relative overflow-visible rounded-full bg-gray-900",
             "progress-3d",
             height,
             className
