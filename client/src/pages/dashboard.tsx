@@ -24,6 +24,9 @@ import { Animated3DBackground } from "@/components/ui/animated-3d-background";
 import { ParticleEffect } from "@/components/ui/particle-effect";
 import { CursorEffect } from "@/components/ui/cursor-effect";
 import { XPBar, StatusBar, GameButton, QuestItem, Celebration } from "@/components/game-elements";
+import { Card3D, Card3DContent, Card3DTitle, Icon3D, Value3D, Text3D, Badge3D } from "@/components/ui/card-3d";
+import { Button3D } from "@/components/ui/button-3d";
+import { Progress3D } from "@/components/ui/progress-3d";
 import "@/components/ui/glow-effects.css";
 import { 
   RefreshCcw, 
@@ -947,70 +950,82 @@ const Dashboard = () => {
                 </TabsContent>
               </Tabs>
               
-              {/* Quick Stats Cards */}
+              {/* Quick Stats Cards - 3D Enhanced */}
               {!isLoading && goals.length > 0 && (
-                <section className="mb-8">
-                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
-                    <Award className="h-5 w-5 mr-2" />
+                <section className="mb-8 section-3d">
+                  <h2 className="text-xl font-semibold text-green-400 text-3d-title flex items-center mb-6">
+                    <Icon3D className="mr-3">
+                      <Award className="h-5 w-5 text-green-400" />
+                    </Icon3D>
                     <span className="mr-2">Achievement Stats</span>
-                    <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">Your progress at a glance</span>
+                    <Badge3D className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">
+                      Your progress at a glance
+                    </Badge3D>
                   </h2>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
-                          <Target className="h-6 w-6 text-green-400" />
+                  <div className="dashboard-3d grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                      <Card3DContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Icon3D>
+                            <Target className="h-6 w-6 text-green-400" />
+                          </Icon3D>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">Total Goals</p>
-                          <p className="text-2xl font-bold text-white">{goals.length}</p>
+                          <Text3D className="text-sm text-gray-400">Total Goals</Text3D>
+                          <Value3D className="text-2xl font-bold text-white">{goals.length}</Value3D>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </Card3DContent>
+                    </Card3D>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
-                          <TrendingUp className="h-6 w-6 text-green-400" />
+                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                      <Card3DContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Icon3D>
+                            <TrendingUp className="h-6 w-6 text-green-400" />
+                          </Icon3D>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">Avg Completion</p>
-                          <p className="text-2xl font-bold text-white">
+                          <Text3D className="text-sm text-gray-400">Avg Completion</Text3D>
+                          <Value3D className="text-2xl font-bold text-white">
                             {Math.round(goals.reduce((acc, goal) => 
                               acc + Math.min(Math.round((goal.current / goal.target) * 100), 100), 0) / goals.length)}%
-                          </p>
+                          </Value3D>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </Card3DContent>
+                    </Card3D>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
-                          <CheckCircle className="h-6 w-6 text-green-400" />
+                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                      <Card3DContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Icon3D>
+                            <CheckCircle className="h-6 w-6 text-green-400" />
+                          </Icon3D>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">On Track Goals</p>
-                          <p className="text-2xl font-bold text-white">
+                          <Text3D className="text-sm text-gray-400">On Track Goals</Text3D>
+                          <Value3D className="text-2xl font-bold text-white">
                             {goalStatuses.filter(status => status.status === "on-track").length}
-                          </p>
+                          </Value3D>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </Card3DContent>
+                    </Card3D>
                     
-                    <Card className="bg-gray-900/70 border border-green-600 glow-card">
-                      <CardContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full glow-element">
-                          <Users className="h-6 w-6 text-green-400" />
+                    <Card3D className="bg-gray-900/70 border border-green-600" intensity="medium" floatEffect={true}>
+                      <Card3DContent className="p-4 flex items-center">
+                        <div className="mr-4 bg-green-900/50 p-3 rounded-full">
+                          <Icon3D>
+                            <Users className="h-6 w-6 text-green-400" />
+                          </Icon3D>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-400">Weekly Tasks</p>
-                          <p className="text-2xl font-bold text-white">
+                          <Text3D className="text-sm text-gray-400">Weekly Tasks</Text3D>
+                          <Value3D className="text-2xl font-bold text-white">
                             {weekTasks.length}
-                          </p>
+                          </Value3D>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </Card3DContent>
+                    </Card3D>
                   </div>
                 </section>
               )}

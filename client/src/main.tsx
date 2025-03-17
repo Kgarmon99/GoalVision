@@ -3,6 +3,7 @@ import App from "./App";
 import "./index.css";
 import "./styles/mobile.css";
 import "./styles/visual-effects.css"; // Consolidated visual effects CSS
+import "./components/ui/3d-effects.css"; // 3D effects inspired by Pokémon games
 // Import our custom Vite HMR client configuration for Replit environment
 import "./vite-hmr-client";
 
