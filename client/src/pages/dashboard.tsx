@@ -77,42 +77,45 @@ const StatCard = memo(({ icon, value, label }: StatCardProps) => (
   </div>
 ));
 
-// Memoized action bar to prevent unnecessary re-renders
+// Memoized action bar to prevent unnecessary re-renders with 3D buttons
 const ActionBar = memo(() => {
   return (
     <div className="mb-6 bg-card rounded-lg border border-border shadow-sm p-4 flex flex-wrap gap-4 justify-end items-center">
       <div className="flex gap-3 flex-wrap">
         <Link href="/add-progress">
-          <Button 
+          <Button3D 
             variant="outline" 
             size="sm" 
             className="gap-2"
             title="Update your progress on existing goals"
+            iconLeft={<PlusCircle className="h-4 w-4" />}
+            glow={true}
           >
-            <PlusCircle className="h-4 w-4" />
             Update Progress
-          </Button>
+          </Button3D>
         </Link>
         <Link href="/add-goal">
-          <Button 
+          <Button3D 
             variant="outline" 
             size="sm" 
             className="gap-2"
             title="Add a new goal to track"
+            iconLeft={<Plus className="h-4 w-4" />}
+            glow={true}
           >
-            <Plus className="h-4 w-4" />
             Add Goal
-          </Button>
+          </Button3D>
         </Link>
         <Link href="/add-task">
-          <Button 
+          <Button3D 
             size="sm" 
             className="gap-2"
             title="Track your execution tasks"
+            iconLeft={<Rocket className="h-4 w-4" />}
+            glow={true}
           >
-            <Rocket className="h-4 w-4" />
             Track Execution
-          </Button>
+          </Button3D>
         </Link>
       </div>
     </div>
@@ -324,78 +327,86 @@ const BurnRateCard = memo(({ monthlyRate }: BurnRateCardProps) => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 dashboard-3d">
+        <Card3D className="bg-card border" intensity="medium" floatEffect={true}>
+          <Card3DContent className="p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-full">
-                <DollarSign className="h-5 w-5 text-red-500" />
+                <Icon3D>
+                  <DollarSign className="h-5 w-5 text-red-500" />
+                </Icon3D>
               </div>
-              <div className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
+              <Badge3D className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
                 Daily
-              </div>
+              </Badge3D>
             </div>
-            <h3 className="text-2xl font-bold mt-1">${dailyRate}</h3>
+            <Value3D className="text-2xl font-bold mt-1">${dailyRate}</Value3D>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Per day spending</span>
-              <span className="text-xs font-medium text-red-500">-${dailyRate}/day</span>
+              <Text3D className="text-xs text-muted-foreground">Per day spending</Text3D>
+              <Text3D className="text-xs font-medium text-red-500">-${dailyRate}/day</Text3D>
             </div>
-          </CardContent>
-        </Card>
+          </Card3DContent>
+        </Card3D>
         
-        <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col">
+        <Card3D className="bg-card border" intensity="medium" floatEffect={true}>
+          <Card3DContent className="p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-full">
-                <DollarSign className="h-5 w-5 text-amber-500" />
+                <Icon3D>
+                  <DollarSign className="h-5 w-5 text-amber-500" />
+                </Icon3D>
               </div>
-              <div className="text-xs font-medium px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">
+              <Badge3D className="text-xs font-medium px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">
                 Weekly
-              </div>
+              </Badge3D>
             </div>
-            <h3 className="text-2xl font-bold mt-1">${weeklyRate}</h3>
+            <Value3D className="text-2xl font-bold mt-1">${weeklyRate}</Value3D>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Weekly projection</span>
-              <span className="text-xs font-medium text-amber-500">-${weeklyRate}/week</span>
+              <Text3D className="text-xs text-muted-foreground">Weekly projection</Text3D>
+              <Text3D className="text-xs font-medium text-amber-500">-${weeklyRate}/week</Text3D>
             </div>
-          </CardContent>
-        </Card>
+          </Card3DContent>
+        </Card3D>
         
-        <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col">
+        <Card3D className="bg-card border" intensity="medium" floatEffect={true}>
+          <Card3DContent className="p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-orange-50 dark:bg-orange-900/20 p-2 rounded-full">
-                <DollarSign className="h-5 w-5 text-orange-500" />
+                <Icon3D>
+                  <DollarSign className="h-5 w-5 text-orange-500" />
+                </Icon3D>
               </div>
-              <div className="text-xs font-medium px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 rounded-full">
+              <Badge3D className="text-xs font-medium px-2 py-1 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 rounded-full">
                 Monthly
-              </div>
+              </Badge3D>
             </div>
-            <h3 className="text-2xl font-bold mt-1">${monthlyRate.toLocaleString()}</h3>
+            <Value3D className="text-2xl font-bold mt-1">${monthlyRate.toLocaleString()}</Value3D>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Current burn rate</span>
-              <span className="text-xs font-medium text-orange-500">-${monthlyRate.toLocaleString()}/month</span>
+              <Text3D className="text-xs text-muted-foreground">Current burn rate</Text3D>
+              <Text3D className="text-xs font-medium text-orange-500">-${monthlyRate.toLocaleString()}/month</Text3D>
             </div>
-          </CardContent>
-        </Card>
+          </Card3DContent>
+        </Card3D>
         
-        <Card className="bg-card border hover:shadow-md transition-all duration-300">
-          <CardContent className="p-4 flex flex-col">
+        <Card3D className="bg-card border" intensity="medium" floatEffect={true}>
+          <Card3DContent className="p-4 flex flex-col">
             <div className="flex items-center justify-between mb-3">
               <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-full">
-                <DollarSign className="h-5 w-5 text-red-600" />
+                <Icon3D>
+                  <DollarSign className="h-5 w-5 text-red-600" />
+                </Icon3D>
               </div>
-              <div className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
+              <Badge3D className="text-xs font-medium px-2 py-1 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-full">
                 Yearly
-              </div>
+              </Badge3D>
             </div>
-            <h3 className="text-2xl font-bold mt-1">${yearlyRate.toLocaleString()}</h3>
+            <Value3D className="text-2xl font-bold mt-1">${yearlyRate.toLocaleString()}</Value3D>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Annual projection</span>
-              <span className="text-xs font-medium text-red-600">-${yearlyRate.toLocaleString()}/year</span>
+              <Text3D className="text-xs text-muted-foreground">Annual projection</Text3D>
+              <Text3D className="text-xs font-medium text-red-600">-${yearlyRate.toLocaleString()}/year</Text3D>
             </div>
-          </CardContent>
-        </Card>
+          </Card3DContent>
+        </Card3D>
       </div>
       
       <div className="mt-6 p-4 bg-muted/50 rounded-lg border">

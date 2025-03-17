@@ -1,260 +1,195 @@
-/* 3D Effects inspired by Pokémon mobile games */
+/* 3D Effects CSS - Pokémon-inspired styles */
 
-:root {
-  --card-shadow-color: rgba(15, 255, 157, 0.4);
-  --card-highlight-color: rgba(121, 255, 212, 0.1);
-  --card-border-color: rgba(61, 255, 175, 0.5);
-  --card-depth: 15px;
-  --rotation-angle: 5deg;
-  --hover-lift: 8px;
-  --button-depth: 4px;
+/* General 3D depth effects */
+.section-3d {
+  perspective: 1000px;
 }
 
-/* Base 3D card effect */
-.card-3d {
-  position: relative;
+.dashboard-3d {
   transform-style: preserve-3d;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: linear-gradient(135deg, rgba(20, 66, 49, 0.95), rgba(10, 40, 30, 0.8));
-  border: 1px solid var(--card-border-color);
-  box-shadow: 
-    0 5px 20px rgba(0, 0, 0, 0.3),
-    0 0 15px var(--card-shadow-color);
-  border-radius: 12px;
-  overflow: hidden;
-  transform: translateZ(0);
 }
 
-.card-3d:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to bottom, var(--card-highlight-color), transparent);
-  pointer-events: none;
-  z-index: 2;
-  border-radius: 12px 12px 0 0;
+/* Title effects */
+.text-3d-title {
+  transform: translateZ(10px);
+  text-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* Floating animation effects */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateZ(0);
+  }
+  50% {
+    transform: translateY(-5px) translateZ(15px);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0) translateZ(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-3px) translateZ(10px) rotate(1deg);
+  }
+}
+
+.float-effect {
+  animation: float 3s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.float-effect-slow {
+  animation: floatSlow 5s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.float-effect-fast {
+  animation: float 2s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+/* Card 3D effects */
+.card-3d {
+  transition: transform 0.3s, box-shadow 0.3s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card-3d:hover {
-  transform: translateY(-6px) translateZ(10px);
-  box-shadow: 
-    0 15px 30px rgba(0, 0, 0, 0.4),
-    0 0 20px var(--card-shadow-color);
+  transform: translateY(-5px) translateZ(10px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), 0 15px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Card components with 3D effect */
-.card-content-3d {
-  position: relative;
-  transform-style: preserve-3d;
-  z-index: 1;
-}
-
-.card-icon-3d {
-  transform: translateZ(10px);
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
-}
-
-.card-title-3d {
-  transform: translateZ(8px);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.card-value-3d {
-  transform: translateZ(12px);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.card-description-3d {
-  transform: translateZ(5px);
-}
-
-/* 3D floating effect */
-.float-3d {
-  animation: float 3s ease-in-out infinite;
-  position: relative;
-}
-
-@keyframes float {
-  0% {
-    transform: translateY(0px) translateZ(0px);
-  }
-  50% {
-    transform: translateY(-8px) translateZ(5px);
-  }
-  100% {
-    transform: translateY(0px) translateZ(0px);
-  }
-}
-
-/* 3D Button styles */
+/* Button 3D effects */
 .button-3d {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 
-    0 var(--button-depth) 0 rgb(10, 79, 39),
-    0 var(--button-depth) 10px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(to bottom, rgba(34, 197, 94, 1), rgba(22, 163, 74, 1));
-  transform: translateZ(0);
-  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.button-3d:after {
+.button-3d::after {
   content: '';
   position: absolute;
-  top: 0;
+  width: 100%;
+  height: 100%;
   left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
-  pointer-events: none;
+  top: 0;
+  background: inherit;
+  border-radius: inherit;
+  transform: translateZ(-4px);
+  filter: brightness(0.7);
+  z-index: -1;
 }
 
 .button-3d:hover {
   transform: translateY(-2px) translateZ(0);
-  box-shadow: 
-    0 calc(var(--button-depth) + 2px) 0 rgb(10, 79, 39),
-    0 calc(var(--button-depth) + 2px) 10px rgba(0, 0, 0, 0.2);
 }
 
 .button-3d:active {
-  transform: translateY(var(--button-depth)) translateZ(0);
-  box-shadow: 0 0 0 rgb(10, 79, 39), 0 0 0 rgba(0, 0, 0, 0.2);
+  transform: translateY(0) translateZ(-2px);
 }
 
-/* 3D section effect */
-.section-3d {
-  position: relative;
-  transform-style: preserve-3d;
-  perspective: 1000px;
-  background: linear-gradient(135deg, rgba(12, 40, 30, 0.7), rgba(5, 20, 15, 0.8));
-  border: 1px solid var(--card-border-color);
-  border-radius: 12px;
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.3),
-    0 0 20px var(--card-shadow-color);
-  overflow: hidden;
-  padding: 20px;
-}
-
-.section-3d:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 30%;
-  background: linear-gradient(to bottom, var(--card-highlight-color), transparent);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.section-content-3d {
-  position: relative;
-  z-index: 2;
-  transform-style: preserve-3d;
-}
-
-/* 3D effect for icons */
-.icon-3d {
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
-  transition: transform 0.2s ease;
-  transform: translateZ(5px);
-}
-
-.icon-3d:hover {
-  transform: translateZ(10px) scale(1.1);
-}
-
-/* Progress bars with 3D effect */
-.progress-bar-3d {
-  position: relative;
-  transform-style: preserve-3d;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    0 0 5px rgba(15, 255, 157, 0.2);
-}
-
-.progress-bar-indicator-3d {
-  position: relative;
-  transform: translateZ(2px);
-  box-shadow: 0 0 10px rgba(15, 255, 157, 0.6);
-}
-
-/* 3D tab effect */
-.tabs-3d {
-  position: relative;
-  transform-style: preserve-3d;
-}
-
-.tab-3d {
-  position: relative;
-  transform-style: preserve-3d;
-  transition: all 0.2s ease;
-  transform: translateZ(0);
-}
-
-.tab-3d[data-state="active"] {
-  transform: translateZ(5px);
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.tab-3d:hover:not([data-state="active"]) {
-  transform: translateZ(3px);
-}
-
-/* Text with 3D effect */
+/* Text 3D effects */
 .text-3d {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 10px rgba(15, 255, 157, 0.3);
   transform: translateZ(5px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.text-3d-title {
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 15px rgba(15, 255, 157, 0.4);
+/* Badge 3D effects */
+.badge-3d {
+  transform: translateZ(3px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Icon 3D effects */
+.icon-3d {
+  transform-style: preserve-3d;
   transform: translateZ(8px);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
 }
 
-/* 3D background effect */
-.background-3d {
+/* Value (numbers) 3D effects */
+.value-3d {
+  transform: translateZ(7px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+}
+
+/* Progress bar 3D effects */
+.progress-3d {
   position: relative;
-  overflow: hidden;
+  transform-style: preserve-3d;
+  overflow: visible;
 }
 
-.background-3d:before {
+.progress-3d::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  right: -50%;
-  bottom: -50%;
-  background: radial-gradient(ellipse at center, rgba(15, 255, 157, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
-  pointer-events: none;
-  animation: pulse 10s ease infinite;
-  z-index: 0;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: inherit;
+  transform: translateZ(-3px);
+  filter: blur(2px);
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.2); opacity: 0.3; }
-  100% { transform: scale(1); opacity: 0.5; }
-}
-
-/* 3D perspective for entire dashboard */
-.dashboard-3d {
-  perspective: 1200px;
-  transform-style: preserve-3d;
-  perspective-origin: center center;
-}
-
-/* Status badge with 3D effect */
-.badge-3d {
-  position: relative;
+.progress-3d .progress-indicator {
   transform: translateZ(5px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+}
+
+/* Glow effects commonly used in Pokémon UI */
+.glow-pulse {
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.4));
+  }
+  100% {
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
+  }
+}
+
+/* Shadowed elements for depth */
+.shadow-3d {
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 8px 15px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Special pokémon-inspired button effects */
+.poke-button {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform-style: preserve-3d;
+  transition: all 0.2s;
+}
+
+.poke-button:hover {
+  box-shadow: 
+    0 7px 10px rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px) translateZ(5px);
+  filter: brightness(1.1);
+}
+
+.poke-button:active {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: translateY(1px) translateZ(0);
+  filter: brightness(0.95);
 }
