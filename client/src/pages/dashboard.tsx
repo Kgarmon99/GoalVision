@@ -6,6 +6,7 @@ import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { SimpleMetricsDashboard } from "@/components/simple-metrics-dashboard";
+import { TopProspects } from "@/components/top-prospects";
 
 
 import { QuickStartGuide } from "@/components/quick-start-guide";
