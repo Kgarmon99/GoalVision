@@ -271,6 +271,64 @@ export class MemStorage implements IStorage {
         await this.createSubtask(subtask);
       }
     }
+    
+    // Sample prospects
+    const sampleProspects: InsertProspect[] = [
+      {
+        name: "Bowling Green Junior High",
+        organization: "Bowling Green Public Schools",
+        value: 250000.00,
+        probability: 85.0,
+        stage: "negotiation",
+        expectedCloseDate: "2024-08-15",
+        notes: "High priority district with 1200+ students. Key decision maker is Principal Sarah Johnson.",
+        priority: 10
+      },
+      {
+        name: "Summit Private Academy",
+        organization: "Summit Education Group",
+        value: 180000.00,
+        probability: 70.0,
+        stage: "initial",
+        expectedCloseDate: "2024-09-30",
+        notes: "Prestigious private school chain, looking to implement our system across 5 campuses.",
+        priority: 8
+      },
+      {
+        name: "Westside School District",
+        organization: "Westside Unified Schools",
+        value: 350000.00,
+        probability: 60.0,
+        stage: "negotiation",
+        expectedCloseDate: "2024-10-15",
+        notes: "Large district with 15 schools. Budget approval pending.",
+        priority: 7
+      },
+      {
+        name: "Riverdale Elementary",
+        organization: "Riverdale School System",
+        value: 120000.00,
+        probability: 90.0,
+        stage: "closing",
+        expectedCloseDate: "2024-07-30",
+        notes: "Contract nearly finalized, just waiting on final signatures.",
+        priority: 9
+      },
+      {
+        name: "Tech Prep Institute",
+        organization: "Future Tech Education",
+        value: 200000.00,
+        probability: 40.0,
+        stage: "initial",
+        expectedCloseDate: "2024-11-20",
+        notes: "Innovative tech-focused charter school. Early discussions.",
+        priority: 5
+      }
+    ];
+    
+    for (const prospect of sampleProspects) {
+      await this.createProspect(prospect);
+    }
   }
 
   // User methods
@@ -538,8 +596,11 @@ export class MemStorage implements IStorage {
       .filter(prospect => prospect.stage !== "won" && prospect.stage !== "lost") // Only include active prospects
       .sort((a, b) => {
         // First sort by priority
-        if (a.priority !== b.priority) {
-          return b.priority - a.priority; // Higher priority first
+        const aPriority = a.priority ?? 0;
+        const bPriority = b.priority ?? 0;
+        
+        if (aPriority !== bPriority) {
+          return bPriority - aPriority; // Higher priority first
         }
         // Then by probability
         return b.probability - a.probability; // Higher probability first
@@ -808,22 +869,24 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getTopProspects(limit: number): Promise<Prospect[]> {
-    return await db
-      .select()
-      .from(prospects)
-      .where(
-        and(
-          // Only include active prospects
-          prospects.stage !== 'won',
-          prospects.stage !== 'lost'
-        )
-      )
-      // Order first by priority (high to low), then by probability (high to low)
-      .orderBy(
-        { column: prospects.priority, order: 'desc' },
-        { column: prospects.probability, order: 'desc' }
-      )
-      .limit(limit);
+    // Get all prospects first, then filter in memory
+    const allProspects = await db.select().from(prospects);
+    
+    // Filter out won/lost prospects and sort by priority, then probability
+    return allProspects
+      .filter(prospect => prospect.stage !== 'won' && prospect.stage !== 'lost')
+      .sort((a, b) => {
+        // First sort by priority
+        const aPriority = a.priority ?? 0;
+        const bPriority = b.priority ?? 0;
+        
+        if (aPriority !== bPriority) {
+          return bPriority - aPriority; // Higher priority first
+        }
+        // Then by probability
+        return b.probability - a.probability; // Higher probability first
+      })
+      .slice(0, limit);
   }
   
   async createProspect(insertProspect: InsertProspect): Promise<Prospect> {
@@ -1003,7 +1066,61 @@ export class DatabaseStorage implements IStorage {
       
       await Promise.all(tasks.map(task => this.createTask(task)));
       
-
+      // Sample prospects
+      const sampleProspects: InsertProspect[] = [
+        {
+          name: "Bowling Green Junior High",
+          organization: "Bowling Green Public Schools",
+          value: 250000.00,
+          probability: 85.0,
+          stage: "negotiation",
+          expectedCloseDate: "2024-08-15",
+          notes: "High priority district with 1200+ students. Key decision maker is Principal Sarah Johnson.",
+          priority: 10
+        },
+        {
+          name: "Summit Private Academy",
+          organization: "Summit Education Group",
+          value: 180000.00,
+          probability: 70.0,
+          stage: "initial",
+          expectedCloseDate: "2024-09-30",
+          notes: "Prestigious private school chain, looking to implement our system across 5 campuses.",
+          priority: 8
+        },
+        {
+          name: "Westside School District",
+          organization: "Westside Unified Schools",
+          value: 350000.00,
+          probability: 60.0,
+          stage: "negotiation",
+          expectedCloseDate: "2024-10-15",
+          notes: "Large district with 15 schools. Budget approval pending.",
+          priority: 7
+        },
+        {
+          name: "Riverdale Elementary",
+          organization: "Riverdale School System",
+          value: 120000.00,
+          probability: 90.0,
+          stage: "closing",
+          expectedCloseDate: "2024-07-30",
+          notes: "Contract nearly finalized, just waiting on final signatures.",
+          priority: 9
+        },
+        {
+          name: "Tech Prep Institute",
+          organization: "Future Tech Education",
+          value: 200000.00,
+          probability: 40.0,
+          stage: "initial",
+          expectedCloseDate: "2024-11-20",
+          notes: "Innovative tech-focused charter school. Early discussions.",
+          priority: 5
+        }
+      ];
+      
+      await Promise.all(sampleProspects.map(prospect => this.createProspect(prospect)));
     }
   }
 }

@@ -10,13 +10,15 @@ import {
   insertWeekSchema,
   insertSubtaskSchema,
   insertUserSchema,
+  insertProspectSchema,
   goals,
   metrics,
   goalStatus,
   executionTasks,
   subtasks,
   weeks,
-  users
+  users,
+  prospects
 } from "@shared/schema";
 import { db } from "./db";
 
@@ -511,6 +513,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Prospect Routes
+  
+  // Get all prospects
+  app.get("/api/prospects", async (req, res) => {
+    try {
+      // Try to get prospects from cache first
+      const cacheKey = "prospects:all";
+      const cachedProspects = serverCache.get(cacheKey);
+      
+      if (cachedProspects) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedProspects);
+      }
+      
+      // Cache miss, fetch from database
+      const prospects = await storage.getAllProspects();
+      
+      // Cache for 5 minutes
+      serverCache.set(cacheKey, prospects, CACHE_TTL.GOALS);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
+      res.json(prospects);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching prospects" });
+    }
+  });
+  
+  // Get top prospects
+  app.get("/api/prospects/top/:limit?", async (req, res) => {
+    try {
+      const limit = parseInt(req.params.limit || "3");
+      
+      // Try to get top prospects from cache first
+      const cacheKey = `prospects:top:${limit}`;
+      const cachedProspects = serverCache.get(cacheKey);
+      
+      if (cachedProspects) {
+        // Set cache header to inform client
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedProspects);
+      }
+      
+      // Cache miss, fetch from database
+      const prospects = await storage.getTopProspects(limit);
+      
+      // Cache for 5 minutes
+      serverCache.set(cacheKey, prospects, CACHE_TTL.GOALS);
+      
+      // Set cache header
+      res.set('X-Cache', 'MISS');
+      res.json(prospects);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching top prospects" });
+    }
+  });
+  
+  // Get a specific prospect
+  app.get("/api/prospects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const prospect = await storage.getProspect(id);
+      
+      if (!prospect) {
+        return res.status(404).json({ message: "Prospect not found" });
+      }
+      
+      res.json(prospect);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching prospect" });
+    }
+  });
+  
+  // Create a prospect
+  app.post("/api/prospects", async (req, res) => {
+    try {
+      const prospectData = insertProspectSchema.parse(req.body);
+      const prospect = await storage.createProspect(prospectData);
+      
+      // Invalidate caches
+      serverCache.invalidate("prospects:all");
+      serverCache.invalidateByPrefix("prospects:top:");
+      
+      res.status(201).json(prospect);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid prospect data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating prospect" });
+    }
+  });
+  
+  // Update a prospect
+  app.patch("/api/prospects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const prospectData = insertProspectSchema.partial().parse(req.body);
+      const updatedProspect = await storage.updateProspect(id, prospectData);
+      
+      if (!updatedProspect) {
+        return res.status(404).json({ message: "Prospect not found" });
+      }
+      
+      // Invalidate caches
+      serverCache.invalidate("prospects:all");
+      serverCache.invalidateByPrefix("prospects:top:");
+      
+      res.json(updatedProspect);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid prospect data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating prospect" });
+    }
+  });
+  
+  // Delete a prospect
+  app.delete("/api/prospects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteProspect(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Prospect not found" });
+      }
+      
+      // Invalidate caches
+      serverCache.invalidate("prospects:all");
+      serverCache.invalidateByPrefix("prospects:top:");
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting prospect" });
+    }
+  });
+
   // Create the server
   const server = createServer(app);
   return server;
