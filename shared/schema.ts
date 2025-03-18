@@ -204,4 +204,31 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
+// Prospects schema for sales pipeline
+export const prospects = pgTable("prospects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  organization: text("organization").notNull(),
+  value: real("value").notNull(), // Deal value
+  probability: real("probability").notNull(), // Probability of closing (0-100)
+  stage: text("stage").notNull(), // e.g. "initial", "negotiation", "closing", "won", "lost"
+  expectedCloseDate: text("expected_close_date").notNull(), // ISO date string
+  notes: text("notes").default(""),
+  priority: integer("priority").default(0), // Higher number = higher priority
+});
+
+export const insertProspectSchema = createInsertSchema(prospects).pick({
+  name: true,
+  organization: true,
+  value: true,
+  probability: true,
+  stage: true,
+  expectedCloseDate: true,
+  notes: true,
+  priority: true,
+});
+
+export type InsertProspect = z.infer<typeof insertProspectSchema>;
+export type Prospect = typeof prospects.$inferSelect;
+
 

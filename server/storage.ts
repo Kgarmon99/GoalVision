@@ -18,6 +18,9 @@ import {
   type Week,
   type InsertWeek,
   subtasks,
+  prospects,
+  type Prospect,
+  type InsertProspect,
   type Subtask,
   type InsertSubtask
 } from "@shared/schema";
@@ -76,7 +79,13 @@ export interface IStorage {
   createWeek(week: InsertWeek): Promise<Week>;
   updateWeek(id: number, week: Partial<InsertWeek>): Promise<Week | undefined>;
   
-
+  // Prospect methods
+  getAllProspects(): Promise<Prospect[]>;
+  getProspect(id: number): Promise<Prospect | undefined>;
+  getTopProspects(limit: number): Promise<Prospect[]>;
+  createProspect(prospect: InsertProspect): Promise<Prospect>;
+  updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined>;
+  deleteProspect(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -87,6 +96,7 @@ export class MemStorage implements IStorage {
   private executionTasksData: Map<number, ExecutionTask>;
   private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
+  private prospectsData: Map<number, Prospect>;
 
   
   private currentUserId: number;
@@ -96,6 +106,7 @@ export class MemStorage implements IStorage {
   private currentExecutionTaskId: number;
   private currentSubtaskId: number;
   private currentWeekId: number;
+  private currentProspectId: number;
 
 
   constructor() {
@@ -106,6 +117,7 @@ export class MemStorage implements IStorage {
     this.executionTasksData = new Map();
     this.subtasksData = new Map();
     this.weeksData = new Map();
+    this.prospectsData = new Map();
 
     
     this.currentUserId = 1;
@@ -115,6 +127,7 @@ export class MemStorage implements IStorage {
     this.currentExecutionTaskId = 1;
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
+    this.currentProspectId = 1;
 
     
     // Call initializeData as async function
@@ -510,7 +523,54 @@ export class MemStorage implements IStorage {
     return updatedWeek;
   }
   
-
+  // Prospect methods
+  async getAllProspects(): Promise<Prospect[]> {
+    return Array.from(this.prospectsData.values());
+  }
+  
+  async getProspect(id: number): Promise<Prospect | undefined> {
+    return this.prospectsData.get(id);
+  }
+  
+  async getTopProspects(limit: number): Promise<Prospect[]> {
+    // Sort prospects by priority (high to low) and probability (high to low)
+    return Array.from(this.prospectsData.values())
+      .filter(prospect => prospect.stage !== "won" && prospect.stage !== "lost") // Only include active prospects
+      .sort((a, b) => {
+        // First sort by priority
+        if (a.priority !== b.priority) {
+          return b.priority - a.priority; // Higher priority first
+        }
+        // Then by probability
+        return b.probability - a.probability; // Higher probability first
+      })
+      .slice(0, limit);
+  }
+  
+  async createProspect(insertProspect: InsertProspect): Promise<Prospect> {
+    const id = this.currentProspectId++;
+    const prospect: Prospect = { 
+      ...insertProspect, 
+      id,
+      notes: insertProspect.notes ?? null,
+      priority: insertProspect.priority ?? 0
+    };
+    this.prospectsData.set(id, prospect);
+    return prospect;
+  }
+  
+  async updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined> {
+    const existingProspect = this.prospectsData.get(id);
+    if (!existingProspect) return undefined;
+    
+    const updatedProspect = { ...existingProspect, ...prospect };
+    this.prospectsData.set(id, updatedProspect);
+    return updatedProspect;
+  }
+  
+  async deleteProspect(id: number): Promise<boolean> {
+    return this.prospectsData.delete(id);
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -737,7 +797,53 @@ export class DatabaseStorage implements IStorage {
     return updatedWeek;
   }
   
-
+  // Prospect methods
+  async getAllProspects(): Promise<Prospect[]> {
+    return await db.select().from(prospects);
+  }
+  
+  async getProspect(id: number): Promise<Prospect | undefined> {
+    const [prospect] = await db.select().from(prospects).where(eq(prospects.id, id));
+    return prospect;
+  }
+  
+  async getTopProspects(limit: number): Promise<Prospect[]> {
+    return await db
+      .select()
+      .from(prospects)
+      .where(
+        and(
+          // Only include active prospects
+          prospects.stage !== 'won',
+          prospects.stage !== 'lost'
+        )
+      )
+      // Order first by priority (high to low), then by probability (high to low)
+      .orderBy(
+        { column: prospects.priority, order: 'desc' },
+        { column: prospects.probability, order: 'desc' }
+      )
+      .limit(limit);
+  }
+  
+  async createProspect(insertProspect: InsertProspect): Promise<Prospect> {
+    const [prospect] = await db.insert(prospects).values(insertProspect).returning();
+    return prospect;
+  }
+  
+  async updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined> {
+    const [updatedProspect] = await db
+      .update(prospects)
+      .set(prospect)
+      .where(eq(prospects.id, id))
+      .returning();
+    return updatedProspect;
+  }
+  
+  async deleteProspect(id: number): Promise<boolean> {
+    const result = await db.delete(prospects).where(eq(prospects.id, id));
+    return !!result;
+  }
   
 
 
