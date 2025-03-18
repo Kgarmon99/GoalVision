@@ -55,7 +55,7 @@ import {
   TrendingDown
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { Goal, Metric, GoalStatus, ExecutionTask, Week } from "@shared/schema";
+import { Goal, Metric, GoalStatus, ExecutionTask, Week, Prospect } from "@shared/schema";
 import { format } from "date-fns";
 import { formatDate, getDaysUntilDescription, getUrgencyLevel } from "@/utils/date-utils";
 import { Link } from "wouter";
@@ -477,6 +477,15 @@ const Dashboard = () => {
     queryKey: ['/api/weeks'],
   });
   
+  // Fetch top prospects
+  const { 
+    data: prospects = [], 
+    isLoading: isLoadingProspects,
+    refetch: refetchProspects
+  } = useQuery<Prospect[]>({
+    queryKey: ['/api/prospects/top'],
+  });
+  
   // Determine current week ID from weeks data
   useEffect(() => {
     if (weeks && weeks.length > 0 && !currentWeekId) {
@@ -524,6 +533,7 @@ const Dashboard = () => {
         refetchRevenueMetrics(), 
         refetchGoalStatuses(),
         refetchWeeks(),
+        refetchProspects(),
         ...(currentWeekId ? [refetchWeek(), refetchTasks()] : []),
       ]);
       
@@ -544,7 +554,7 @@ const Dashboard = () => {
     }
   }, [
     refetchGoals, refetchGrowthMetrics, refetchRevenueMetrics, 
-    refetchGoalStatuses, refetchWeeks, currentWeekId, 
+    refetchGoalStatuses, refetchWeeks, refetchProspects, currentWeekId, 
     refetchWeek, refetchTasks, toast
   ]);
   
@@ -573,10 +583,11 @@ const Dashboard = () => {
     isLoadingRevenueMetrics || 
     isLoadingGoalStatuses || 
     isLoadingWeeks ||
+    isLoadingProspects ||
     (currentWeekId && (isLoadingWeek || isLoadingTasks)),
     [
       isLoadingGoals, isLoadingGrowthMetrics, isLoadingRevenueMetrics,
-      isLoadingGoalStatuses, isLoadingWeeks, currentWeekId,
+      isLoadingGoalStatuses, isLoadingWeeks, isLoadingProspects, currentWeekId,
       isLoadingWeek, isLoadingTasks
     ]
   );
@@ -889,6 +900,33 @@ const Dashboard = () => {
                         <EmptyState 
                           title="No Revenue Metrics" 
                           description="Add metrics to track revenue KPIs"
+                          icon="chart"
+                          className="h-full"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Top Prospects */}
+                    <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                      {isLoading ? (
+                        <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
+                          <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
+                          <div className="space-y-3">
+                            {[1, 2, 3].map((_, i) => (
+                              <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : prospects.length > 0 ? (
+                        <TopProspects 
+                          prospects={prospects} 
+                          maxItems={3}
+                          className="h-full"
+                        />
+                      ) : (
+                        <EmptyState 
+                          title="No Prospects" 
+                          description="Add prospects to track your sales pipeline"
                           icon="chart"
                           className="h-full"
                         />
