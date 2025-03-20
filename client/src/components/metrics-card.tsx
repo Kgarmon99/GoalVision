@@ -23,13 +23,13 @@ interface MetricsCardProps {
 const getMetricIcon = (metricName: string) => {
   const name = metricName.toLowerCase();
   if (name.includes('revenue') || name.includes('mrr') || name.includes('arr') || name.includes('cost')) {
-    return <DollarSign className="h-4 w-4 text-green-400 drop-shadow-glow" />;
+    return <DollarSign className="h-4 w-4 text-green-400" />;
   } else if (name.includes('user') || name.includes('customer') || name.includes('churn') || name.includes('retention')) {
-    return <Users className="h-4 w-4 text-green-400 drop-shadow-glow" />;
+    return <Users className="h-4 w-4 text-green-400" />;
   } else if (name.includes('growth') || name.includes('increase')) {
-    return <TrendingUp className="h-4 w-4 text-green-400 drop-shadow-glow" />;
+    return <TrendingUp className="h-4 w-4 text-green-400" />;
   } else {
-    return <BarChart3 className="h-4 w-4 text-green-400 drop-shadow-glow" />;
+    return <BarChart3 className="h-4 w-4 text-green-400" />;
   }
 };
 
@@ -74,10 +74,10 @@ const MetricsCard = memo(({ title, metrics, category }: MetricsCardProps) => {
   };
   
   return (
-    <Card className="h-full bg-gray-900 border border-green-600 glow-card glow-aura-combo">
+    <Card className="h-full bg-gray-900 border border-green-600 glow-card">
       <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold text-green-400 text-glow flex items-center">
-          <TrendingUp className="h-5 w-5 mr-2 drop-shadow-glow" />
+          <TrendingUp className="h-5 w-5 mr-2" />
           {title}
         </CardTitle>
         
@@ -87,7 +87,7 @@ const MetricsCard = memo(({ title, metrics, category }: MetricsCardProps) => {
             size="sm"
             onClick={handleRefreshMetrics}
             disabled={isRefreshing}
-            className="h-7 px-2 text-green-400 hover:text-green-300 hover:bg-gray-800 hover:glow-soft button-glow"
+            className="h-7 px-2 text-green-400 hover:text-green-300 hover:bg-gray-800"
             title="Refresh metrics based on current goal data"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -98,7 +98,7 @@ const MetricsCard = memo(({ title, metrics, category }: MetricsCardProps) => {
         {metrics.map((metric) => (
           <div 
             key={metric.id} 
-            className="flex flex-col xs:flex-row xs:justify-between xs:items-center py-2 border-b border-gray-800 last:border-0 hover:bg-gray-800/40 hover:glow-inner rounded-md px-2 transition-all duration-200"
+            className="flex flex-col xs:flex-row xs:justify-between xs:items-center py-2 border-b border-gray-800 last:border-0 hover:bg-gray-800/40 rounded-md px-2 transition-colors duration-200"
           >
             <div className="flex items-center mb-1 xs:mb-0">
               {getMetricIcon(metric.name)}

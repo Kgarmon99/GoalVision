@@ -246,12 +246,12 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       duration={0.4}
       className="w-full"
     >
-      <Card className={`glow-card ethereal-effect bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
+      <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
         percentComplete >= 75 ? "border-green-600" :
         percentComplete >= 50 ? "border-yellow-600" :
         percentComplete >= 25 ? "border-orange-600" :
         "border-red-600"
-      } ${percentComplete >= 100 ? "aura-pulse" : ""}`}>
+      }`}>
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
@@ -271,7 +271,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     delay={0.1}
                     className="ml-1"
                   >
-                    <Award className="h-3 w-3 text-yellow-400 glow-intense drop-shadow-glow" />
+                    <Award className="h-3 w-3 text-yellow-400" />
                   </AnimatedComponent>
                 )}
                 {percentComplete < 100 && (
@@ -281,7 +281,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     iterationCount="infinite"
                     className="ml-1"
                   >
-                    <Target className="h-3 w-3 text-green-400 drop-shadow-glow" />
+                    <Target className="h-3 w-3 text-green-400" />
                   </AnimatedComponent>
                 )}
               </div>
@@ -342,10 +342,10 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           <div className="mt-2">
             <button 
               onClick={() => setExpanded(!expanded)} 
-              className="text-xs text-green-400 hover:text-green-300 transition-all flex items-center w-full justify-center text-glow-sm hover:text-glow button-glow"
+              className="text-xs text-green-400 hover:text-green-300 transition-colors flex items-center w-full justify-center"
             >
               {expanded ? "Hide details" : "Show details"}
-              <ChevronUp className={`h-3 w-3 ml-1 transition-transform duration-300 ${expanded ? "" : "transform rotate-180"} drop-shadow-glow`} />
+              <ChevronUp className={`h-3 w-3 ml-1 transition-transform duration-300 ${expanded ? "" : "transform rotate-180"}`} />
             </button>
           </div>
           
@@ -405,9 +405,9 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="px-2 h-8 text-gray-400 hover:text-green-400 hover:bg-gray-800 hover:glow-soft button-glow"
+                  className="px-2 h-8 text-gray-400 hover:text-green-400 hover:bg-gray-800"
                 >
-                  <MoreVertical className="h-4 w-4 drop-shadow-glow" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700 text-gray-200">
@@ -426,14 +426,14 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     }, 100);
                   }}
                 >
-                  <PlusCircle className="h-4 w-4 mr-2 drop-shadow-glow" />
+                  <PlusCircle className="h-4 w-4 mr-2" />
                   Update Progress
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center cursor-pointer hover:text-green-400 hover:bg-gray-800"
                   onClick={() => setIsEditDialogOpen(true)}
                 >
-                  <Pencil className="h-4 w-4 mr-2 drop-shadow-glow" />
+                  <Pencil className="h-4 w-4 mr-2" />
                   Edit Goal
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-gray-700" />
@@ -441,7 +441,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   className="flex items-center cursor-pointer text-red-400 hover:text-red-300 hover:bg-gray-800"
                   onClick={() => setIsDeleteDialogOpen(true)}
                 >
-                  <Trash2 className="h-4 w-4 mr-2 drop-shadow-glow" />
+                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete Goal
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -513,7 +513,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-green-400 font-medium flex items-center">
-                        <PlusCircle className="h-3 w-3 mr-1 drop-shadow-glow" />
+                        <PlusCircle className="h-3 w-3 mr-1" />
                         Current Progress
                       </FormLabel>
                       <FormControl>
@@ -663,7 +663,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                 {/* Help text */}
                 <div className="text-xs text-green-400 bg-gray-800 p-2 rounded border border-gray-700 mb-2">
                   <p className="flex items-center">
-                    <PlusCircle className="h-3 w-3 mr-1 drop-shadow-glow" />
+                    <PlusCircle className="h-3 w-3 mr-1" />
                     <span>Tip: Update your progress regularly to stay on track and celebrate milestones!</span>
                   </p>
                 </div>
