@@ -1,7 +1,7 @@
+@import "./styles/enhanced-effects.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./styles/enhanced-effects.css";
 
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */

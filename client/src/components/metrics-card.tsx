@@ -23,9 +23,9 @@ interface MetricsCardProps {
 const getMetricIcon = (metricName: string) => {
   const name = metricName.toLowerCase();
   if (name.includes('revenue') || name.includes('mrr') || name.includes('arr') || name.includes('cost')) {
-    return <DollarSign className="h-4 w-4 text-green-400" />;
+    return <DollarSign className="h-4 w-4 text-green-400 drop-shadow-glow" />;
   } else if (name.includes('user') || name.includes('customer') || name.includes('churn') || name.includes('retention')) {
-    return <Users className="h-4 w-4 text-green-400" />;
+    return <Users className="h-4 w-4 text-green-400 drop-shadow-glow" />;
   } else if (name.includes('growth') || name.includes('increase')) {
     return <TrendingUp className="h-4 w-4 text-green-400" />;
   } else {
@@ -74,7 +74,7 @@ const MetricsCard = memo(({ title, metrics, category }: MetricsCardProps) => {
   };
   
   return (
-    <Card className="h-full bg-gray-900 border border-green-600 glow-card">
+    <Card className="h-full bg-gray-900 border border-green-600 glow-card glow-aura-combo">
       <CardHeader className="pb-2 px-3 sm:px-6 pt-3 sm:pt-6 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold text-green-400 text-glow flex items-center">
           <TrendingUp className="h-5 w-5 mr-2" />

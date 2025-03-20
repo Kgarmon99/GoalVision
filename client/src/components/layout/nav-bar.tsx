@@ -17,9 +17,9 @@ export function NavBar() {
       <div className="container flex items-center justify-between h-16">
         <a 
           href="/" 
-          className="flex items-center gap-2 font-semibold"
+          className="flex items-center gap-2 font-semibold text-glow-medium"
         >
-          <Target className="h-5 w-5 text-primary" />
+          <Target className="h-5 w-5 text-primary drop-shadow-glow" />
           <span>Goals</span>
         </a>
         
@@ -30,8 +30,8 @@ export function NavBar() {
               href={item.path}
               className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors duration-200 
                 ${location.pathname === item.path 
-                  ? 'bg-primary/10 text-primary' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  ? 'bg-primary/10 text-primary text-glow-soft glow-soft' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted hover:text-glow-soft'
                 }`}
             >
               {item.icon}
@@ -43,8 +43,8 @@ export function NavBar() {
             href="/add-goal" 
             className={`ml-2 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors duration-200
               ${location.pathname === '/add-goal'
-                ? 'bg-primary/90 text-primary-foreground'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                ? 'bg-primary/90 text-primary-foreground glow-medium'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 button-glow'
               }`}
           >
             <Plus size={18} />
