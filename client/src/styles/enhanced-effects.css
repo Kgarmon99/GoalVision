@@ -1,0 +1,447 @@
+/*
+ * Enhanced Visual Effects - Comprehensive collection of glow and aura effects
+ * for an immersive UI experience
+ */
+
+/* -------------- GLOW EFFECTS -------------- */
+
+/* Base soft glow effect for all elements */
+.glow-soft {
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.2),
+              0 0 20px rgba(74, 222, 128, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-soft:hover {
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.3),
+              0 0 30px rgba(74, 222, 128, 0.2);
+}
+
+/* Medium intensity glow effect */
+.glow-medium {
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.3),
+              0 0 30px rgba(74, 222, 128, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-medium:hover {
+  box-shadow: 0 0 25px rgba(74, 222, 128, 0.4),
+              0 0 50px rgba(74, 222, 128, 0.3);
+}
+
+/* Intense glow effect for important elements */
+.glow-intense {
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.4),
+              0 0 40px rgba(74, 222, 128, 0.3),
+              0 0 60px rgba(74, 222, 128, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-intense:hover {
+  box-shadow: 0 0 30px rgba(74, 222, 128, 0.5),
+              0 0 60px rgba(74, 222, 128, 0.4),
+              0 0 90px rgba(74, 222, 128, 0.2);
+}
+
+/* Text glow variants */
+.text-glow-soft {
+  text-shadow: 0 0 5px rgba(74, 222, 128, 0.3);
+  transition: text-shadow 0.3s ease;
+}
+
+.text-glow-medium {
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4),
+               0 0 16px rgba(74, 222, 128, 0.2);
+  transition: text-shadow 0.3s ease;
+}
+
+.text-glow-intense {
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.5),
+               0 0 20px rgba(74, 222, 128, 0.3),
+               0 0 30px rgba(74, 222, 128, 0.1);
+  transition: text-shadow 0.3s ease;
+}
+
+/* -------------- AURA EFFECTS -------------- */
+
+/* Subtle aura border */
+.aura-border {
+  position: relative;
+}
+
+.aura-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(74, 222, 128, 0.5),
+    rgba(16, 185, 129, 0.5),
+    rgba(6, 95, 70, 0.5),
+    rgba(74, 222, 128, 0.5)
+  );
+  background-size: 300% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+  animation: aura-flow 6s linear infinite;
+}
+
+.aura-border:hover::before {
+  opacity: 1;
+}
+
+/* Pulsating aura effect */
+.aura-pulse {
+  position: relative;
+}
+
+.aura-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  padding: 5px;
+  background: linear-gradient(
+    90deg,
+    rgba(74, 222, 128, 0.5),
+    rgba(16, 185, 129, 0.5),
+    rgba(6, 95, 70, 0.5),
+    rgba(74, 222, 128, 0.5)
+  );
+  background-size: 300% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: aura-flow 4s linear infinite;
+}
+
+.aura-pulse:hover::after {
+  opacity: 1;
+}
+
+/* Static aura glow effect */
+.aura-static {
+  position: relative;
+  z-index: 1;
+}
+
+.aura-static::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(74, 222, 128, 0.4) 0%,
+    rgba(16, 185, 129, 0.2) 40%,
+    rgba(6, 95, 70, 0.1) 60%,
+    transparent 80%
+  );
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.aura-static:hover::before {
+  opacity: 0.8;
+}
+
+/* Reactive aura - expands on hover */
+.aura-reactive {
+  position: relative;
+  z-index: 1;
+}
+
+.aura-reactive::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(74, 222, 128, 0.3) 0%,
+    rgba(16, 185, 129, 0.2) 30%,
+    rgba(6, 95, 70, 0.1) 60%,
+    transparent 80%
+  );
+  z-index: -1;
+  opacity: 0.5;
+  transition: all 0.5s ease;
+}
+
+.aura-reactive:hover::before {
+  inset: -15px;
+  opacity: 0.8;
+}
+
+/* -------------- COMBINED EFFECTS -------------- */
+
+/* Glow + Aura combination */
+.glow-aura-combo {
+  position: relative;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.2),
+              0 0 30px rgba(74, 222, 128, 0.1);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.glow-aura-combo::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(74, 222, 128, 0.5),
+    rgba(16, 185, 129, 0.5),
+    rgba(6, 95, 70, 0.5),
+    rgba(74, 222, 128, 0.5)
+  );
+  background-size: 300% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  animation: aura-flow 6s linear infinite;
+}
+
+.glow-aura-combo:hover {
+  box-shadow: 0 0 25px rgba(74, 222, 128, 0.3),
+              0 0 50px rgba(74, 222, 128, 0.2);
+  transform: translateY(-2px);
+}
+
+.glow-aura-combo:hover::before {
+  opacity: 1;
+}
+
+/* Ethereal effect - for special achievements */
+.ethereal-effect {
+  position: relative;
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.3),
+              0 0 40px rgba(74, 222, 128, 0.2);
+  overflow: visible;
+  z-index: 1;
+}
+
+.ethereal-effect::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(74, 222, 128, 0.4) 0%,
+    rgba(16, 185, 129, 0.2) 40%,
+    rgba(6, 95, 70, 0.1) 70%,
+    transparent 100%
+  );
+  z-index: -1;
+  opacity: 0.5;
+  filter: blur(10px);
+  transition: all 0.5s ease;
+}
+
+.ethereal-effect::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 222, 128, 0.8),
+    rgba(16, 185, 129, 0.4),
+    rgba(74, 222, 128, 0.8)
+  );
+  background-size: 300% 100%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 0;
+  opacity: 0.5;
+  animation: aura-flow 8s linear infinite;
+}
+
+.ethereal-effect:hover {
+  box-shadow: 0 0 30px rgba(74, 222, 128, 0.4),
+              0 0 60px rgba(74, 222, 128, 0.3),
+              0 0 90px rgba(74, 222, 128, 0.1);
+}
+
+.ethereal-effect:hover::before {
+  opacity: 0.8;
+  filter: blur(15px);
+  inset: -10px;
+}
+
+.ethereal-effect:hover::after {
+  opacity: 1;
+}
+
+/* -------------- SPECIALIZED EFFECTS -------------- */
+
+/* Button special glow */
+.button-glow {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.button-glow::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    rgba(74, 222, 128, 0.7), 
+    rgba(16, 185, 129, 0.7), 
+    rgba(6, 95, 70, 0.7),
+    rgba(74, 222, 128, 0.7));
+  background-size: 400% 400%;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.button-glow:hover::before {
+  opacity: 1;
+}
+
+/* Progress bar luminous effect */
+.progress-luminous {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-luminous::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 30px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shine-sweep 3s ease-in-out infinite;
+}
+
+/* Card focus effect - for active selection */
+.card-focus {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.card-focus.active {
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.4),
+              0 0 40px rgba(74, 222, 128, 0.2);
+}
+
+.card-focus.active::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    45deg,
+    rgba(74, 222, 128, 0.8),
+    rgba(16, 185, 129, 0.5),
+    rgba(6, 95, 70, 0.8)
+  );
+  background-size: 200% 200%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gradient-pulse 3s ease infinite;
+}
+
+/* -------------- ANIMATIONS -------------- */
+
+@keyframes aura-flow {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 300% center;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shine-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  40%, 100% {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes gradient-pulse {
+  0% {
+    background-position: 0% 0%;
+    opacity: 0.7;
+  }
+  50% {
+    background-position: 100% 100%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 0%;
+    opacity: 0.7;
+  }
+}
+
+/* -------------- RESPONSIVE ADAPTATIONS -------------- */
+
+/* Reduce intensity on small screens to avoid overwhelming visuals */
+@media (max-width: A640px) {
+  .glow-intense {
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.3),
+                0 0 30px rgba(74, 222, 128, 0.2);
+  }
+  
+  .ethereal-effect::before {
+    opacity: 0.3;
+  }
+}

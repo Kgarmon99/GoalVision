@@ -246,12 +246,12 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
       duration={0.4}
       className="w-full"
     >
-      <Card className={`glow-card bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
+      <Card className={`glow-card ethereal-effect bg-gray-900 border hover:shadow-xl transition-all duration-300 ${
         percentComplete >= 75 ? "border-green-600" :
         percentComplete >= 50 ? "border-yellow-600" :
         percentComplete >= 25 ? "border-orange-600" :
         "border-red-600"
-      }`}>
+      } ${percentComplete >= 100 ? "aura-pulse" : ""}`}>
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0">
             <div>
@@ -271,7 +271,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     delay={0.1}
                     className="ml-1"
                   >
-                    <Award className="h-3 w-3 text-yellow-400" />
+                    <Award className="h-3 w-3 text-yellow-400 glow-intense drop-shadow-glow" />
                   </AnimatedComponent>
                 )}
                 {percentComplete < 100 && (
@@ -281,7 +281,7 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
                     iterationCount="infinite"
                     className="ml-1"
                   >
-                    <Target className="h-3 w-3 text-green-400" />
+                    <Target className="h-3 w-3 text-green-400 drop-shadow-glow" />
                   </AnimatedComponent>
                 )}
               </div>
