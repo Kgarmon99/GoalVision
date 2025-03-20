@@ -342,10 +342,10 @@ export function GoalProgressCard({ goal, onDelete }: GoalProgressCardProps) {
           <div className="mt-2">
             <button 
               onClick={() => setExpanded(!expanded)} 
-              className="text-xs text-green-400 hover:text-green-300 transition-colors flex items-center w-full justify-center"
+              className="text-xs text-green-400 hover:text-green-300 transition-all flex items-center w-full justify-center text-glow-sm hover:text-glow button-glow"
             >
               {expanded ? "Hide details" : "Show details"}
-              <ChevronUp className={`h-3 w-3 ml-1 transition-transform duration-300 ${expanded ? "" : "transform rotate-180"}`} />
+              <ChevronUp className={`h-3 w-3 ml-1 transition-transform duration-300 ${expanded ? "" : "transform rotate-180"} drop-shadow-glow`} />
             </button>
           </div>
           
