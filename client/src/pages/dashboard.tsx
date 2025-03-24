@@ -54,7 +54,7 @@ import {
   TrendingDown
 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { Goal, Metric, GoalStatus, ExecutionTask, Week, Prospect } from "@shared/schema";
+import { Goal, Metric, GoalStatus, Week, Prospect } from "@shared/schema";
 import { format } from "date-fns";
 import { formatDate, getDaysUntilDescription, getUrgencyLevel } from "@/utils/date-utils";
 import { Link } from "wouter";
@@ -500,7 +500,8 @@ const Dashboard = () => {
   });
   
   // Initialize a simple variable for completed tasks (removed task fetching)
-  const weekTasks: ExecutionTask[] = [];
+  type SimpleTask = { id: number; status: string; };
+  const weekTasks: SimpleTask[] = [];
   const isLoadingTasks = false;
   const refetchTasks = () => Promise.resolve(weekTasks);
   const tasksError = null;
