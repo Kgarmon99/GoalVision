@@ -6,8 +6,6 @@ import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
 import { SimpleMetricsDashboard } from "@/components/simple-metrics-dashboard";
 import { TopProspects } from "@/components/top-prospects";
-
-
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { EmptyState, NoDataEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
@@ -48,7 +46,6 @@ import {
   Sparkles,
   Flame,
   Trophy,
-  Heart,
   Clock,
   AlertCircle,
   TrendingDown
@@ -417,7 +414,6 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [lastUpdated, setLastUpdated] = useState(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
   const [isRefreshing, setIsRefreshing] = useState(false);
-  // Removed week-related state
   const [shouldShowQuickStart, setShouldShowQuickStart] = useState(false);
   
   // Fetch goals
@@ -456,8 +452,6 @@ const Dashboard = () => {
     queryKey: ['/api/goal-statuses'],
   });
   
-  // Weeks functionality has been removed
-  
   // Fetch top prospects
   const { 
     data: prospects = [], 
@@ -467,37 +461,15 @@ const Dashboard = () => {
     queryKey: ['/api/prospects/top'],
   });
   
-  // Determine current week ID from weeks data
+  // Check if we should show the quick start guide - show when no goals
   useEffect(() => {
-    if (weeks && weeks.length > 0 && !currentWeekId) {
-      setCurrentWeekId(weeks[0].id);
-    }
-    
-    // Check if we should show the quick start guide
-    // Show when data has been reset (no goals, no weeks)
-    if (!isLoadingGoals && !isLoadingWeeks && goals.length === 0 && weeks.length === 0) {
+    // Show when data has been reset (no goals)
+    if (!isLoadingGoals && goals.length === 0) {
       setShouldShowQuickStart(true);
     } else {
       setShouldShowQuickStart(false);
     }
-  }, [weeks, currentWeekId, isLoadingGoals, isLoadingWeeks, goals]);
-  
-  // Fetch current week (only if currentWeekId is set)
-  const { 
-    data: currentWeek,
-    isLoading: isLoadingWeek,
-    refetch: refetchWeek
-  } = useQuery<Week>({
-    queryKey: ['/api/weeks', currentWeekId],
-    enabled: !!currentWeekId,
-  });
-  
-  // Initialize a simple variable for completed tasks (removed task fetching)
-  type SimpleTask = { id: number; status: string; };
-  const weekTasks: SimpleTask[] = [];
-  const isLoadingTasks = false;
-  const refetchTasks = () => Promise.resolve(weekTasks);
-  const tasksError = null;
+  }, [isLoadingGoals, goals]);
   
   // Memoize handlers to avoid unnecessary re-renders
   const handleRefreshData = useCallback(async () => {
@@ -509,9 +481,7 @@ const Dashboard = () => {
         refetchGrowthMetrics(), 
         refetchRevenueMetrics(), 
         refetchGoalStatuses(),
-        refetchWeeks(),
         refetchProspects(),
-        ...(currentWeekId ? [refetchWeek(), refetchTasks()] : []),
       ]);
       
       setLastUpdated(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
@@ -531,27 +501,8 @@ const Dashboard = () => {
     }
   }, [
     refetchGoals, refetchGrowthMetrics, refetchRevenueMetrics, 
-    refetchGoalStatuses, refetchWeeks, refetchProspects, currentWeekId, 
-    refetchWeek, refetchTasks, toast
+    refetchGoalStatuses, refetchProspects, toast
   ]);
-  
-  const handlePreviousWeek = useCallback(() => {
-    if (weeks.length > 0 && currentWeekId) {
-      const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
-      if (currentIndex > 0) {
-        setCurrentWeekId(weeks[currentIndex - 1].id);
-      }
-    }
-  }, [weeks, currentWeekId]);
-  
-  const handleNextWeek = useCallback(() => {
-    if (weeks.length > 0 && currentWeekId) {
-      const currentIndex = weeks.findIndex(week => week.id === currentWeekId);
-      if (currentIndex < weeks.length - 1) {
-        setCurrentWeekId(weeks[currentIndex + 1].id);
-      }
-    }
-  }, [weeks, currentWeekId]);
   
   // Memoize computed values
   const isLoading = useMemo(() => 
@@ -559,20 +510,17 @@ const Dashboard = () => {
     isLoadingGrowthMetrics || 
     isLoadingRevenueMetrics || 
     isLoadingGoalStatuses || 
-    isLoadingWeeks ||
-    isLoadingProspects ||
-    (currentWeekId && (isLoadingWeek || isLoadingTasks)),
+    isLoadingProspects,
     [
       isLoadingGoals, isLoadingGrowthMetrics, isLoadingRevenueMetrics,
-      isLoadingGoalStatuses, isLoadingWeeks, isLoadingProspects, currentWeekId,
-      isLoadingWeek, isLoadingTasks
+      isLoadingGoalStatuses, isLoadingProspects
     ]
   );
   
   // Check if there's any data to display - memoized to prevent recalculations
   const hasAnyData = useMemo(() => 
-    goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0 || weeks.length > 0,
-    [goals.length, growthMetrics.length, revenueMetrics.length, weeks.length]
+    goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0,
+    [goals.length, growthMetrics.length, revenueMetrics.length]
   );
   
   // State for celebration effects
@@ -691,7 +639,7 @@ const Dashboard = () => {
             <>
               {/* Stats Overview */}
               <motion.div 
-                className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -724,13 +672,6 @@ const Dashboard = () => {
                   value={goals.filter(goal => (goal.current / goal.target) >= 0.75).length}
                   label="On Track Goals"
                   delay={0.3}
-                />
-                
-                <StatCard 
-                  icon={<Calendar className="h-8 w-8" />}
-                  value={weeks.length}
-                  label="Planning Weeks"
-                  delay={0.4}
                 />
               </motion.div>
             
@@ -765,7 +706,7 @@ const Dashboard = () => {
                 )}
               </section>
               
-              {/* Dashboard Tabs - Metrics and Execution */}
+              {/* Dashboard Tabs - Metrics */}
               <div className="mb-4">
                 <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center mb-4">
                   <BarChart3 className="h-5 w-5 mr-2" />
@@ -866,42 +807,15 @@ const Dashboard = () => {
                       ) : (
                         <EmptyState 
                           title="No Revenue Metrics" 
-                          description="Add metrics to track revenue KPIs"
+                          description="Add metrics to track revenue goals"
                           icon="chart"
                           className="h-full"
                         />
                       )}
                     </div>
                     
-                    {/* Top Prospects */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-1">
-                      {isLoading ? (
-                        <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
-                          <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
-                          <div className="space-y-3">
-                            {[1, 2, 3].map((_, i) => (
-                              <div key={i} className="h-8 bg-gray-800 rounded w-full"></div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : prospects.length > 0 ? (
-                        <TopProspects 
-                          prospects={prospects} 
-                          maxItems={3}
-                          className="h-full"
-                        />
-                      ) : (
-                        <EmptyState 
-                          title="No Prospects" 
-                          description="Add prospects to track your sales pipeline"
-                          icon="chart"
-                          className="h-full"
-                        />
-                      )}
-                    </div>
-                    
-                    {/* Status Indicators */}
-                    <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                    {/* Goal Statuses */}
+                    <div className="col-span-1">
                       {isLoading ? (
                         <div className="bg-gray-900 rounded-lg shadow-sm border border-green-600 p-3 sm:p-4 h-48 sm:h-64 animate-pulse">
                           <div className="h-5 bg-gray-800 rounded w-1/3 mb-4"></div>
@@ -912,11 +826,19 @@ const Dashboard = () => {
                           </div>
                         </div>
                       ) : goalStatuses.length > 0 ? (
-                        <StatusIndicator statuses={goalStatuses} />
+                        <div className="bg-card rounded-lg shadow-sm border p-3 sm:p-4 h-full">
+                          <div className="flex items-center mb-4">
+                            <div className="bg-primary/10 p-2 rounded-full mr-2">
+                              <Target className="h-4 w-4 text-primary" />
+                            </div>
+                            <h3 className="font-medium">Goal Status</h3>
+                          </div>
+                          <StatusIndicator statuses={goalStatuses} />
+                        </div>
                       ) : (
                         <EmptyState 
                           title="No Goal Statuses" 
-                          description="Goal statuses will appear here when you add goals"
+                          description="Add goals to track status"
                           icon="chart"
                           className="h-full"
                         />
@@ -924,187 +846,80 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </TabsContent>
-                
-
               </Tabs>
               
-              {/* Quick Stats Cards - 3D Enhanced */}
-              {!isLoading && goals.length > 0 && (
-                <section className="mb-8 section-3d">
-                  <h2 className="text-xl font-semibold text-green-400 text-3d-title flex items-center mb-6">
-                    <Icon3D className="mr-3">
-                      <Award className="h-5 w-5 text-green-400" />
-                    </Icon3D>
-                    <span className="mr-2">Achievement Stats</span>
-                    <Badge3D className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">
-                      Your progress at a glance
-                    </Badge3D>
+              {/* Top Prospects Section */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-green-400 text-glow flex items-center">
+                    <Users className="h-5 w-5 mr-2" />
+                    <span className="mr-2">Top Prospects</span>
+                    <span className="text-xs px-2 py-0.5 bg-green-900/40 rounded-full text-green-300 font-normal">High potential opportunities</span>
                   </h2>
-                  
-                  <div className="dashboard-3d grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
-                      <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
-                          <Icon3D>
-                            <Target className="h-6 w-6 text-green-400 glow-pulse" />
-                          </Icon3D>
-                        </div>
-                        <div>
-                          <Text3D className="text-sm text-gray-400">Total Goals</Text3D>
-                          <Value3D className="text-2xl font-bold text-white">{goals.length}</Value3D>
-                        </div>
-                      </Card3DContent>
-                    </Card3D>
-                    
-                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
-                      <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
-                          <Icon3D>
-                            <TrendingUp className="h-6 w-6 text-green-400 glow-pulse" />
-                          </Icon3D>
-                        </div>
-                        <div>
-                          <Text3D className="text-sm text-gray-400">Avg Completion</Text3D>
-                          <Value3D className="text-2xl font-bold text-white">
-                            {Math.round(goals.reduce((acc, goal) => 
-                              acc + Math.min(Math.round((goal.current / goal.target) * 100), 100), 0) / goals.length)}%
-                          </Value3D>
-                        </div>
-                      </Card3DContent>
-                    </Card3D>
-                    
-                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
-                      <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
-                          <Icon3D>
-                            <CheckCircle className="h-6 w-6 text-green-400 glow-pulse" />
-                          </Icon3D>
-                        </div>
-                        <div>
-                          <Text3D className="text-sm text-gray-400">On Track Goals</Text3D>
-                          <Value3D className="text-2xl font-bold text-white">
-                            {goalStatuses.filter(status => status.status === "on-track").length}
-                          </Value3D>
-                        </div>
-                      </Card3DContent>
-                    </Card3D>
-                    
-                    <Card3D className="bg-gray-900/70 border border-green-600 dashboard-card-3d stacked-card-3d" intensity="high" floatEffect={true}>
-                      <Card3DContent className="p-4 flex items-center">
-                        <div className="mr-4 bg-green-900/50 p-3 rounded-full shadow-3d">
-                          <Icon3D>
-                            <Users className="h-6 w-6 text-green-400 glow-pulse" />
-                          </Icon3D>
-                        </div>
-                        <div>
-                          <Text3D className="text-sm text-gray-400">Completed Goals</Text3D>
-                          <Value3D className="text-2xl font-bold text-white">
-                            {goals.filter(goal => (goal.current / goal.target) >= 1).length}
-                          </Value3D>
-                        </div>
-                      </Card3DContent>
-                    </Card3D>
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-          
-          {/* Getting Started Resources */}
-          {!isLoading && !hasAnyData && (
-            <motion.section 
-              className="mt-12 relative"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/10 blur-3xl float-effect-slow"></div>
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/5 blur-3xl float-effect"></div>
-              
-              <h2 className="text-lg font-semibold text-green-400 text-glow mb-4 flex items-center">
-                <Rocket className="h-5 w-5 mr-2 float-effect" />
-                Getting Started Resources
-              </h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <motion.div 
-                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
-                  <div className="relative">
-                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
-                      <Target className="h-4 w-4 mr-2 float-effect-fast" />
-                      Add Your First Goal
-                    </h3>
-                    <p className="text-gray-300 text-sm mb-4">
-                      Define your 2025 targets with measurable goals to track progress over time.
-                    </p>
-                    <Link to="/add-goal">
-                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
-                        Start <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
-                      </Button>
-                    </Link>
-                  </div>
-                </motion.div>
+                  <Button variant="ghost" className="border border-green-600/20 hover:bg-green-900/20">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
                 
-                <motion.div 
-                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 gradient-border glow-card relative overflow-hidden group"
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
-                  <div className="relative">
-                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2 float-effect-fast" />
-                      Track Key Metrics
-                    </h3>
-                    <p className="text-gray-300 text-sm mb-4">
-                      Monitor important KPIs related to growth, revenue, and performance.
-                    </p>
-                    <Link to="/add-metric">
-                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
-                        View Metrics <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
-                      </Button>
-                    </Link>
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+                    {[1, 2, 3, 4].map((_, index) => (
+                      <div key={index} className="bg-card rounded-lg shadow-sm border border-border p-4 h-28">
+                        <div className="flex items-center space-x-3">
+                          <div className="rounded-full bg-muted h-10 w-10"></div>
+                          <div>
+                            <div className="h-4 bg-muted rounded w-24 mb-2"></div>
+                            <div className="h-3 bg-muted rounded w-16"></div>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <div className="h-3 bg-muted rounded w-full"></div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="bg-gray-900/70 backdrop-blur-sm border border-green-600 rounded-lg p-4 sm:p-5 sm:col-span-2 lg:col-span-1 gradient-border glow-card relative overflow-hidden group"
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
-                  <div className="relative">
-                    <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
-                      <TrendingUp className="h-4 w-4 mr-2 float-effect-fast" />
-                      Update Progress
-                    </h3>
-                    <p className="text-gray-300 text-sm mb-4">
-                      Keep your goal progress up to date to track performance and celebrate achievements.
-                    </p>
-                    <Link to="/add-progress">
-                      <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
-                        Update Goals <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
-                      </Button>
-                    </Link>
-                  </div>
-                </motion.div>
+                ) : (
+                  <TopProspects prospects={prospects} maxItems={4} />
+                )}
               </div>
-            </motion.section>
+              
+              {/* Global Impact Call to Action */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-950 rounded-lg shadow-lg border border-green-700 p-6 md:p-8 relative overflow-hidden hover:shadow-green-900/20 transition-all duration-300">
+                  <div className="absolute inset-0 bg-grid-white/[0.02] opacity-50"></div>
+                  <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
+                  <div className="absolute top-0 bottom-0 left-0 w-px bg-gradient-to-b from-transparent via-green-500 to-transparent"></div>
+                  <div className="absolute top-0 bottom-0 right-0 w-px bg-gradient-to-b from-transparent via-green-500 to-transparent"></div>
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-white mb-2 flex items-center">
+                        <Trophy className="h-6 w-6 text-yellow-500 mr-3" />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Go Global</span>
+                      </h3>
+                      <p className="text-gray-300 max-w-2xl">
+                        See how your goal progress compares globally. Connect with other achievers tracking similar objectives around the world.
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Link href="/global-impact">
+                        <Button3D
+                          glow={true}
+                          className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 border-green-500 text-white shadow-lg shadow-green-900/30"
+                          iconRight={<ArrowUpRight className="h-4 w-4 ml-2" />}
+                        >
+                          Explore Global Impact
+                        </Button3D>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </main>
-      
-      {/* Footer removed and replaced with consistent navigation */}
     </div>
   );
 };
