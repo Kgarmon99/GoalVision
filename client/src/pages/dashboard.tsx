@@ -782,7 +782,7 @@ const Dashboard = () => {
               </div>
               
               <Tabs defaultValue="metrics" className="w-full mb-8">
-                <TabsList className="grid grid-cols-2 max-w-md mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1 gradient-border">
+                <TabsList className="grid grid-cols-1 max-w-md mb-6 bg-gray-900/70 border border-green-800 rounded-lg overflow-hidden p-1 gradient-border">
                   <TabsTrigger 
                     value="metrics" 
                     className="flex-1 py-2 px-3 data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
@@ -790,16 +790,6 @@ const Dashboard = () => {
                     <div className="relative group flex items-center justify-center">
                       <DollarSign className="h-4 w-4 mr-2 float-effect-fast" />
                       <span className="text-sm whitespace-nowrap">Money & Growth</span>
-                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="execution" 
-                    className="flex-1 py-2 px-3 data-[state=active]:bg-gray-800 data-[state=active]:text-green-400 data-[state=active]:text-glow data-[state=active]:neon-glow transition-all"
-                  >
-                    <div className="relative group flex items-center justify-center">
-                      <Calendar className="h-4 w-4 mr-2 float-effect-fast" />
-                      <span className="text-sm whitespace-nowrap">Weekly Progress</span>
                       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
                     </div>
                   </TabsTrigger>
