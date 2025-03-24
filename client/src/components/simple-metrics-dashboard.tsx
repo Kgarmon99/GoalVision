@@ -1,15 +1,5 @@
 import { Goal, Metric } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  BarChart,
-  ResponsiveContainer,
-  Bar,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip,
-  Legend
-} from "recharts";
 import { useMemo } from "react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
@@ -19,15 +9,7 @@ interface SimpleMetricsDashboardProps {
 }
 
 export function SimpleMetricsDashboard({ goals, metrics }: SimpleMetricsDashboardProps) {
-  // Create simplified goal progress data for the chart
-  const goalProgressData = useMemo(() => {
-    return goals.map(goal => ({
-      name: goal.name.length > 15 ? `${goal.name.substring(0, 15)}...` : goal.name,
-      current: goal.current,
-      target: goal.target,
-      progress: Math.min(Math.round((goal.current / goal.target) * 100), 100)
-    }));
-  }, [goals]);
+  // Goal progress chart has been removed
 
   // Calculate metrics summaries by category
   const metricSummaries = useMemo(() => {
@@ -52,48 +34,7 @@ export function SimpleMetricsDashboard({ goals, metrics }: SimpleMetricsDashboar
   
   return (
     <div className="space-y-6">
-      {/* Goal Progress Chart - Simple bar chart */}
-      {goals.length > 0 && (
-        <Card className="bg-card border">
-          <CardContent className="p-4 pt-6">
-            <h3 className="text-lg font-semibold mb-4">Goal Progress</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={goalProgressData} margin={{ top: 5, right: 5, left: 5, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fill: 'var(--muted-foreground)' }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={70}
-                />
-                <YAxis tick={{ fill: 'var(--muted-foreground)' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '6px',
-                    color: 'var(--foreground)'
-                  }} 
-                />
-                <Legend />
-                <Bar 
-                  dataKey="current" 
-                  name="Current" 
-                  fill="var(--primary)" 
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar 
-                  dataKey="target" 
-                  name="Target" 
-                  fill="var(--muted)" 
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+      {/* Goal Progress Chart has been removed */}
       
       {/* Metrics Summary Cards */}
       {Object.keys(metricSummaries).length > 0 && (
