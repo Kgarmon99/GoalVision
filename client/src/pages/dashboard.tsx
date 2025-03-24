@@ -499,16 +499,11 @@ const Dashboard = () => {
     enabled: !!currentWeekId,
   });
   
-  // Fetch tasks for current week
-  const { 
-    data: weekTasks = [], 
-    isLoading: isLoadingTasks,
-    refetch: refetchTasks,
-    error: tasksError
-  } = useQuery<ExecutionTask[]>({
-    queryKey: ['/api/tasks/week', currentWeekId],
-    enabled: !!currentWeekId,
-  });
+  // Initialize a simple variable for completed tasks (removed task fetching)
+  const weekTasks: ExecutionTask[] = [];
+  const isLoadingTasks = false;
+  const refetchTasks = () => Promise.resolve(weekTasks);
+  const tasksError = null;
   
   // Memoize handlers to avoid unnecessary re-renders
   const handleRefreshData = useCallback(async () => {
@@ -731,9 +726,9 @@ const Dashboard = () => {
                 />
                 
                 <StatCard 
-                  icon={<ListTodo className="h-8 w-8" />}
-                  value={weekTasks.length}
-                  label="Execution Tasks"
+                  icon={<CheckCircle className="h-8 w-8" />}
+                  value={goals.filter(goal => (goal.current / goal.target) >= 0.75).length}
+                  label="On Track Goals"
                   delay={0.3}
                 />
                 
@@ -803,7 +798,7 @@ const Dashboard = () => {
                   >
                     <div className="relative group flex items-center justify-center">
                       <Calendar className="h-4 w-4 mr-2 float-effect-fast" />
-                      <span className="text-sm whitespace-nowrap">Weekly Tasks</span>
+                      <span className="text-sm whitespace-nowrap">Weekly Progress</span>
                       <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 group-data-[state=active]:w-full transition-all duration-300"></span>
                     </div>
                   </TabsTrigger>
@@ -962,12 +957,35 @@ const Dashboard = () => {
                       </div>
                     </div>
                   ) : currentWeek ? (
-                    <WeeklyExecutionTracker 
-                      tasks={weekTasks} 
-                      week={currentWeek}
-                      onPreviousWeek={handlePreviousWeek}
-                      onNextWeek={handleNextWeek}
-                    />
+                    <div className="bg-card rounded-lg border shadow-sm p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Goal Progress Overview</h3>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handlePreviousWeek}
+                            disabled={weeks.indexOf(currentWeek) === weeks.length - 1}
+                          >
+                            Previous
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleNextWeek}
+                            disabled={weeks.indexOf(currentWeek) === 0}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="bg-muted/30 p-3 rounded-md mb-4">
+                        <p className="text-sm">{currentWeek.dateRange}</p>
+                      </div>
+                      <div className="flex justify-center items-center py-4">
+                        <p className="text-muted-foreground">Focus on tracking your goals' progress</p>
+                      </div>
+                    </div>
                   ) : weeks.length > 0 ? (
                     <div className="bg-gray-950 border border-green-800 rounded-lg p-6">
                       <h2 className="text-lg font-semibold text-green-400 mb-4">Weekly Execution Tracker</h2>
@@ -979,10 +997,10 @@ const Dashboard = () => {
                   ) : (
                     <EmptyState 
                       title="No Weekly Planning" 
-                      description="Add your first week and tasks to track weekly execution"
+                      description="Set up weekly tracking for better goal monitoring"
                       icon="chart"
-                      addLink="/add-task"
-                      addText="Add Weekly Planning"
+                      addLink="/add-goal"
+                      addText="Set Goal Timeline"
                     />
                   )}
                 </TabsContent>
@@ -1057,9 +1075,9 @@ const Dashboard = () => {
                           </Icon3D>
                         </div>
                         <div>
-                          <Text3D className="text-sm text-gray-400">Weekly Tasks</Text3D>
+                          <Text3D className="text-sm text-gray-400">Completed Goals</Text3D>
                           <Value3D className="text-2xl font-bold text-white">
-                            {weekTasks.length}
+                            {goals.filter(goal => (goal.current / goal.target) >= 1).length}
                           </Value3D>
                         </div>
                       </Card3DContent>
@@ -1145,15 +1163,15 @@ const Dashboard = () => {
                   <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-500/5 to-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"></div>
                   <div className="relative">
                     <h3 className="text-green-400 font-medium mb-2 text-glow flex items-center">
-                      <ListTodo className="h-4 w-4 mr-2 float-effect-fast" />
-                      Plan Weekly Tasks
+                      <TrendingUp className="h-4 w-4 mr-2 float-effect-fast" />
+                      Update Progress
                     </h3>
                     <p className="text-gray-300 text-sm mb-4">
-                      Break down your goals into actionable weekly tasks for execution tracking.
+                      Keep your goal progress up to date to track performance and celebrate achievements.
                     </p>
-                    <Link to="/add-task">
+                    <Link to="/add-progress">
                       <Button variant="outline" size="sm" className="w-full border-green-600 text-green-400 neon-glow iridescent-hover">
-                        Add Tasks <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
+                        Update Goals <ChevronRight className="ml-1 h-4 w-4 float-effect-fast" />
                       </Button>
                     </Link>
                   </div>
