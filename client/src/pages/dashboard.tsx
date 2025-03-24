@@ -4,7 +4,6 @@ import { SimpleNav } from "@/components/layout/simple-nav";
 import { GoalProgressCard } from "@/components/goal-progress-card";
 import MetricsCard from "@/components/metrics-card";
 import StatusIndicator from "@/components/status-indicator";
-import WeeklyExecutionTracker from "@/components/weekly-execution-tracker";
 import { SimpleMetricsDashboard } from "@/components/simple-metrics-dashboard";
 import { TopProspects } from "@/components/top-prospects";
 
@@ -105,17 +104,6 @@ const ActionBar = memo(() => {
             glow={true}
           >
             Add Goal
-          </Button3D>
-        </Link>
-        <Link href="/add-task">
-          <Button3D 
-            size="sm" 
-            className="gap-2"
-            title="Track your execution tasks"
-            iconLeft={<Rocket className="h-4 w-4" />}
-            glow={true}
-          >
-            Track Execution
           </Button3D>
         </Link>
       </div>

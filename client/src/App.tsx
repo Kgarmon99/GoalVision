@@ -11,10 +11,6 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const AddGoal = lazy(() => import("@/pages/add-goal"));
 const AddProgress = lazy(() => import("@/pages/add-progress"));
-const AddTask = lazy(() => import("@/pages/add-task"));
-const TaskDetails = lazy(() => import("@/pages/task-details"));
-const GoalTasks = lazy(() => import("@/pages/goal-tasks"));
-const TaskBoard = lazy(() => import("@/pages/task-board"));
 const GoalVisualizations = lazy(() => import("@/pages/goal-visualizations"));
 const Metrics = lazy(() => import("@/pages/metrics"));
 const GlobalImpact = lazy(() => import("@/pages/global-impact"));
@@ -38,12 +34,6 @@ function App() {
       case '/add-progress':
         setCurrentPage(<AddProgress />);
         break;
-      case '/add-task':
-        setCurrentPage(<AddTask />);
-        break;
-      case '/task-board':
-        setCurrentPage(<TaskBoard />);
-        break;
       case '/goal-visualizations':
         setCurrentPage(<GoalVisualizations />);
         break;
@@ -54,14 +44,7 @@ function App() {
         setCurrentPage(<GlobalImpact />);
         break;
       default:
-        // Check for pattern matches
-        if (path.startsWith('/tasks/')) {
-          setCurrentPage(<TaskDetails />);
-        } else if (path.startsWith('/goal-tasks/')) {
-          setCurrentPage(<GoalTasks />);
-        } else {
-          setCurrentPage(<NotFound />);
-        }
+        setCurrentPage(<NotFound />);
     }
     
     // Set very short loading time to hide blue/white screen but keep app functionality
@@ -115,7 +98,6 @@ function App() {
           fixed={true}
           quickActions={[
             { name: 'Add Goal', path: '/add-goal', icon: <Target size={16} />, description: 'Create a new goal' },
-            { name: 'Add Task', path: '/add-task', icon: <Target size={16} />, description: 'Add a new task' },
             { name: 'Update Progress', path: '/add-progress', icon: <Target size={16} />, description: 'Update goal progress' }
           ]}
         />
