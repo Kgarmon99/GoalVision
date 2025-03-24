@@ -448,70 +448,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get tasks by week with specific weekId
-  app.get("/api/tasks/week/:weekId", async (req, res) => {
-    try {
-      const weekId = parseInt(req.params.weekId);
-      
-      // Try to get tasks from cache first
-      const cacheKey = `tasks:week:${weekId}`;
-      const cachedTasks = serverCache.get(cacheKey);
-      
-      if (cachedTasks) {
-        // Set cache header to inform client
-        res.set('X-Cache', 'HIT');
-        return res.json(cachedTasks);
-      }
-      
-      // Cache miss, fetch from database
-      const tasks = await storage.getTasksByWeek(weekId);
-      
-      // Cache for configured TTL
-      serverCache.set(cacheKey, tasks, CACHE_TTL.TASKS);
-      
-      // Set cache header
-      res.set('X-Cache', 'MISS');
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching tasks by week" });
-    }
-  });
-  
-  // Get tasks by week (default to the first week if no id specified)
-  app.get("/api/tasks/week", async (req, res) => {
-    try {
-      // Get the first week from the database, or default to week with ID 1
-      const weeks = await storage.getAllWeeks();
-      
-      if (weeks.length === 0) {
-        return res.status(404).json({ message: "No weeks found" });
-      }
-      
-      const firstWeek = weeks[0];
-      
-      // Try to get tasks from cache first
-      const cacheKey = `tasks:week:${firstWeek.id}`;
-      const cachedTasks = serverCache.get(cacheKey);
-      
-      if (cachedTasks) {
-        // Set cache header to inform client
-        res.set('X-Cache', 'HIT');
-        return res.json(cachedTasks);
-      }
-      
-      // Cache miss, fetch from database
-      const tasks = await storage.getTasksByWeek(firstWeek.id);
-      
-      // Cache for configured TTL
-      serverCache.set(cacheKey, tasks, CACHE_TTL.TASKS);
-      
-      // Set cache header
-      res.set('X-Cache', 'MISS');
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching tasks" });
-    }
-  });
+  // Task-related endpoints have been removed
+  // as part of simplifying the application to focus only on goal tracking
   
   // Prospect Routes
   
