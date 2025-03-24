@@ -518,7 +518,7 @@ const Dashboard = () => {
     refetch: refetchTasks,
     error: tasksError
   } = useQuery<ExecutionTask[]>({
-    queryKey: [currentWeekId ? `/api/tasks/week/${currentWeekId}` : '/api/tasks/week'],
+    queryKey: ['/api/tasks/week', currentWeekId],
     enabled: !!currentWeekId,
   });
   

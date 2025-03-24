@@ -79,7 +79,17 @@ export function getQueryFn<T = unknown>(options: {
       // Improved error handling for fetch that catches network errors
       let res: Response;
       try {
-        res = await fetch(queryKey[0] as string, {
+        // Handle array query keys where the first element is the base URL
+        // and the second element is a parameter 
+        let url = queryKey[0] as string;
+        
+        // If we have a second element in the queryKey and it's a number or string
+        // append it to the URL as a path parameter
+        if (queryKey.length > 1 && (typeof queryKey[1] === 'number' || typeof queryKey[1] === 'string') && queryKey[1] !== null && queryKey[1] !== undefined) {
+          url = `${url}/${queryKey[1]}`;
+        }
+        
+        res = await fetch(url, {
           credentials: "include",
           // Add cache control headers to work with our server-side caching
           headers: {
@@ -92,7 +102,7 @@ export function getQueryFn<T = unknown>(options: {
         console.log("Error handled gracefully:", `Query failed (${String(queryKey[0])}): Failed to fetch`);
         
         // For debugging
-        console.log("Attempting to fetch from URL:", queryKey[0]);
+        console.log("Attempting to fetch from URL:", queryKey);
         
         // Return empty data immediately for UI to render properly
         console.log("Returning empty data array due to network errors");
