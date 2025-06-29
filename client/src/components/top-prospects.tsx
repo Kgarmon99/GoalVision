@@ -127,9 +127,16 @@ export function TopProspects({
     <Card className={`${className} shadow-md border-green-600/50 bg-gray-900/60`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="text-xl font-semibold text-white">Kentucky School Prospects</CardTitle>
-            <CardDescription>Top priority schools to close deals with</CardDescription>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/moneybot-logo.png" 
+              alt="MoneyBot" 
+              className="h-6 w-6 opacity-50 drop-shadow-lg"
+            />
+            <div>
+              <CardTitle className="text-xl font-semibold text-white">Kentucky School Prospects</CardTitle>
+              <CardDescription>Top priority schools to close deals with</CardDescription>
+            </div>
           </div>
           <Button
             variant="ghost"

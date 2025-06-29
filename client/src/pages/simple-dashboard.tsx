@@ -552,6 +552,15 @@ const SimpleDashboard = () => {
 
         </div>
       </main>
+      
+      {/* Bottom right watermark */}
+      <div className="fixed bottom-4 right-4 z-20">
+        <img 
+          src="/moneybot-logo.png" 
+          alt="MoneyBot" 
+          className="h-8 w-8 opacity-30 hover:opacity-60 transition-opacity duration-300 drop-shadow-lg"
+        />
+      </div>
     </div>
   );
 };
