@@ -21,6 +21,7 @@ import {
   prospects
 } from "@shared/schema";
 import { db } from "./db";
+import path from "path";
 
 // Simple server-side cache implementation to reduce database load
 // Cache entries expire after specified time to ensure data freshness
@@ -586,6 +587,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Error deleting prospect" });
     }
+  });
+
+  // Serve MoneyBot logo
+  app.get("/moneybot-logo.png", (req, res) => {
+    res.sendFile(path.resolve("public/moneybot-logo.png"));
   });
 
   // Create the server
