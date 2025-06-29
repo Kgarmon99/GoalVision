@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatedComponent } from "@/components/ui/animated-component";
 import { Prospect } from "@shared/schema";
 import { formatDate, getDaysUntilDescription } from "@/utils/date-utils";
 import { Progress } from "@/components/ui/progress";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronUp, Edit } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TopProspectsProps {
   prospects: Prospect[];
@@ -18,11 +23,38 @@ export function TopProspects({
   prospects, 
   loading = false, 
   className = "",
-  maxItems = 3 
+  maxItems = 10 
 }: TopProspectsProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const sortedProspects = [...prospects]
-    .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-    .slice(0, maxItems);
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+  const displayedProspects = expanded ? sortedProspects : sortedProspects.slice(0, 3);
+
+  const updateStageMutation = useMutation({
+    mutationFn: async ({ id, stage }: { id: number; stage: string }) => {
+      return apiRequest("PATCH", `/api/prospects/${id}`, { stage });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/prospects"] });
+      toast({
+        title: "Stage Updated",
+        description: "Prospect stage has been updated successfully.",
+      });
+      setEditingId(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update prospect stage.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const getStageColor = (stage: string) => {
     switch(stage.toLowerCase()) {
@@ -35,6 +67,15 @@ export function TopProspects({
       default: return "bg-gray-600 text-white";
     }
   };
+
+  const stageOptions = [
+    { value: "initial", label: "Initial" },
+    { value: "qualified", label: "Qualified" },
+    { value: "negotiation", label: "Negotiation" },
+    { value: "closing", label: "Closing" },
+    { value: "won", label: "Won" },
+    { value: "lost", label: "Lost" }
+  ];
 
   const getPriorityIndicator = (priority: number | null, index: number) => {
     // Show special indicator for the #1 priority prospect
@@ -85,12 +126,34 @@ export function TopProspects({
   return (
     <Card className={`${className} shadow-md border-green-600/50 bg-gray-900/60`}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold text-white">Top Prospects</CardTitle>
-        <CardDescription>Highest priority deals to close</CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle className="text-xl font-semibold text-white">Kentucky School Prospects</CardTitle>
+            <CardDescription>Top priority schools to close deals with</CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpanded(!expanded)}
+            className="text-gray-400 hover:text-white"
+          >
+            {expanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-1" />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-1" />
+                Show All 10
+              </>
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {sortedProspects.map((prospect, index) => (
+          {displayedProspects.map((prospect, index) => (
             <AnimatedComponent
               key={prospect.id}
               animation="slideIn"
@@ -102,7 +165,7 @@ export function TopProspects({
                 {getPriorityIndicator(prospect.priority, index)}
                 
                 <div className="flex justify-between items-start mb-1">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-white">
                       {prospect.name}
                       {index === 0 && (
@@ -111,9 +174,41 @@ export function TopProspects({
                     </h3>
                     <p className="text-sm text-gray-400">{prospect.organization}</p>
                   </div>
-                  <Badge className={`${getStageColor(prospect.stage)}`}>
-                    {prospect.stage}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {editingId === prospect.id ? (
+                      <Select
+                        value={prospect.stage}
+                        onValueChange={(value) => {
+                          updateStageMutation.mutate({ id: prospect.id, stage: value });
+                        }}
+                      >
+                        <SelectTrigger className="w-32 h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {stageOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <>
+                        <Badge className={`${getStageColor(prospect.stage)} cursor-pointer`}>
+                          {prospect.stage}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                          onClick={() => setEditingId(prospect.id)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex justify-between items-center mt-2">
@@ -133,6 +228,13 @@ export function TopProspects({
             </AnimatedComponent>
           ))}
         </div>
+        {!expanded && sortedProspects.length > 3 && (
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-400">
+              Showing 3 of {sortedProspects.length} prospects
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
