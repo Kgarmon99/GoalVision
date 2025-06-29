@@ -40,7 +40,7 @@ export function TopProspects({
       return apiRequest("PATCH", `/api/prospects/${id}`, { stage });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prospects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/prospects/top/10"] });
       toast({
         title: "Stage Updated",
         description: "Prospect stage has been updated successfully.",

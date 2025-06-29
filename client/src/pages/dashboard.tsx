@@ -458,7 +458,7 @@ const Dashboard = () => {
     isLoading: isLoadingProspects,
     refetch: refetchProspects
   } = useQuery<Prospect[]>({
-    queryKey: ['/api/prospects/top'],
+    queryKey: ['/api/prospects/top/10'],
   });
   
   // Check if we should show the quick start guide - show when no goals
