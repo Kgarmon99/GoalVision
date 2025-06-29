@@ -6,15 +6,18 @@ import { TopProspects } from "@/components/top-prospects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Animated3DBackground } from "@/components/ui/animated-3d-background";
-import { ParticleEffect } from "@/components/ui/particle-effect";
-import { CursorEffect } from "@/components/ui/cursor-effect";
 import { 
   Star, 
   Target,
   CheckCircle,
   Plus,
-  RefreshCcw
+  RefreshCcw,
+  TrendingDown,
+  Users,
+  Briefcase,
+  Scale,
+  Code,
+  DollarSign
 } from "lucide-react";
 import { Goal, Prospect } from "@shared/schema";
 import { useState, useCallback } from "react";
@@ -79,19 +82,18 @@ const SimpleDashboard = () => {
       {/* SimpleNav for consistent navigation */}
       <SimpleNav />
       
-      {/* 3D Animated Background */}
-      <Animated3DBackground 
-        color="#10b981" 
-        particleCount={150}
-        speed={0.05}
-        interactive={true}
-      />
-      
-      {/* Particle Effect */}
-      <ParticleEffect count={50} />
-      
-      {/* Cursor Effect */}
-      <CursorEffect />
+      {/* Galaxy Grid Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `
+            linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px'
+        }}></div>
+        <div className="absolute inset-0 bg-gradient-radial from-green-900/10 via-transparent to-transparent"></div>
+      </div>
       
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
@@ -235,6 +237,110 @@ const SimpleDashboard = () => {
             transition={{ duration: 1.0 }}
           >
             <TopProspects prospects={prospects} maxItems={10} />
+          </motion.div>
+
+          {/* Burn Rate Section */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2 }}
+          >
+            <Card className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-red-600/50 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-6">
+                  <div className="bg-red-500/20 p-3 rounded-full mr-4">
+                    <TrendingDown className="h-6 w-6 text-red-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-red-400">Monthly Burn Rate</h2>
+                    <p className="text-sm text-gray-300">$250k monthly projection breakdown</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Talent - 50% */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-blue-500/20 p-2 rounded-full mr-3">
+                          <Users className="h-5 w-5 text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Talent</h3>
+                          <p className="text-xs text-gray-400">50% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-400">$125k</div>
+                      <div className="text-sm text-gray-400">Staff salaries & benefits</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sales & Marketing - 20% */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-green-500/20 p-2 rounded-full mr-3">
+                          <Briefcase className="h-5 w-5 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Sales & Marketing</h3>
+                          <p className="text-xs text-gray-400">20% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-green-400">$50k</div>
+                      <div className="text-sm text-gray-400">Customer acquisition</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Legal Fees - 15% */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-purple-500/20 p-2 rounded-full mr-3">
+                          <Scale className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Legal Fees</h3>
+                          <p className="text-xs text-gray-400">15% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-purple-400">$37.5k</div>
+                      <div className="text-sm text-gray-400">Compliance & contracts</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Development - 15% */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-yellow-500/20 p-2 rounded-full mr-3">
+                          <Code className="h-5 w-5 text-yellow-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Development</h3>
+                          <p className="text-xs text-gray-400">15% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-yellow-400">$37.5k</div>
+                      <div className="text-sm text-gray-400">Product & infrastructure</div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Total Summary */}
+                <div className="mt-6 pt-4 border-t border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <DollarSign className="h-5 w-5 text-red-400 mr-2" />
+                      <span className="text-lg font-semibold text-white">Total Monthly Burn</span>
+                    </div>
+                    <div className="text-2xl font-bold text-red-400">$250,000</div>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-2">Monitor expenses to maintain runway and optimize efficiency</p>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
         </div>
