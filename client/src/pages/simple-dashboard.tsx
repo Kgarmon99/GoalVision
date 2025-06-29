@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { SimpleNav } from "@/components/layout/simple-nav";
 import { GoalProgressCard } from "@/components/goal-progress-card";
 import { TopProspects } from "@/components/top-prospects";
 import { Button } from "@/components/ui/button";
@@ -160,8 +159,7 @@ const SimpleDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
-      {/* SimpleNav for consistent navigation */}
-      <SimpleNav />
+
       
       {/* Electric Galaxy Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">

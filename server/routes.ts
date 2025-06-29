@@ -422,35 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get all weeks
-  app.get("/api/weeks", async (req, res) => {
-    try {
-      // Try to get weeks from cache first
-      const cacheKey = "weeks:all";
-      const cachedWeeks = serverCache.get(cacheKey);
-      
-      if (cachedWeeks) {
-        // Set cache header to inform client
-        res.set('X-Cache', 'HIT');
-        return res.json(cachedWeeks);
-      }
-      
-      // Cache miss, fetch from database
-      const weeks = await storage.getAllWeeks();
-      
-      // Cache for 30 minutes - weeks don't change frequently
-      serverCache.set(cacheKey, weeks, 30 * 60 * 1000);
-      
-      // Set cache header
-      res.set('X-Cache', 'MISS');
-      res.json(weeks);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching weeks" });
-    }
-  });
-  
-  // Task-related endpoints have been removed
-  // as part of simplifying the application to focus only on goal tracking
+  // Simplified MoneyBot Dashboard - Weekly tasks removed per user request
   
   // Prospect Routes
   
