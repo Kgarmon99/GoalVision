@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Goal, Prospect } from "@shared/schema";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 
 const SimpleDashboard = () => {
@@ -42,6 +42,30 @@ const SimpleDashboard = () => {
   const [isEditingTask, setIsEditingTask] = useState(false);
   const [editTaskTitle, setEditTaskTitle] = useState(priorityTask.title);
   const [editTaskDescription, setEditTaskDescription] = useState(priorityTask.description);
+  
+  // Motivational quotes
+  const motivationalQuotes = [
+    "The best time to plant a tree was 20 years ago. The second best time is now. - Chinese Proverb",
+    "Success is walking from failure to failure with no loss of enthusiasm. - Winston Churchill", 
+    "The way to get started is to quit talking and begin doing. - Walt Disney",
+    "Innovation distinguishes between a leader and a follower. - Steve Jobs",
+    "Your limitation—it's only your imagination.",
+    "Push yourself, because no one else is going to do it for you.",
+    "Great things never come from comfort zones.",
+    "Dream it. Wish it. Do it.",
+    "Success doesn't just find you. You have to go out and get it.",
+    "The harder you work for something, the greater you'll feel when you achieve it."
+  ];
+  
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  
+  // Rotate quotes every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentQuoteIndex(prev => (prev + 1) % motivationalQuotes.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [motivationalQuotes.length]);
   
   // Fetch goals
   const { 
@@ -182,6 +206,10 @@ const SimpleDashboard = () => {
                     MoneyBot Dashboard
                   </h1>
                   <p className="text-gray-300">Kentucky School Prospect Tracker</p>
+                  <div className="mt-2 p-2 bg-gradient-to-r from-yellow-900/40 to-orange-900/40 rounded-lg border border-yellow-500/30">
+                    <p className="text-yellow-300 font-semibold text-sm">🎯 Mission: Become the #1 Global Financial Brand</p>
+                    <p className="text-yellow-200/80 text-xs italic">"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
+                  </div>
                 </div>
               </div>
               
@@ -232,6 +260,7 @@ const SimpleDashboard = () => {
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
                     <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
+                    <p className="text-xs text-yellow-200/70 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
                   </div>
                   <img 
                     src="/moneybot-logo.png" 
@@ -339,7 +368,10 @@ const SimpleDashboard = () => {
                 <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
                   <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
                 </div>
-                <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
+                  <p className="text-xs text-green-200/70 italic">"A goal is a dream with a deadline." - Napoleon Hill</p>
+                </div>
                 <img 
                   src="/moneybot-logo.png" 
                   alt="MoneyBot" 
@@ -421,6 +453,7 @@ const SimpleDashboard = () => {
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-red-300 drop-shadow-lg">Annual Burn Rate</h2>
                     <p className="text-sm text-gray-300/90">$250k yearly projection breakdown</p>
+                    <p className="text-xs text-red-200/70 italic mt-1">"Every dollar invested is a step closer to empire." - MoneyBot</p>
                   </div>
                   <img 
                     src="/moneybot-logo.png" 
