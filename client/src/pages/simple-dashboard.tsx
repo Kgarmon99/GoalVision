@@ -17,8 +17,13 @@ import {
   Briefcase,
   Scale,
   Code,
-  DollarSign
+  DollarSign,
+  Edit,
+  Check,
+  X
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Goal, Prospect } from "@shared/schema";
 import { useState, useCallback } from "react";
 import { format } from "date-fns";
@@ -27,6 +32,16 @@ const SimpleDashboard = () => {
   const { toast } = useToast();
   const [lastUpdated, setLastUpdated] = useState(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Priority task state
+  const [priorityTask, setPriorityTask] = useState({
+    title: "Close Shelby County Schools Deal",
+    description: "Follow up on budget approval and finalize contract terms",
+    completed: false
+  });
+  const [isEditingTask, setIsEditingTask] = useState(false);
+  const [editTaskTitle, setEditTaskTitle] = useState(priorityTask.title);
+  const [editTaskDescription, setEditTaskDescription] = useState(priorityTask.description);
   
   // Fetch goals
   const { 
@@ -76,6 +91,40 @@ const SimpleDashboard = () => {
       setIsRefreshing(false);
     }
   }, [refetchGoals, refetchProspects, toast]);
+
+  // Priority task handlers
+  const handleMarkComplete = useCallback(() => {
+    setPriorityTask(prev => ({ ...prev, completed: !prev.completed }));
+    toast({
+      title: priorityTask.completed ? "Task reopened" : "Task completed!",
+      description: priorityTask.completed ? "Task marked as incomplete" : "Great job! Task marked as complete.",
+    });
+  }, [priorityTask.completed, toast]);
+
+  const handleEditTask = useCallback(() => {
+    setIsEditingTask(true);
+    setEditTaskTitle(priorityTask.title);
+    setEditTaskDescription(priorityTask.description);
+  }, [priorityTask.title, priorityTask.description]);
+
+  const handleSaveTask = useCallback(() => {
+    setPriorityTask(prev => ({
+      ...prev,
+      title: editTaskTitle,
+      description: editTaskDescription
+    }));
+    setIsEditingTask(false);
+    toast({
+      title: "Task updated",
+      description: "Priority task has been updated successfully.",
+    });
+  }, [editTaskTitle, editTaskDescription, toast]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditingTask(false);
+    setEditTaskTitle(priorityTask.title);
+    setEditTaskDescription(priorityTask.description);
+  }, [priorityTask.title, priorityTask.description]);
 
   return (
     <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
@@ -179,13 +228,88 @@ const SimpleDashboard = () => {
                   </div>
                 </div>
                 <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg text-white font-medium">Close Shelby County Schools Deal</span>
-                    <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-semibold shadow-lg hover:shadow-yellow-500/25 transition-all duration-200">
-                      Mark Complete
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-300/80 mt-2">Follow up on budget approval and finalize contract terms</p>
+                  {isEditingTask ? (
+                    // Edit mode
+                    <div className="space-y-3">
+                      <Input
+                        value={editTaskTitle}
+                        onChange={(e) => setEditTaskTitle(e.target.value)}
+                        className="bg-black/50 border-yellow-500/60 text-white placeholder-gray-400 focus:border-yellow-400"
+                        placeholder="Task title..."
+                      />
+                      <Textarea
+                        value={editTaskDescription}
+                        onChange={(e) => setEditTaskDescription(e.target.value)}
+                        className="bg-black/50 border-yellow-500/60 text-white placeholder-gray-400 focus:border-yellow-400 min-h-[60px]"
+                        placeholder="Task description..."
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={handleSaveTask}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-200"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Save
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={handleCancelEdit}
+                          className="border-gray-500/60 text-gray-300 hover:bg-gray-800/50 hover:border-gray-400"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    // View mode
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-medium transition-all duration-200 ${
+                            priorityTask.completed 
+                              ? "text-gray-400 line-through" 
+                              : "text-white"
+                          }`}>
+                            {priorityTask.title}
+                          </span>
+                          {priorityTask.completed && (
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={handleEditTask}
+                            className="text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300 p-2"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            onClick={handleMarkComplete}
+                            className={`font-semibold shadow-lg transition-all duration-200 ${
+                              priorityTask.completed
+                                ? "bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 text-white hover:shadow-gray-500/25"
+                                : "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black hover:shadow-yellow-500/25"
+                            }`}
+                          >
+                            {priorityTask.completed ? "Reopen" : "Mark Complete"}
+                          </Button>
+                        </div>
+                      </div>
+                      <p className={`text-sm mt-2 transition-all duration-200 ${
+                        priorityTask.completed 
+                          ? "text-gray-500 line-through" 
+                          : "text-gray-300/80"
+                      }`}>
+                        {priorityTask.description}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
