@@ -29,10 +29,12 @@ import { format } from "date-fns";
 
 const SimpleDashboard = () => {
   const { toast } = useToast();
-  const [lastUpdated, setLastUpdated] = useState(format(new Date(), 'HH:mm'));
+  const [lastUpdated, setLastUpdated] = useState(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Priority task state
   const [priorityTask, setPriorityTask] = useState({
-    title: "Close Western Kentucky University Deal",
+    title: "Close Shelby County Schools Deal",
     description: "Follow up on budget approval and finalize contract terms",
     completed: false
   });
@@ -65,30 +67,47 @@ const SimpleDashboard = () => {
   }, [motivationalQuotes.length]);
   
   // Fetch goals
-  const { data: goals = [], isLoading, refetch: refetchGoals } = useQuery({
+  const { 
+    data: goals = [], 
+    isLoading: isLoadingGoals,
+    refetch: refetchGoals
+  } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
   });
-
-  // Fetch prospects  
-  const { data: prospects = [], refetch: refetchProspects } = useQuery({
+  
+  // Fetch top prospects
+  const { 
+    data: prospects = [], 
+    isLoading: isLoadingProspects,
+    refetch: refetchProspects
+  } = useQuery<Prospect[]>({
     queryKey: ['/api/prospects/top/10'],
   });
-
+  
+  // Get top 3 most important goals
   const topThreeGoals = goals.slice(0, 3);
-
+  const isLoading = isLoadingGoals || isLoadingProspects;
+  
+  // Simplified refresh handler
   const handleRefreshData = useCallback(async () => {
     setIsRefreshing(true);
+    
     try {
-      await Promise.all([refetchGoals(), refetchProspects()]);
-      setLastUpdated(format(new Date(), 'HH:mm'));
+      await Promise.all([
+        refetchGoals(), 
+        refetchProspects(),
+      ]);
+      
+      setLastUpdated(format(new Date(), "MMMM d, yyyy 'at' h:mm a"));
+      
       toast({
         title: "Data refreshed",
-        description: "All dashboard data has been updated successfully.",
+        description: "Dashboard data has been updated successfully.",
       });
     } catch (error) {
       toast({
-        title: "Refresh failed",
-        description: "There was an error updating the data. Please try again.",
+        title: "Error refreshing data",
+        description: "There was a problem updating the dashboard data.",
         variant: "destructive",
       });
     } finally {
@@ -115,242 +134,141 @@ const SimpleDashboard = () => {
 
   const handleEditTask = useCallback(() => {
     setIsEditingTask(true);
-  }, []);
+    setEditTaskTitle(priorityTask.title);
+    setEditTaskDescription(priorityTask.description);
+  }, [priorityTask.title, priorityTask.description]);
 
   const handleSaveTask = useCallback(() => {
     setPriorityTask(prev => ({
       ...prev,
-      title: editTaskTitle.trim() || prev.title,
-      description: editTaskDescription.trim() || prev.description
+      title: editTaskTitle,
+      description: editTaskDescription
     }));
     setIsEditingTask(false);
     toast({
       title: "Task updated",
-      description: "Your priority task has been saved successfully.",
+      description: "Priority task has been updated successfully.",
     });
   }, [editTaskTitle, editTaskDescription, toast]);
 
   const handleCancelEdit = useCallback(() => {
-    setEditTaskTitle(priorityTask.title);
-    setEditTaskDescription(priorityTask.description);
     setIsEditingTask(false);
-  }, [priorityTask.title, priorityTask.description]);
-
-  // Update edit state when priority task changes
-  useEffect(() => {
     setEditTaskTitle(priorityTask.title);
     setEditTaskDescription(priorityTask.description);
   }, [priorityTask.title, priorityTask.description]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg" style={{
-      perspective: '1000px'
+    <div className="min-h-screen flex flex-col relative overflow-hidden text-slate-800" style={{
+      background: 'linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 25%, #ffffff 50%, #f8fcff 75%, #e6f3ff 100%)'
     }}>
+
       
-      {/* Electric Galaxy Background with 3D Effects */}
+      {/* Natural Light Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-black"></div>
-        
-        {/* Electric grid overlay with 3D effects */}
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: `
-            linear-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))',
-          transform: 'translateZ(10px)'
+        {/* Soft natural light rays */}
+        <div className="absolute inset-0" style={{
+          background: `
+            radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6) 0%, transparent 50%),
+            radial-gradient(circle at 80% 30%, rgba(173, 216, 230, 0.3) 0%, transparent 60%),
+            radial-gradient(circle at 60% 80%, rgba(240, 248, 255, 0.4) 0%, transparent 70%)
+          `
         }}></div>
         
-        {/* Glowing orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse" style={{
-          transform: 'translateZ(20px)',
-          boxShadow: '0 0 100px rgba(16, 185, 129, 0.2)'
-        }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ 
-          animationDelay: '2s',
-          transform: 'translateZ(15px)',
-          boxShadow: '0 0 80px rgba(59, 130, 246, 0.2)'
-        }}></div>
+        {/* Subtle floating particles like dust in natural light */}
+        <div className="absolute top-1/4 left-1/6 w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
+        <div className="absolute top-1/2 right-1/4 w-0.5 h-0.5 bg-blue-100/80 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/3 left-1/2 w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute top-3/4 right-1/2 w-0.5 h-0.5 bg-sky-100/60 rounded-full animate-pulse" style={{ animationDelay: '6s' }}></div>
         
-        {/* Electric lines */}
-        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-pulse" style={{
-          transform: 'translateZ(5px)',
-          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8))'
-        }}></div>
-        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse" style={{ 
-          animationDelay: '1s',
-          transform: 'translateZ(5px)',
-          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8))'
-        }}></div>
+        {/* Soft light diffusion areas */}
+        <div className="absolute top-1/4 right-1/3 w-40 h-40 bg-gradient-to-r from-white/15 to-blue-50/25 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-32 h-32 bg-gradient-to-r from-sky-50/20 to-white/15 rounded-full blur-3xl"></div>
         
-        {/* Corner glow effects */}
-        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-xl"></div>
-        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-blue-400/10 to-transparent rounded-full blur-xl"></div>
+        {/* Corner natural light effects */}
+        <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-white/25 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tl from-blue-50/25 to-transparent rounded-full blur-3xl"></div>
       </div>
       
       {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           
-          {/* 3D Header with Beautiful Lighting */}
+          {/* Header */}
           <motion.div 
             className="mb-8"
-            initial={{ opacity: 0, y: -20, rotateX: 15 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            style={{ 
-              transformStyle: 'preserve-3d',
-              filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
-            }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" style={{
-              transform: 'translateZ(20px)',
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              padding: '24px',
-              border: '1px solid rgba(16, 185, 129, 0.2)',
-              boxShadow: `
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 10px 30px rgba(0, 0, 0, 0.3),
-                0 0 60px rgba(16, 185, 129, 0.1)
-              `
-            }}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-center gap-4">
-                <div style={{
-                  transform: 'translateZ(15px)',
-                  filter: 'drop-shadow(0 8px 16px rgba(16, 185, 129, 0.4))'
-                }}>
-                  <img 
-                    src="/moneybot-logo.png" 
-                    alt="MoneyBot Logo" 
-                    className="h-14 w-14"
-                    style={{
-                      filter: 'drop-shadow(0 0 20px rgba(16, 185, 129, 0.6)) brightness(1.2)',
-                      animation: 'float 6s ease-in-out infinite'
-                    }}
-                  />
-                </div>
-                <div style={{ transform: 'translateZ(10px)' }}>
-                  <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.3))',
-                    textShadow: '0 0 30px rgba(16, 185, 129, 0.5)'
+                <img 
+                  src="/moneybot-logo.png" 
+                  alt="MoneyBot Logo" 
+                  className="h-12 w-12 drop-shadow-lg"
+                />
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent mb-2" style={{
+                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}>
                     MoneyBot Dashboard
                   </h1>
-                  <p className="text-gray-300 mb-3" style={{
-                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))'
-                  }}>Kentucky School Prospect Tracker</p>
-                  <div className="p-3 rounded-xl" style={{
-                    background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(251, 191, 36, 0.15) 100%)',
-                    border: '1px solid rgba(234, 179, 8, 0.3)',
-                    transform: 'translateZ(5px)',
-                    boxShadow: `
-                      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                      0 4px 12px rgba(234, 179, 8, 0.2),
-                      0 0 30px rgba(234, 179, 8, 0.1)
-                    `
+                  <p className="text-slate-600">Kentucky School Prospect Tracker</p>
+                  <div className="mt-2 p-3 rounded-xl" style={{
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
                   }}>
-                    <p className="font-semibold text-sm" style={{
-                      background: 'linear-gradient(135deg, #eab308 0%, #fbbf24 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      filter: 'drop-shadow(0 2px 4px rgba(234, 179, 8, 0.3))'
-                    }}>🎯 Mission: Become the #1 Global Financial Brand</p>
-                    <p className="text-xs italic mt-1" style={{
-                      color: 'rgba(251, 191, 36, 0.8)',
-                      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))'
-                    }}>"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
+                    <p className="text-amber-700 font-semibold text-sm">🎯 Mission: Become the #1 Global Financial Brand</p>
+                    <p className="text-slate-600 text-xs italic mt-1">"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4" style={{ transform: 'translateZ(10px)' }}>
-                <div className="rounded-xl p-3 hidden sm:block" style={{
-                  background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(251, 146, 60, 0.15) 100%)',
-                  border: '1px solid rgba(234, 179, 8, 0.3)',
-                  transform: 'translateZ(8px)',
-                  boxShadow: `
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 6px 18px rgba(234, 179, 8, 0.2),
-                    0 0 40px rgba(234, 179, 8, 0.1)
-                  `,
-                  backdropFilter: 'blur(10px)'
+              <div className="flex items-center gap-4">
+                <div className="p-3 hidden sm:block rounded-lg" style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
                 }}>
-                  <span className="text-sm" style={{
-                    background: 'linear-gradient(135deg, #eab308 0%, #f59e0b 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>🏆 Building Empire:</span>
-                  <span className="text-sm font-bold ml-1" style={{
-                    background: 'linear-gradient(135deg, #fbbf24 0%, #fb923c 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    filter: 'drop-shadow(0 2px 4px rgba(234, 179, 8, 0.3))'
-                  }}>Global Financial Dominance</span>
+                  <span className="text-sm text-amber-600">🏆 Building Empire:</span>
+                  <span className="text-sm font-bold text-amber-700 ml-1">Global Financial Dominance</span>
                 </div>
-                <div className="rounded-xl p-3 hidden md:block" style={{
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 58, 78, 0.6) 100%)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  transform: 'translateZ(8px)',
-                  boxShadow: `
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 6px 18px rgba(16, 185, 129, 0.2),
-                    0 0 40px rgba(16, 185, 129, 0.1)
-                  `,
-                  backdropFilter: 'blur(10px)'
+                <div className="p-3 hidden md:block rounded-lg" style={{
+                  background: 'rgba(255, 255, 255, 0.5)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
                 }}>
-                  <span className="text-sm" style={{
-                    color: '#10b981',
-                    filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))'
-                  }}>Last updated:</span>
-                  <span className="text-sm font-medium text-white ml-1" style={{
-                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))'
-                  }}>{lastUpdated}</span>
+                  <span className="text-sm text-emerald-600">Last updated:</span>
+                  <span className="text-sm font-medium text-slate-700 ml-1">{lastUpdated}</span>
                 </div>
-                <div style={{
-                  transform: 'translateZ(12px)',
-                  filter: 'drop-shadow(0 8px 16px rgba(16, 185, 129, 0.2))'
-                }}>
-                  <Button 
-                    variant="outline"
-                    onClick={handleRefreshData} 
-                    disabled={isRefreshing}
-                    className="rounded-xl border-2 transition-all duration-300 hover:scale-105"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
-                      borderColor: 'rgba(16, 185, 129, 0.6)',
-                      color: '#10b981',
-                      backdropFilter: 'blur(10px)',
-                      boxShadow: `
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                        0 4px 12px rgba(16, 185, 129, 0.2),
-                        0 0 30px rgba(16, 185, 129, 0.1)
-                      `
-                    }}
-                  >
-                    {isRefreshing ? (
-                      <>
-                        <RefreshCcw className="h-4 w-4 mr-1 animate-spin" style={{
-                          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))'
-                        }} />
-                        <span className="hidden sm:inline">Refreshing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCcw className="h-4 w-4 mr-1" style={{
-                          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))'
-                        }} />
-                        <span className="hidden sm:inline">Refresh</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline"
+                  onClick={handleRefreshData} 
+                  disabled={isRefreshing}
+                  className="text-emerald-700 hover:text-emerald-800 transition-all duration-200 border-0"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
+                  }}
+                >
+                  {isRefreshing ? (
+                    <>
+                      <RefreshCcw className="h-4 w-4 mr-1 animate-spin" />
+                      <span className="hidden sm:inline">Refreshing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCcw className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Refresh</span>
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -362,20 +280,29 @@ const SimpleDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="relative bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-yellow-400/80 transition-all duration-300">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(234,179,8,0.1)]"></div>
+            <Card className="relative overflow-hidden group transition-all duration-300" style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+            }}>
+              {/* Natural light reflection */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-blue-50/10 opacity-60"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
               
               <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="bg-yellow-500/30 p-3 rounded-full mr-4 shadow-lg shadow-yellow-500/20 ring-1 ring-yellow-500/30">
-                    <Star className="h-6 w-6 text-yellow-300 drop-shadow-lg filter" />
+                  <div className="p-3 rounded-full mr-4" style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
+                  }}>
+                    <Star className="h-6 w-6 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
-                    <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
-                    <p className="text-xs text-yellow-200/70 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
+                    <h2 className="text-xl font-bold text-slate-700">Most Important Thing Today</h2>
+                    <p className="text-sm text-slate-600">Your #1 priority task to focus on</p>
+                    <p className="text-xs text-amber-600 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
                   </div>
                   <img 
                     src="/moneybot-logo.png" 
@@ -383,7 +310,12 @@ const SimpleDashboard = () => {
                     className="h-8 w-8 opacity-60 drop-shadow-lg"
                   />
                 </div>
-                <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
+                <div className="rounded-lg p-4" style={{
+                  background: 'rgba(255, 255, 255, 0.5)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.05)'
+                }}>
                   {isEditingTask ? (
                     // Edit mode
                     <div className="space-y-3">
@@ -403,16 +335,16 @@ const SimpleDashboard = () => {
                         <Button 
                           size="sm" 
                           onClick={handleSaveTask}
-                          className="bg-green-600 hover:bg-green-700 text-white border-green-500"
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-200"
                         >
                           <Check className="h-4 w-4 mr-1" />
                           Save
                         </Button>
                         <Button 
                           size="sm" 
-                          variant="outline" 
+                          variant="outline"
                           onClick={handleCancelEdit}
-                          className="border-gray-500 text-gray-300 hover:bg-gray-800"
+                          className="border-gray-500/60 text-gray-300 hover:bg-gray-800/50 hover:border-gray-400"
                         >
                           <X className="h-4 w-4 mr-1" />
                           Cancel
@@ -421,34 +353,47 @@ const SimpleDashboard = () => {
                     </div>
                   ) : (
                     // View mode
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className={`text-lg font-semibold ${priorityTask.completed ? 'text-green-400 line-through' : 'text-white'}`}>
-                          {priorityTask.title}
-                        </h3>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg font-medium transition-all duration-200 ${
+                            priorityTask.completed 
+                              ? "text-gray-400 line-through" 
+                              : "text-white"
+                          }`}>
+                            {priorityTask.title}
+                          </span>
+                          {priorityTask.completed && (
+                            <CheckCircle className="h-5 w-5 text-green-400" />
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           <Button 
                             size="sm" 
-                            variant="outline" 
+                            variant="ghost"
                             onClick={handleEditTask}
-                            className="border-yellow-500/60 text-yellow-300 hover:bg-yellow-900/20"
+                            className="text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300 p-2"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
                             size="sm" 
                             onClick={handleMarkComplete}
-                            className={priorityTask.completed ? 
-                              "bg-gray-600 hover:bg-gray-700 text-white" : 
-                              "bg-green-600 hover:bg-green-700 text-white"
-                            }
+                            className={`font-semibold shadow-lg transition-all duration-200 ${
+                              priorityTask.completed
+                                ? "bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-400 hover:to-gray-500 text-white hover:shadow-gray-500/25"
+                                : "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black hover:shadow-yellow-500/25"
+                            }`}
                           >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            {priorityTask.completed ? 'Reopen' : 'Complete'}
+                            {priorityTask.completed ? "Reopen" : "Mark Complete"}
                           </Button>
                         </div>
                       </div>
-                      <p className={`text-sm ${priorityTask.completed ? 'text-gray-500 line-through' : 'text-gray-300'}`}>
+                      <p className={`text-sm mt-2 transition-all duration-200 ${
+                        priorityTask.completed 
+                          ? "text-gray-500 line-through" 
+                          : "text-gray-300/80"
+                      }`}>
                         {priorityTask.description}
                       </p>
                     </div>
@@ -458,82 +403,89 @@ const SimpleDashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Goals and Prospects Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Goals Section */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
-                    <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
-                    <p className="text-xs text-green-200/70 italic">"A goal is a dream with a deadline." - Napoleon Hill</p>
-                  </div>
-                  <img 
-                    src="/moneybot-logo.png" 
-                    alt="MoneyBot" 
-                    className="h-6 w-6 opacity-50 ml-3 drop-shadow-lg"
-                  />
+          {/* Three Main Goals Section */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
+                  <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
                 </div>
-                <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Goal
-                </Button>
+                <div>
+                  <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
+                  <p className="text-xs text-green-200/70 italic">"A goal is a dream with a deadline." - Napoleon Hill</p>
+                </div>
+                <img 
+                  src="/moneybot-logo.png" 
+                  alt="MoneyBot" 
+                  className="h-6 w-6 opacity-50 ml-3 drop-shadow-lg"
+                />
               </div>
-              
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((_, index) => (
-                    <div key={index} className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6 h-48 animate-pulse">
-                      <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-                      <div className="h-8 bg-gray-700 rounded w-3/4 mb-4"></div>
-                      <div className="h-2 bg-gray-700 rounded w-full mb-2"></div>
-                      <div className="h-4 bg-gray-700 rounded w-1/3"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : topThreeGoals.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {topThreeGoals.map((goal, index) => (
-                    <motion.div
-                      key={goal.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                    >
-                      <GoalProgressCard goal={goal} />
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
-                  <CardContent className="p-8 text-center">
-                    <Target className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-300 mb-2">No Goals Yet</h3>
-                    <p className="text-gray-500 mb-4">Start by creating your first goal to track your progress</p>
-                    <Button className="bg-green-600 hover:bg-green-700 text-white">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Goal
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+              <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Goal
+              </Button>
             </div>
+            
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[1, 2, 3].map((_, index) => (
+                  <div key={index} className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6 h-48 animate-pulse">
+                    <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+                    <div className="h-8 bg-gray-700 rounded w-3/4 mb-4"></div>
+                    <div className="h-2 bg-gray-700 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-1/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : topThreeGoals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {topThreeGoals.map((goal, index) => (
+                  <motion.div
+                    key={goal.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <GoalProgressCard goal={goal} />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <Card className="border-dashed border-gray-600 bg-gray-900/30">
+                <CardContent className="p-8 text-center">
+                  <Target className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-300 mb-2">No Goals Yet</h3>
+                  <p className="text-gray-500 mb-4">Add your first goal to start tracking your progress</p>
+                  <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Your First Goal
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </motion.div>
 
-            {/* Prospects Section */}
-            <div>
-              <TopProspects prospects={prospects} />
-            </div>
-          </div>
+          {/* Kentucky School Prospects Section */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.0 }}
+          >
+            <TopProspects prospects={prospects} maxItems={10} />
+          </motion.div>
 
           {/* Burn Rate Section */}
           <motion.div 
             className="mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 1.2 }}
           >
             <Card className="relative bg-gradient-to-br from-red-900/40 to-orange-900/40 border-red-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-red-400/80 transition-all duration-300">
               {/* Glow effect */}
@@ -557,35 +509,122 @@ const SimpleDashboard = () => {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-black/30 rounded-lg p-4 border border-red-500/40 backdrop-blur-sm text-center">
-                    <Users className="h-6 w-6 text-red-300 mx-auto mb-2 drop-shadow-lg" />
-                    <div className="text-2xl font-bold text-white drop-shadow-lg">$125k</div>
-                    <div className="text-sm text-red-200/80">Talent (50%)</div>
-                  </div>
-                  <div className="bg-black/30 rounded-lg p-4 border border-red-500/40 backdrop-blur-sm text-center">
-                    <Briefcase className="h-6 w-6 text-red-300 mx-auto mb-2 drop-shadow-lg" />
-                    <div className="text-2xl font-bold text-white drop-shadow-lg">$50k</div>
-                    <div className="text-sm text-red-200/80">Sales/Marketing (20%)</div>
-                  </div>
-                  <div className="bg-black/30 rounded-lg p-4 border border-red-500/40 backdrop-blur-sm text-center">
-                    <Scale className="h-6 w-6 text-red-300 mx-auto mb-2 drop-shadow-lg" />
-                    <div className="text-2xl font-bold text-white drop-shadow-lg">$37.5k</div>
-                    <div className="text-sm text-red-200/80">Legal (15%)</div>
-                  </div>
-                  <div className="bg-black/30 rounded-lg p-4 border border-red-500/40 backdrop-blur-sm text-center">
-                    <Code className="h-6 w-6 text-red-300 mx-auto mb-2 drop-shadow-lg" />
-                    <div className="text-2xl font-bold text-white drop-shadow-lg">$37.5k</div>
-                    <div className="text-sm text-red-200/80">Development (15%)</div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Talent - 50% */}
+                  <Card className="bg-black/40 border-blue-500/60 backdrop-blur-sm hover:border-blue-400/80 transition-all duration-200 group shadow-lg hover:shadow-blue-500/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-blue-500/30 p-2 rounded-full mr-3 shadow-md shadow-blue-500/20 ring-1 ring-blue-500/30">
+                          <Users className="h-5 w-5 text-blue-300 drop-shadow-lg" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Talent</h3>
+                          <p className="text-xs text-gray-300/80">50% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-300 drop-shadow-lg">$125k</div>
+                      <div className="text-sm text-gray-300/80">Staff salaries & benefits</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sales & Marketing - 20% */}
+                  <Card className="bg-black/40 border-green-500/60 backdrop-blur-sm hover:border-green-400/80 transition-all duration-200 group shadow-lg hover:shadow-green-500/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-green-500/30 p-2 rounded-full mr-3 shadow-md shadow-green-500/20 ring-1 ring-green-500/30">
+                          <Briefcase className="h-5 w-5 text-green-300 drop-shadow-lg" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Sales & Marketing</h3>
+                          <p className="text-xs text-gray-300/80">20% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-green-300 drop-shadow-lg">$50k</div>
+                      <div className="text-sm text-gray-300/80">Customer acquisition</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Legal Fees - 15% */}
+                  <Card className="bg-black/40 border-purple-500/60 backdrop-blur-sm hover:border-purple-400/80 transition-all duration-200 group shadow-lg hover:shadow-purple-500/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-purple-500/30 p-2 rounded-full mr-3 shadow-md shadow-purple-500/20 ring-1 ring-purple-500/30">
+                          <Scale className="h-5 w-5 text-purple-300 drop-shadow-lg" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Legal Fees</h3>
+                          <p className="text-xs text-gray-300/80">15% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-purple-300 drop-shadow-lg">$37.5k</div>
+                      <div className="text-sm text-gray-300/80">Compliance & contracts</div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Development - 15% */}
+                  <Card className="bg-black/40 border-yellow-500/60 backdrop-blur-sm hover:border-yellow-400/80 transition-all duration-200 group shadow-lg hover:shadow-yellow-500/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center mb-3">
+                        <div className="bg-yellow-500/30 p-2 rounded-full mr-3 shadow-md shadow-yellow-500/20 ring-1 ring-yellow-500/30">
+                          <Code className="h-5 w-5 text-yellow-300 drop-shadow-lg" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white">Development</h3>
+                          <p className="text-xs text-gray-300/80">15% of budget</p>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-yellow-300 drop-shadow-lg">$37.5k</div>
+                      <div className="text-sm text-gray-300/80">Product & infrastructure</div>
+                    </CardContent>
+                  </Card>
                 </div>
-                
-                <div className="mt-4 p-3 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-lg border border-green-500/40">
-                  <div className="flex items-center">
-                    <DollarSign className="h-5 w-5 text-green-400 mr-2 drop-shadow-lg" />
-                    <span className="text-green-300 font-semibold">Monthly Target: $20.8k</span>
-                    <span className="text-gray-400 ml-2">• Weekly: $5.2k • Daily: $685</span>
+
+                {/* Burn Rate Calculations */}
+                <div className="mt-6 pt-4 border-t border-gray-700">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <DollarSign className="h-5 w-5 text-red-400 mr-2" />
+                    Burn Rate Breakdown
+                  </h3>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {/* Daily */}
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Daily</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 365).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                    
+                    {/* Weekly */}
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Weekly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 52).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                    
+                    {/* Monthly */}
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Monthly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                    
+                    {/* Quarterly */}
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Quarterly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 4).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                    
+                    {/* Bi-Annual */}
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Bi-Annual</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 2).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                    
+                    {/* Yearly */}
+                    <div className="bg-black/40 border-red-500/60 rounded-lg p-3 backdrop-blur-sm ring-1 ring-red-500/30 shadow-lg shadow-red-500/20">
+                      <div className="text-xs text-red-300 mb-1">Yearly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">$250,000</div>
+                    </div>
                   </div>
+                  
+                  <p className="text-sm text-gray-400 mt-4">Based on $250k yearly burn rate - monitor expenses to maintain runway and optimize efficiency</p>
                 </div>
               </CardContent>
             </Card>
