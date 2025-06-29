@@ -171,11 +171,18 @@ const SimpleDashboard = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">
-                  2025 Goals Dashboard
-                </h1>
-                <p className="text-gray-300">Stay focused on what matters most</p>
+              <div className="flex items-center gap-4">
+                <img 
+                  src="/moneybot-logo.png" 
+                  alt="MoneyBot Logo" 
+                  className="h-12 w-12 drop-shadow-lg"
+                />
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">
+                    MoneyBot Dashboard
+                  </h1>
+                  <p className="text-gray-300">Kentucky School Prospect Tracker</p>
+                </div>
               </div>
               
               <div className="flex items-center gap-4">
@@ -222,10 +229,15 @@ const SimpleDashboard = () => {
                   <div className="bg-yellow-500/30 p-3 rounded-full mr-4 shadow-lg shadow-yellow-500/20 ring-1 ring-yellow-500/30">
                     <Star className="h-6 w-6 text-yellow-300 drop-shadow-lg filter" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
                     <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
                   </div>
+                  <img 
+                    src="/moneybot-logo.png" 
+                    alt="MoneyBot" 
+                    className="h-8 w-8 opacity-60 drop-shadow-lg"
+                  />
                 </div>
                 <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
                   {isEditingTask ? (
@@ -328,6 +340,11 @@ const SimpleDashboard = () => {
                   <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
                 </div>
                 <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
+                <img 
+                  src="/moneybot-logo.png" 
+                  alt="MoneyBot" 
+                  className="h-6 w-6 opacity-50 ml-3 drop-shadow-lg"
+                />
               </div>
               <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
                 <Plus className="h-4 w-4 mr-2" />
@@ -401,10 +418,15 @@ const SimpleDashboard = () => {
                   <div className="bg-red-500/30 p-3 rounded-full mr-4 shadow-lg shadow-red-500/20 ring-1 ring-red-500/30">
                     <TrendingDown className="h-6 w-6 text-red-300 drop-shadow-lg" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h2 className="text-xl font-bold text-red-300 drop-shadow-lg">Annual Burn Rate</h2>
                     <p className="text-sm text-gray-300/90">$250k yearly projection breakdown</p>
                   </div>
+                  <img 
+                    src="/moneybot-logo.png" 
+                    alt="MoneyBot" 
+                    className="h-8 w-8 opacity-60 drop-shadow-lg"
+                  />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
