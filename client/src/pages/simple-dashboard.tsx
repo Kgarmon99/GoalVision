@@ -59,11 +59,11 @@ const SimpleDashboard = () => {
   
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   
-  // Rotate quotes every 10 seconds
+  // Rotate quotes every 10 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuoteIndex(prev => (prev + 1) % motivationalQuotes.length);
-    }, 10000);
+    }, 600000); // 10 minutes = 600,000 milliseconds
     return () => clearInterval(interval);
   }, [motivationalQuotes.length]);
   
@@ -615,7 +615,7 @@ const SimpleDashboard = () => {
               className="h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: 10, ease: "linear" }}
+              transition={{ duration: 600, ease: "linear" }}
             />
           </div>
         </div>
