@@ -253,8 +253,8 @@ const SimpleDashboard = () => {
                     <TrendingDown className="h-6 w-6 text-red-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-red-400">Monthly Burn Rate</h2>
-                    <p className="text-sm text-gray-300">$250k monthly projection breakdown</p>
+                    <h2 className="text-xl font-bold text-red-400">Annual Burn Rate</h2>
+                    <p className="text-sm text-gray-300">$250k yearly projection breakdown</p>
                   </div>
                 </div>
                 
@@ -339,41 +339,41 @@ const SimpleDashboard = () => {
                     {/* Daily */}
                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                       <div className="text-xs text-gray-400 mb-1">Daily</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 30).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      <div className="text-lg font-bold text-red-400">${(250000 / 365).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Weekly */}
                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                       <div className="text-xs text-gray-400 mb-1">Weekly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 4.33).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      <div className="text-lg font-bold text-red-400">${(250000 / 52).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Monthly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-red-600/50">
-                      <div className="text-xs text-red-300 mb-1">Monthly</div>
-                      <div className="text-lg font-bold text-red-400">$250,000</div>
+                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                      <div className="text-xs text-gray-400 mb-1">Monthly</div>
+                      <div className="text-lg font-bold text-red-400">${(250000 / 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Quarterly */}
                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                       <div className="text-xs text-gray-400 mb-1">Quarterly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 * 3).toLocaleString()}</div>
+                      <div className="text-lg font-bold text-red-400">${(250000 / 4).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Bi-Annual */}
                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                       <div className="text-xs text-gray-400 mb-1">Bi-Annual</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 * 6).toLocaleString()}</div>
+                      <div className="text-lg font-bold text-red-400">${(250000 / 2).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Yearly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Yearly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 * 12).toLocaleString()}</div>
+                    <div className="bg-gray-800/50 rounded-lg p-3 border border-red-600/50">
+                      <div className="text-xs text-red-300 mb-1">Yearly</div>
+                      <div className="text-lg font-bold text-red-400">$250,000</div>
                     </div>
                   </div>
                   
-                  <p className="text-sm text-gray-400 mt-4">Based on $250k monthly burn rate - monitor expenses to maintain runway and optimize efficiency</p>
+                  <p className="text-sm text-gray-400 mt-4">Based on $250k yearly burn rate - monitor expenses to maintain runway and optimize efficiency</p>
                 </div>
               </CardContent>
             </Card>
