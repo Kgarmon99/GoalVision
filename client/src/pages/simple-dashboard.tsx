@@ -119,9 +119,17 @@ const SimpleDashboard = () => {
   // Priority task handlers
   const handleMarkComplete = useCallback(() => {
     setPriorityTask(prev => ({ ...prev, completed: !prev.completed }));
+    const celebrationQuotes = [
+      "🎉 Victory! Another step closer to empire!",
+      "🚀 Excellence achieved! The #1 global brand is within reach!",
+      "💎 Outstanding work! Champions finish what they start!",
+      "⚡ Momentum building! Success breeds success!",
+      "🏆 Another win! The world's best are defined by daily victories!"
+    ];
+    
     toast({
-      title: priorityTask.completed ? "Task reopened" : "Task completed!",
-      description: priorityTask.completed ? "Task marked as incomplete" : "Great job! Task marked as complete.",
+      title: priorityTask.completed ? "Task reopened" : celebrationQuotes[Math.floor(Math.random() * celebrationQuotes.length)],
+      description: priorityTask.completed ? "Task marked as incomplete" : "Keep this energy - greatness is a daily habit!",
     });
   }, [priorityTask.completed, toast]);
 
@@ -214,7 +222,11 @@ const SimpleDashboard = () => {
               </div>
               
               <div className="flex items-center gap-4">
-                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden sm:block">
+                <div className="bg-gradient-to-r from-yellow-900/60 to-orange-900/60 rounded-md shadow-sm border border-yellow-500/60 p-2 hidden sm:block">
+                  <span className="text-sm text-yellow-300">🏆 Building Empire:</span>
+                  <span className="text-sm font-bold text-yellow-200 ml-1">Global Financial Dominance</span>
+                </div>
+                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden md:block">
                   <span className="text-sm text-green-400">Last updated:</span>
                   <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
                 </div>
@@ -586,6 +598,29 @@ const SimpleDashboard = () => {
         </div>
       </main>
       
+      {/* Floating motivational quote */}
+      <motion.div 
+        className="fixed bottom-20 right-4 z-20 max-w-xs"
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        key={currentQuoteIndex}
+      >
+        <div className="bg-gradient-to-r from-purple-900/80 to-blue-900/80 backdrop-blur-sm border border-purple-500/40 rounded-lg p-3 shadow-lg">
+          <p className="text-xs text-purple-200 italic leading-relaxed">
+            "{motivationalQuotes[currentQuoteIndex]}"
+          </p>
+          <div className="mt-2 w-full bg-purple-800/50 rounded-full h-1">
+            <motion.div 
+              className="h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 10, ease: "linear" }}
+            />
+          </div>
+        </div>
+      </motion.div>
+
       {/* Bottom right watermark */}
       <div className="fixed bottom-4 right-4 z-20">
         <img 
