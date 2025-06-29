@@ -425,32 +425,7 @@ const Dashboard = () => {
     queryKey: ['/api/goals'],
   });
   
-  // Fetch growth metrics
-  const { 
-    data: growthMetrics = [], 
-    isLoading: isLoadingGrowthMetrics,
-    refetch: refetchGrowthMetrics
-  } = useQuery<Metric[]>({
-    queryKey: ['/api/metrics/category/growth'],
-  });
-  
-  // Fetch revenue metrics
-  const { 
-    data: revenueMetrics = [], 
-    isLoading: isLoadingRevenueMetrics,
-    refetch: refetchRevenueMetrics
-  } = useQuery<Metric[]>({
-    queryKey: ['/api/metrics/category/revenue'],
-  });
-  
-  // Fetch goal statuses
-  const { 
-    data: goalStatuses = [], 
-    isLoading: isLoadingGoalStatuses,
-    refetch: refetchGoalStatuses
-  } = useQuery<GoalStatus[]>({
-    queryKey: ['/api/goal-statuses'],
-  });
+  // Only keep essential data fetching
   
   // Fetch top prospects
   const { 
@@ -471,16 +446,13 @@ const Dashboard = () => {
     }
   }, [isLoadingGoals, goals]);
   
-  // Memoize handlers to avoid unnecessary re-renders
+  // Simplified refresh handler
   const handleRefreshData = useCallback(async () => {
     setIsRefreshing(true);
     
     try {
       await Promise.all([
         refetchGoals(), 
-        refetchGrowthMetrics(), 
-        refetchRevenueMetrics(), 
-        refetchGoalStatuses(),
         refetchProspects(),
       ]);
       
@@ -499,29 +471,14 @@ const Dashboard = () => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [
-    refetchGoals, refetchGrowthMetrics, refetchRevenueMetrics, 
-    refetchGoalStatuses, refetchProspects, toast
-  ]);
+  }, [refetchGoals, refetchProspects, toast]);
   
-  // Memoize computed values
-  const isLoading = useMemo(() => 
-    isLoadingGoals || 
-    isLoadingGrowthMetrics || 
-    isLoadingRevenueMetrics || 
-    isLoadingGoalStatuses || 
-    isLoadingProspects,
-    [
-      isLoadingGoals, isLoadingGrowthMetrics, isLoadingRevenueMetrics,
-      isLoadingGoalStatuses, isLoadingProspects
-    ]
-  );
+  // Simplified state management
+  const isLoading = isLoadingGoals || isLoadingProspects;
+  const hasAnyData = goals.length > 0;
   
-  // Check if there's any data to display - memoized to prevent recalculations
-  const hasAnyData = useMemo(() => 
-    goals.length > 0 || growthMetrics.length > 0 || revenueMetrics.length > 0,
-    [goals.length, growthMetrics.length, revenueMetrics.length]
-  );
+  // Get top 3 most important goals
+  const topThreeGoals = goals.slice(0, 3);
   
   // State for celebration effects
   const [showCelebration, setShowCelebration] = useState(false);
