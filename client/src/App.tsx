@@ -2,18 +2,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { GoalCelebrationProvider } from "./context/goal-celebration-context";
-import { EnhancedNav } from "@/components/layout/enhanced-nav";
 import { Suspense, lazy, useState, useEffect } from "react";
-import { Target, Globe, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-// Lazily load components for better performance
-const NotFound = lazy(() => import("@/pages/not-found"));
+// Simple MoneyBot dashboard only
 const Dashboard = lazy(() => import("@/pages/simple-dashboard"));
-const AddGoal = lazy(() => import("@/pages/add-goal"));
-const AddProgress = lazy(() => import("@/pages/add-progress"));
-const GoalVisualizations = lazy(() => import("@/pages/goal-visualizations"));
-const Metrics = lazy(() => import("@/pages/metrics"));
-const GlobalImpact = lazy(() => import("@/pages/global-impact"));
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
@@ -23,29 +16,8 @@ function App() {
     // Get the current path when the component mounts
     const path = window.location.pathname;
     
-    // Simple client-side routing
-    switch (path) {
-      case '/':
-        setCurrentPage(<Dashboard />);
-        break;
-      case '/add-goal':
-        setCurrentPage(<AddGoal />);
-        break;
-      case '/add-progress':
-        setCurrentPage(<AddProgress />);
-        break;
-      case '/goal-visualizations':
-        setCurrentPage(<GoalVisualizations />);
-        break;
-      case '/metrics':
-        setCurrentPage(<Metrics />);
-        break;
-      case '/global-impact':
-        setCurrentPage(<GlobalImpact />);
-        break;
-      default:
-        setCurrentPage(<NotFound />);
-    }
+    // Single MoneyBot dashboard page only
+    setCurrentPage(<Dashboard />);
     
     // Set very short loading time to hide blue/white screen but keep app functionality
     setTimeout(() => {
@@ -89,23 +61,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GoalCelebrationProvider>
-        {/* Navigation Header - Use Enhanced Nav */}
-        <EnhancedNav 
-          variant="enhanced"
-          brandingText="Goals"
-          brandingIcon={<Target className="h-5 w-5 text-primary" />}
-          showBranding={true}
-          fixed={true}
-          quickActions={[
-            { name: 'Add Goal', path: '/add-goal', icon: <Target size={16} />, description: 'Create a new goal' },
-            { name: 'Update Progress', path: '/add-progress', icon: <Target size={16} />, description: 'Update goal progress' }
-          ]}
-        />
-        
-        {/* Main Content with Suspense for lazy loading */}
-        <div className="pt-16 animate-in fade-in-50 duration-300">
+        {/* Main Content - Full screen MoneyBot dashboard */}
+        <div className="animate-in fade-in-50 duration-300">
           <Suspense fallback={
-            <div className="h-[calc(100vh-4rem)] w-full flex items-center justify-center">
+            <div className="h-screen w-full flex items-center justify-center">
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">Loading content...</p>
