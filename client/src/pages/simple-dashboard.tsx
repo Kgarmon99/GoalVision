@@ -292,13 +292,17 @@ const SimpleDashboard = () => {
               
               <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="bg-yellow-500/30 p-3 rounded-full mr-4 shadow-lg shadow-yellow-500/20 ring-1 ring-yellow-500/30">
-                    <Star className="h-6 w-6 text-yellow-300 drop-shadow-lg filter" />
+                  <div className="p-3 rounded-full mr-4" style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
+                  }}>
+                    <Star className="h-6 w-6 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
-                    <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
-                    <p className="text-xs text-yellow-200/70 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
+                    <h2 className="text-xl font-bold text-slate-700">Most Important Thing Today</h2>
+                    <p className="text-sm text-slate-600">Your #1 priority task to focus on</p>
+                    <p className="text-xs text-amber-600 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
                   </div>
                   <img 
                     src="/moneybot-logo.png" 
@@ -306,7 +310,12 @@ const SimpleDashboard = () => {
                     className="h-8 w-8 opacity-60 drop-shadow-lg"
                   />
                 </div>
-                <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
+                <div className="rounded-lg p-4" style={{
+                  background: 'rgba(255, 255, 255, 0.5)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.05)'
+                }}>
                   {isEditingTask ? (
                     // Edit mode
                     <div className="space-y-3">
