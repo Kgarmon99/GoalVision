@@ -158,7 +158,9 @@ const SimpleDashboard = () => {
   }, [priorityTask.title, priorityTask.description]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
+    <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg" style={{
+      perspective: '1000px'
+    }}>
 
       
       {/* Electric Galaxy Background */}
@@ -166,23 +168,38 @@ const SimpleDashboard = () => {
         {/* Base gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-black"></div>
         
-        {/* Electric grid overlay */}
+        {/* Electric grid overlay with 3D effects */}
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `
             linear-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px),
             linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1px, transparent 1px)
           `,
           backgroundSize: '40px 40px',
-          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))'
+          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))',
+          transform: 'translateZ(10px)'
         }}></div>
         
         {/* Glowing orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse" style={{
+          transform: 'translateZ(20px)',
+          boxShadow: '0 0 100px rgba(16, 185, 129, 0.2)'
+        }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ 
+          animationDelay: '2s',
+          transform: 'translateZ(15px)',
+          boxShadow: '0 0 80px rgba(59, 130, 246, 0.2)'
+        }}></div>
         
         {/* Electric lines */}
-        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-pulse"></div>
-        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-pulse" style={{
+          transform: 'translateZ(5px)',
+          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8))'
+        }}></div>
+        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse" style={{ 
+          animationDelay: '1s',
+          transform: 'translateZ(5px)',
+          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8))'
+        }}></div>
         
         {/* Corner glow effects */}
         <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-xl"></div>
@@ -193,74 +210,207 @@ const SimpleDashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           
-          {/* Header */}
+          {/* 3D Header with Beautiful Lighting */}
           <motion.div 
             className="mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: -20, rotateX: 15 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            style={{ 
+              transformStyle: 'preserve-3d',
+              filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3))'
+            }}
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" style={{
+              transform: 'translateZ(20px)',
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              padding: '24px',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              boxShadow: `
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 10px 30px rgba(0, 0, 0, 0.3),
+                0 0 60px rgba(16, 185, 129, 0.1)
+              `
+            }}>
               <div className="flex items-center gap-4">
-                <img 
-                  src="/moneybot-logo.png" 
-                  alt="MoneyBot Logo" 
-                  className="h-12 w-12 drop-shadow-lg"
-                />
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">
+                <div style={{
+                  transform: 'translateZ(15px)',
+                  filter: 'drop-shadow(0 8px 16px rgba(16, 185, 129, 0.4))'
+                }}>
+                  <img 
+                    src="/moneybot-logo.png" 
+                    alt="MoneyBot Logo" 
+                    className="h-14 w-14"
+                    style={{
+                      filter: 'drop-shadow(0 0 20px rgba(16, 185, 129, 0.6)) brightness(1.2)',
+                      animation: 'float 6s ease-in-out infinite'
+                    }}
+                  />
+                </div>
+                <div style={{ transform: 'translateZ(10px)' }}>
+                  <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #34d399 50%, #6ee7b7 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.3))',
+                    textShadow: '0 0 30px rgba(16, 185, 129, 0.5)'
+                  }}>
                     MoneyBot Dashboard
                   </h1>
-                  <p className="text-gray-300">Kentucky School Prospect Tracker</p>
-                  <div className="mt-2 p-2 bg-gradient-to-r from-yellow-900/40 to-orange-900/40 rounded-lg border border-yellow-500/30">
-                    <p className="text-yellow-300 font-semibold text-sm">🎯 Mission: Become the #1 Global Financial Brand</p>
-                    <p className="text-yellow-200/80 text-xs italic">"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
+                  <p className="text-gray-300 mb-3" style={{
+                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))'
+                  }}>Kentucky School Prospect Tracker</p>
+                  <div className="p-3 rounded-xl" style={{
+                    background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(251, 191, 36, 0.15) 100%)',
+                    border: '1px solid rgba(234, 179, 8, 0.3)',
+                    transform: 'translateZ(5px)',
+                    boxShadow: `
+                      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                      0 4px 12px rgba(234, 179, 8, 0.2),
+                      0 0 30px rgba(234, 179, 8, 0.1)
+                    `
+                  }}>
+                    <p className="font-semibold text-sm" style={{
+                      background: 'linear-gradient(135deg, #eab308 0%, #fbbf24 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      filter: 'drop-shadow(0 2px 4px rgba(234, 179, 8, 0.3))'
+                    }}>🎯 Mission: Become the #1 Global Financial Brand</p>
+                    <p className="text-xs italic mt-1" style={{
+                      color: 'rgba(251, 191, 36, 0.8)',
+                      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))'
+                    }}>"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-r from-yellow-900/60 to-orange-900/60 rounded-md shadow-sm border border-yellow-500/60 p-2 hidden sm:block">
-                  <span className="text-sm text-yellow-300">🏆 Building Empire:</span>
-                  <span className="text-sm font-bold text-yellow-200 ml-1">Global Financial Dominance</span>
+              <div className="flex items-center gap-4" style={{ transform: 'translateZ(10px)' }}>
+                <div className="rounded-xl p-3 hidden sm:block" style={{
+                  background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(251, 146, 60, 0.15) 100%)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  transform: 'translateZ(8px)',
+                  boxShadow: `
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                    0 6px 18px rgba(234, 179, 8, 0.2),
+                    0 0 40px rgba(234, 179, 8, 0.1)
+                  `,
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  <span className="text-sm" style={{
+                    background: 'linear-gradient(135deg, #eab308 0%, #f59e0b 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>🏆 Building Empire:</span>
+                  <span className="text-sm font-bold ml-1" style={{
+                    background: 'linear-gradient(135deg, #fbbf24 0%, #fb923c 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 2px 4px rgba(234, 179, 8, 0.3))'
+                  }}>Global Financial Dominance</span>
                 </div>
-                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden md:block">
-                  <span className="text-sm text-green-400">Last updated:</span>
-                  <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
+                <div className="rounded-xl p-3 hidden md:block" style={{
+                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 58, 78, 0.6) 100%)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  transform: 'translateZ(8px)',
+                  boxShadow: `
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                    0 6px 18px rgba(16, 185, 129, 0.2),
+                    0 0 40px rgba(16, 185, 129, 0.1)
+                  `,
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  <span className="text-sm" style={{
+                    color: '#10b981',
+                    filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))'
+                  }}>Last updated:</span>
+                  <span className="text-sm font-medium text-white ml-1" style={{
+                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))'
+                  }}>{lastUpdated}</span>
                 </div>
-                <Button 
-                  variant="outline"
-                  onClick={handleRefreshData} 
-                  disabled={isRefreshing}
-                  className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400"
-                >
-                  {isRefreshing ? (
-                    <>
-                      <RefreshCcw className="h-4 w-4 mr-1 animate-spin" />
-                      <span className="hidden sm:inline">Refreshing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCcw className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Refresh</span>
-                    </>
-                  )}
-                </Button>
+                <div style={{
+                  transform: 'translateZ(12px)',
+                  filter: 'drop-shadow(0 8px 16px rgba(16, 185, 129, 0.2))'
+                }}>
+                  <Button 
+                    variant="outline"
+                    onClick={handleRefreshData} 
+                    disabled={isRefreshing}
+                    className="rounded-xl border-2 transition-all duration-300 hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%)',
+                      borderColor: 'rgba(16, 185, 129, 0.6)',
+                      color: '#10b981',
+                      backdropFilter: 'blur(10px)',
+                      boxShadow: `
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                        0 4px 12px rgba(16, 185, 129, 0.2),
+                        0 0 30px rgba(16, 185, 129, 0.1)
+                      `
+                    }}
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <RefreshCcw className="h-4 w-4 mr-1 animate-spin" style={{
+                          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))'
+                        }} />
+                        <span className="hidden sm:inline">Refreshing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCcw className="h-4 w-4 mr-1" style={{
+                          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))'
+                        }} />
+                        <span className="hidden sm:inline">Refresh</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Priority Task Section */}
+          {/* 3D Priority Task Section with Beautiful Lighting */}
           <motion.div 
             className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 20, rotateX: 10 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            style={{ 
+              transformStyle: 'preserve-3d',
+              perspective: '1000px'
+            }}
           >
-            <Card className="relative bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-yellow-400/80 transition-all duration-300">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(234,179,8,0.1)]"></div>
+            <div className="relative group" style={{
+              transform: 'translateZ(30px) rotateX(2deg)',
+              filter: 'drop-shadow(0 25px 50px rgba(0, 0, 0, 0.4))',
+              animation: 'rotate3d 20s ease-in-out infinite'
+            }}>
+              <Card className="relative overflow-hidden transition-all duration-500 hover:scale-[1.02]" style={{
+                background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(251, 146, 60, 0.15) 100%)',
+                border: '2px solid rgba(234, 179, 8, 0.4)',
+                borderRadius: '24px',
+                backdropFilter: 'blur(20px)',
+                boxShadow: `
+                  inset 0 2px 0 rgba(255, 255, 255, 0.1),
+                  inset 0 -2px 0 rgba(0, 0, 0, 0.1),
+                  0 20px 40px rgba(234, 179, 8, 0.2),
+                  0 0 80px rgba(234, 179, 8, 0.1),
+                  0 0 200px rgba(234, 179, 8, 0.05)
+                `
+              }}>
+              {/* Multi-layered 3D glow effects */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{
+                background: 'radial-gradient(circle at 30% 30%, rgba(234, 179, 8, 0.3) 0%, rgba(251, 146, 60, 0.2) 40%, transparent 70%)',
+                borderRadius: '24px',
+                filter: 'blur(2px)'
+              }}></div>
+              <div className="absolute inset-0" style={{
+                background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, transparent 50%, rgba(251, 146, 60, 0.1) 100%)',
+                borderRadius: '24px',
+                boxShadow: 'inset 0 0 60px rgba(234, 179, 8, 0.1)'
+              }}></div>
               
               <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
