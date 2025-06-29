@@ -6,17 +6,11 @@ import {
   insertGoalSchema, 
   insertMetricSchema, 
   insertGoalStatusSchema, 
-  insertExecutionTaskSchema, 
-  insertWeekSchema,
-  insertSubtaskSchema,
   insertUserSchema,
   insertProspectSchema,
   goals,
   metrics,
   goalStatus,
-  executionTasks,
-  subtasks,
-  weeks,
   users,
   prospects
 } from "@shared/schema";
@@ -30,13 +24,13 @@ type CacheEntry<T> = {
   timestamp: number;
 };
 
-// Cache configuration constants
+// Cache configuration constants - Simplified for MoneyBot dashboard
 const CACHE_TTL = {
   GOALS: 5 * 60 * 1000,         // 5 minutes for goals data
   METRICS: 10 * 60 * 1000,      // 10 minutes for metrics (changes less frequently)
-  TASKS: 2 * 60 * 1000,         // 2 minutes for tasks (changes more frequently)
   USERS: 15 * 60 * 1000,        // 15 minutes for users data
   GOAL_STATUSES: 5 * 60 * 1000, // 5 minutes for goal statuses
+  PROSPECTS: 5 * 60 * 1000,     // 5 minutes for prospect data
   DEFAULT: 60 * 1000            // 1 minute default
 };
 
