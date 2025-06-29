@@ -8,7 +8,7 @@ import { Target, Globe, Loader2 } from "lucide-react";
 
 // Lazily load components for better performance
 const NotFound = lazy(() => import("@/pages/not-found"));
-const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Dashboard = lazy(() => import("@/pages/simple-dashboard"));
 const AddGoal = lazy(() => import("@/pages/add-goal"));
 const AddProgress = lazy(() => import("@/pages/add-progress"));
 const GoalVisualizations = lazy(() => import("@/pages/goal-visualizations"));
