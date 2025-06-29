@@ -158,35 +158,35 @@ const SimpleDashboard = () => {
   }, [priorityTask.title, priorityTask.description]);
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden text-slate-800" style={{
-      background: 'linear-gradient(135deg, #e8f4f8 0%, #f0f8ff 25%, #ffffff 50%, #f8fcff 75%, #e6f3ff 100%)'
-    }}>
+    <div className="min-h-screen flex flex-col bg-black text-white relative cosmic-bg">
 
       
-      {/* Natural Light Background */}
+      {/* Electric Galaxy Background */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        {/* Soft natural light rays */}
-        <div className="absolute inset-0" style={{
-          background: `
-            radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6) 0%, transparent 50%),
-            radial-gradient(circle at 80% 30%, rgba(173, 216, 230, 0.3) 0%, transparent 60%),
-            radial-gradient(circle at 60% 80%, rgba(240, 248, 255, 0.4) 0%, transparent 70%)
-          `
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-black"></div>
+        
+        {/* Electric grid overlay */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `
+            linear-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))'
         }}></div>
         
-        {/* Subtle floating particles like dust in natural light */}
-        <div className="absolute top-1/4 left-1/6 w-1 h-1 bg-white/60 rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
-        <div className="absolute top-1/2 right-1/4 w-0.5 h-0.5 bg-blue-100/80 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-1/3 left-1/2 w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '4s' }}></div>
-        <div className="absolute top-3/4 right-1/2 w-0.5 h-0.5 bg-sky-100/60 rounded-full animate-pulse" style={{ animationDelay: '6s' }}></div>
+        {/* Glowing orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         
-        {/* Soft light diffusion areas */}
-        <div className="absolute top-1/4 right-1/3 w-40 h-40 bg-gradient-to-r from-white/15 to-blue-50/25 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/4 w-32 h-32 bg-gradient-to-r from-sky-50/20 to-white/15 rounded-full blur-3xl"></div>
+        {/* Electric lines */}
+        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-pulse"></div>
+        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
         
-        {/* Corner natural light effects */}
-        <div className="absolute top-0 left-0 w-48 h-48 bg-gradient-to-br from-white/25 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-48 h-48 bg-gradient-to-tl from-blue-50/25 to-transparent rounded-full blur-3xl"></div>
+        {/* Corner glow effects */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-blue-400/10 to-transparent rounded-full blur-xl"></div>
       </div>
       
       {/* Main Content */}
@@ -208,54 +208,31 @@ const SimpleDashboard = () => {
                   className="h-12 w-12 drop-shadow-lg"
                 />
                 <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent mb-2" style={{
-                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-green-400 mb-2">
                     MoneyBot Dashboard
                   </h1>
-                  <p className="text-slate-600">Kentucky School Prospect Tracker</p>
-                  <div className="mt-2 p-3 rounded-xl" style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
-                  }}>
-                    <p className="text-amber-700 font-semibold text-sm">🎯 Mission: Become the #1 Global Financial Brand</p>
-                    <p className="text-slate-600 text-xs italic mt-1">"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
+                  <p className="text-gray-300">Kentucky School Prospect Tracker</p>
+                  <div className="mt-2 p-2 bg-gradient-to-r from-yellow-900/40 to-orange-900/40 rounded-lg border border-yellow-500/30">
+                    <p className="text-yellow-300 font-semibold text-sm">🎯 Mission: Become the #1 Global Financial Brand</p>
+                    <p className="text-yellow-200/80 text-xs italic">"Success is not final, failure is not fatal: it is the courage to continue that counts." - Churchill</p>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
-                <div className="p-3 hidden sm:block rounded-lg" style={{
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
-                }}>
-                  <span className="text-sm text-amber-600">🏆 Building Empire:</span>
-                  <span className="text-sm font-bold text-amber-700 ml-1">Global Financial Dominance</span>
+                <div className="bg-gradient-to-r from-yellow-900/60 to-orange-900/60 rounded-md shadow-sm border border-yellow-500/60 p-2 hidden sm:block">
+                  <span className="text-sm text-yellow-300">🏆 Building Empire:</span>
+                  <span className="text-sm font-bold text-yellow-200 ml-1">Global Financial Dominance</span>
                 </div>
-                <div className="p-3 hidden md:block rounded-lg" style={{
-                  background: 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
-                }}>
-                  <span className="text-sm text-emerald-600">Last updated:</span>
-                  <span className="text-sm font-medium text-slate-700 ml-1">{lastUpdated}</span>
+                <div className="bg-gray-900/80 rounded-md shadow-sm border border-green-600 p-2 hidden md:block">
+                  <span className="text-sm text-green-400">Last updated:</span>
+                  <span className="text-sm font-medium text-white ml-1">{lastUpdated}</span>
                 </div>
                 <Button 
                   variant="outline"
                   onClick={handleRefreshData} 
                   disabled={isRefreshing}
-                  className="text-emerald-700 hover:text-emerald-800 transition-all duration-200 border-0"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
-                  }}
+                  className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400"
                 >
                   {isRefreshing ? (
                     <>
@@ -280,29 +257,20 @@ const SimpleDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="relative overflow-hidden group transition-all duration-300" style={{
-              background: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
-            }}>
-              {/* Natural light reflection */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-blue-50/10 opacity-60"></div>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+            <Card className="relative bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-yellow-400/80 transition-all duration-300">
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(234,179,8,0.1)]"></div>
               
               <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="p-3 rounded-full mr-4" style={{
-                    background: 'rgba(255, 255, 255, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
-                  }}>
-                    <Star className="h-6 w-6 text-amber-600" />
+                  <div className="bg-yellow-500/30 p-3 rounded-full mr-4 shadow-lg shadow-yellow-500/20 ring-1 ring-yellow-500/30">
+                    <Star className="h-6 w-6 text-yellow-300 drop-shadow-lg filter" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-bold text-slate-700">Most Important Thing Today</h2>
-                    <p className="text-sm text-slate-600">Your #1 priority task to focus on</p>
-                    <p className="text-xs text-amber-600 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
+                    <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
+                    <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
+                    <p className="text-xs text-yellow-200/70 italic mt-1">"Focus is the ultimate leverage in business." - Gary Vaynerchuk</p>
                   </div>
                   <img 
                     src="/moneybot-logo.png" 
@@ -310,12 +278,7 @@ const SimpleDashboard = () => {
                     className="h-8 w-8 opacity-60 drop-shadow-lg"
                   />
                 </div>
-                <div className="rounded-lg p-4" style={{
-                  background: 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.05)'
-                }}>
+                <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
                   {isEditingTask ? (
                     // Edit mode
                     <div className="space-y-3">
