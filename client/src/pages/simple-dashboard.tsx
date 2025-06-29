@@ -619,8 +619,16 @@ const SimpleDashboard = () => {
         </div>
       </motion.div>
 
-      {/* Bottom right watermark */}
-      <div className="fixed bottom-4 right-4 z-20">
+      {/* Zapier Chatbot - Bottom right corner */}
+      <div className="fixed bottom-4 right-4 z-30">
+        <zapier-interfaces-chatbot-embed 
+          is-popup='true' 
+          chatbot-id='cmchygm7p000clrbfpib6vzhx'
+        ></zapier-interfaces-chatbot-embed>
+      </div>
+
+      {/* Bottom right watermark - moved up to avoid chatbot overlap */}
+      <div className="fixed bottom-20 right-4 z-20">
         <img 
           src="/moneybot-logo.png" 
           alt="MoneyBot" 
