@@ -82,17 +82,32 @@ const SimpleDashboard = () => {
       {/* SimpleNav for consistent navigation */}
       <SimpleNav />
       
-      {/* Galaxy Grid Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900"></div>
-        <div className="absolute inset-0 opacity-20" style={{
+      {/* Electric Galaxy Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-gray-950 to-black"></div>
+        
+        {/* Electric grid overlay */}
+        <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `
-            linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1px, transparent 1px)
           `,
-          backgroundSize: '50px 50px'
+          backgroundSize: '40px 40px',
+          filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))'
         }}></div>
-        <div className="absolute inset-0 bg-gradient-radial from-green-900/10 via-transparent to-transparent"></div>
+        
+        {/* Glowing orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Electric lines */}
+        <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-green-400/20 to-transparent animate-pulse"></div>
+        <div className="absolute top-1/3 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        {/* Corner glow effects */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-xl"></div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-blue-400/10 to-transparent rounded-full blur-xl"></div>
       </div>
       
       {/* Main Content */}
@@ -148,25 +163,29 @@ const SimpleDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-yellow-600/50 shadow-lg">
-              <CardContent className="p-6">
+            <Card className="relative bg-gradient-to-br from-yellow-900/40 to-orange-900/40 border-yellow-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-yellow-400/80 transition-all duration-300">
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(234,179,8,0.1)]"></div>
+              
+              <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-4">
-                  <div className="bg-yellow-500/20 p-3 rounded-full mr-4">
-                    <Star className="h-6 w-6 text-yellow-400" />
+                  <div className="bg-yellow-500/30 p-3 rounded-full mr-4 shadow-lg shadow-yellow-500/20 ring-1 ring-yellow-500/30">
+                    <Star className="h-6 w-6 text-yellow-300 drop-shadow-lg filter" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-yellow-400">Most Important Thing Today</h2>
-                    <p className="text-sm text-gray-300">Your #1 priority task to focus on</p>
+                    <h2 className="text-xl font-bold text-yellow-300 drop-shadow-lg">Most Important Thing Today</h2>
+                    <p className="text-sm text-gray-300/90">Your #1 priority task to focus on</p>
                   </div>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-4 border border-yellow-600/30">
+                <div className="bg-black/30 rounded-lg p-4 border border-yellow-500/40 backdrop-blur-sm shadow-inner">
                   <div className="flex items-center justify-between">
-                    <span className="text-lg text-white">Close Shelby County Schools Deal</span>
-                    <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-black">
+                    <span className="text-lg text-white font-medium">Close Shelby County Schools Deal</span>
+                    <Button size="sm" className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-semibold shadow-lg hover:shadow-yellow-500/25 transition-all duration-200">
                       Mark Complete
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-400 mt-2">Follow up on budget approval and finalize contract terms</p>
+                  <p className="text-sm text-gray-300/80 mt-2">Follow up on budget approval and finalize contract terms</p>
                 </div>
               </CardContent>
             </Card>
@@ -181,10 +200,12 @@ const SimpleDashboard = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
-                <Target className="h-6 w-6 text-green-400 mr-3" />
-                <h2 className="text-2xl font-bold text-green-400">Three Main Goals</h2>
+                <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
+                  <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
+                </div>
+                <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
               </div>
-              <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
+              <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Goal
               </Button>
@@ -246,84 +267,88 @@ const SimpleDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2 }}
           >
-            <Card className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border-red-600/50 shadow-lg">
-              <CardContent className="p-6">
+            <Card className="relative bg-gradient-to-br from-red-900/40 to-orange-900/40 border-red-500/60 shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-red-400/80 transition-all duration-300">
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(239,68,68,0.1)]"></div>
+              
+              <CardContent className="p-6 relative z-10">
                 <div className="flex items-center mb-6">
-                  <div className="bg-red-500/20 p-3 rounded-full mr-4">
-                    <TrendingDown className="h-6 w-6 text-red-400" />
+                  <div className="bg-red-500/30 p-3 rounded-full mr-4 shadow-lg shadow-red-500/20 ring-1 ring-red-500/30">
+                    <TrendingDown className="h-6 w-6 text-red-300 drop-shadow-lg" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-red-400">Annual Burn Rate</h2>
-                    <p className="text-sm text-gray-300">$250k yearly projection breakdown</p>
+                    <h2 className="text-xl font-bold text-red-300 drop-shadow-lg">Annual Burn Rate</h2>
+                    <p className="text-sm text-gray-300/90">$250k yearly projection breakdown</p>
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Talent - 50% */}
-                  <Card className="bg-gray-800/50 border-gray-700">
+                  <Card className="bg-black/40 border-blue-500/60 backdrop-blur-sm hover:border-blue-400/80 transition-all duration-200 group shadow-lg hover:shadow-blue-500/20">
                     <CardContent className="p-4">
                       <div className="flex items-center mb-3">
-                        <div className="bg-blue-500/20 p-2 rounded-full mr-3">
-                          <Users className="h-5 w-5 text-blue-400" />
+                        <div className="bg-blue-500/30 p-2 rounded-full mr-3 shadow-md shadow-blue-500/20 ring-1 ring-blue-500/30">
+                          <Users className="h-5 w-5 text-blue-300 drop-shadow-lg" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">Talent</h3>
-                          <p className="text-xs text-gray-400">50% of budget</p>
+                          <p className="text-xs text-gray-300/80">50% of budget</p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-blue-400">$125k</div>
-                      <div className="text-sm text-gray-400">Staff salaries & benefits</div>
+                      <div className="text-2xl font-bold text-blue-300 drop-shadow-lg">$125k</div>
+                      <div className="text-sm text-gray-300/80">Staff salaries & benefits</div>
                     </CardContent>
                   </Card>
 
                   {/* Sales & Marketing - 20% */}
-                  <Card className="bg-gray-800/50 border-gray-700">
+                  <Card className="bg-black/40 border-green-500/60 backdrop-blur-sm hover:border-green-400/80 transition-all duration-200 group shadow-lg hover:shadow-green-500/20">
                     <CardContent className="p-4">
                       <div className="flex items-center mb-3">
-                        <div className="bg-green-500/20 p-2 rounded-full mr-3">
-                          <Briefcase className="h-5 w-5 text-green-400" />
+                        <div className="bg-green-500/30 p-2 rounded-full mr-3 shadow-md shadow-green-500/20 ring-1 ring-green-500/30">
+                          <Briefcase className="h-5 w-5 text-green-300 drop-shadow-lg" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">Sales & Marketing</h3>
-                          <p className="text-xs text-gray-400">20% of budget</p>
+                          <p className="text-xs text-gray-300/80">20% of budget</p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-green-400">$50k</div>
-                      <div className="text-sm text-gray-400">Customer acquisition</div>
+                      <div className="text-2xl font-bold text-green-300 drop-shadow-lg">$50k</div>
+                      <div className="text-sm text-gray-300/80">Customer acquisition</div>
                     </CardContent>
                   </Card>
 
                   {/* Legal Fees - 15% */}
-                  <Card className="bg-gray-800/50 border-gray-700">
+                  <Card className="bg-black/40 border-purple-500/60 backdrop-blur-sm hover:border-purple-400/80 transition-all duration-200 group shadow-lg hover:shadow-purple-500/20">
                     <CardContent className="p-4">
                       <div className="flex items-center mb-3">
-                        <div className="bg-purple-500/20 p-2 rounded-full mr-3">
-                          <Scale className="h-5 w-5 text-purple-400" />
+                        <div className="bg-purple-500/30 p-2 rounded-full mr-3 shadow-md shadow-purple-500/20 ring-1 ring-purple-500/30">
+                          <Scale className="h-5 w-5 text-purple-300 drop-shadow-lg" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">Legal Fees</h3>
-                          <p className="text-xs text-gray-400">15% of budget</p>
+                          <p className="text-xs text-gray-300/80">15% of budget</p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-purple-400">$37.5k</div>
-                      <div className="text-sm text-gray-400">Compliance & contracts</div>
+                      <div className="text-2xl font-bold text-purple-300 drop-shadow-lg">$37.5k</div>
+                      <div className="text-sm text-gray-300/80">Compliance & contracts</div>
                     </CardContent>
                   </Card>
 
                   {/* Development - 15% */}
-                  <Card className="bg-gray-800/50 border-gray-700">
+                  <Card className="bg-black/40 border-yellow-500/60 backdrop-blur-sm hover:border-yellow-400/80 transition-all duration-200 group shadow-lg hover:shadow-yellow-500/20">
                     <CardContent className="p-4">
                       <div className="flex items-center mb-3">
-                        <div className="bg-yellow-500/20 p-2 rounded-full mr-3">
-                          <Code className="h-5 w-5 text-yellow-400" />
+                        <div className="bg-yellow-500/30 p-2 rounded-full mr-3 shadow-md shadow-yellow-500/20 ring-1 ring-yellow-500/30">
+                          <Code className="h-5 w-5 text-yellow-300 drop-shadow-lg" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">Development</h3>
-                          <p className="text-xs text-gray-400">15% of budget</p>
+                          <p className="text-xs text-gray-300/80">15% of budget</p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-yellow-400">$37.5k</div>
-                      <div className="text-sm text-gray-400">Product & infrastructure</div>
+                      <div className="text-2xl font-bold text-yellow-300 drop-shadow-lg">$37.5k</div>
+                      <div className="text-sm text-gray-300/80">Product & infrastructure</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -337,39 +362,39 @@ const SimpleDashboard = () => {
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {/* Daily */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Daily</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 365).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Daily</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 365).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Weekly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Weekly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 52).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Weekly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 52).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Monthly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Monthly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Monthly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 12).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Quarterly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Quarterly</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 4).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Quarterly</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 4).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Bi-Annual */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                      <div className="text-xs text-gray-400 mb-1">Bi-Annual</div>
-                      <div className="text-lg font-bold text-red-400">${(250000 / 2).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div className="bg-black/40 border-gray-500/60 rounded-lg p-3 backdrop-blur-sm hover:border-gray-400/80 transition-all duration-200 shadow-md hover:shadow-gray-500/10">
+                      <div className="text-xs text-gray-300/80 mb-1">Bi-Annual</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">${(250000 / 2).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
                     
                     {/* Yearly */}
-                    <div className="bg-gray-800/50 rounded-lg p-3 border border-red-600/50">
+                    <div className="bg-black/40 border-red-500/60 rounded-lg p-3 backdrop-blur-sm ring-1 ring-red-500/30 shadow-lg shadow-red-500/20">
                       <div className="text-xs text-red-300 mb-1">Yearly</div>
-                      <div className="text-lg font-bold text-red-400">$250,000</div>
+                      <div className="text-lg font-bold text-red-300 drop-shadow-lg">$250,000</div>
                     </div>
                   </div>
                   
