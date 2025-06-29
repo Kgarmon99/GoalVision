@@ -879,7 +879,7 @@ const Dashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <TopProspects prospects={prospects} maxItems={4} />
+                  <TopProspects prospects={prospects} maxItems={10} />
                 )}
               </div>
               
