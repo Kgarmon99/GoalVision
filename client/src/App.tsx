@@ -5,8 +5,9 @@ import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 import { Suspense, lazy, useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-// Simple MoneyBot dashboard only
+// Dashboard pages
 const Dashboard = lazy(() => import("@/pages/simple-dashboard"));
+const OodaDashboard = lazy(() => import("@/pages/ooda-dashboard"));
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
@@ -16,8 +17,12 @@ function App() {
     // Get the current path when the component mounts
     const path = window.location.pathname;
     
-    // Single MoneyBot dashboard page only
-    setCurrentPage(<Dashboard />);
+    // Route to appropriate page
+    if (path === '/ooda' || path === '/ooda-dashboard') {
+      setCurrentPage(<OodaDashboard />);
+    } else {
+      setCurrentPage(<Dashboard />);
+    }
     
     // Set very short loading time to hide blue/white screen but keep app functionality
     setTimeout(() => {
@@ -29,6 +34,21 @@ function App() {
         emergencyNav.style.display = 'none';
       }
     }, 200); // Short delay to maintain responsiveness
+  }, []);
+
+  // Handle route changes
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/ooda' || path === '/ooda-dashboard') {
+        setCurrentPage(<OodaDashboard />);
+      } else {
+        setCurrentPage(<Dashboard />);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // If page is still technically "loading", show skeleton UI instead of white screen

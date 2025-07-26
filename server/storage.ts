@@ -22,7 +22,16 @@ import {
   type Prospect,
   type InsertProspect,
   type Subtask,
-  type InsertSubtask
+  type InsertSubtask,
+  oodaLoops,
+  type OodaLoop,
+  type InsertOodaLoop,
+  oodaOpportunities,
+  type OodaOpportunity,
+  type InsertOodaOpportunity,
+  dailyMoves,
+  type DailyMove,
+  type InsertDailyMove
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -86,6 +95,23 @@ export interface IStorage {
   createProspect(prospect: InsertProspect): Promise<Prospect>;
   updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined>;
   deleteProspect(id: number): Promise<boolean>;
+  
+  // OODA Loop methods
+  getTodayOodaLoop(): Promise<OodaLoop | undefined>;
+  createOodaLoop(loop: InsertOodaLoop): Promise<OodaLoop>;
+  updateOodaLoop(id: number, loop: Partial<InsertOodaLoop>): Promise<OodaLoop | undefined>;
+  getOodaStreak(): Promise<number>;
+  
+  // OODA Opportunities methods
+  getTopOodaOpportunities(limit: number): Promise<OodaOpportunity[]>;
+  createOodaOpportunity(opportunity: InsertOodaOpportunity): Promise<OodaOpportunity>;
+  updateOodaOpportunity(id: number, opportunity: Partial<InsertOodaOpportunity>): Promise<OodaOpportunity | undefined>;
+  
+  // Daily Moves methods
+  getTodayDailyMove(): Promise<DailyMove | undefined>;
+  createDailyMove(move: InsertDailyMove): Promise<DailyMove>;
+  updateDailyMove(id: number, move: Partial<InsertDailyMove>): Promise<DailyMove | undefined>;
+  getRecentMoves(limit: number): Promise<DailyMove[]>;
 }
 
 export class MemStorage implements IStorage {

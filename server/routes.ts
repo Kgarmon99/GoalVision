@@ -12,9 +12,12 @@ import {
   metrics,
   goalStatus,
   users,
-  prospects
+  prospects,
+  oodaOpportunities,
+  dailyMoves
 } from "@shared/schema";
 import { db } from "./db";
+import { desc, eq } from "drizzle-orm";
 import path from "path";
 
 // Simple server-side cache implementation to reduce database load
@@ -555,6 +558,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OODA Loop routes
+  app.get("/api/ooda/opportunities/top/:limit", async (req, res) => {
+    try {
+      const limit = parseInt(req.params.limit) || 3;
+      const cacheKey = `ooda:opportunities:top:${limit}`;
+      
+      let opportunities = serverCache.get<any[]>(cacheKey);
+      if (!opportunities) {
+        opportunities = await db.select().from(oodaOpportunities)
+          .orderBy(desc(oodaOpportunities.priority))
+          .limit(limit);
+        serverCache.set(cacheKey, opportunities, CACHE_TTL.DEFAULT);
+      }
+      
+      res.json(opportunities);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching top OODA opportunities" });
+    }
+  });
+  
+  app.get("/api/ooda/daily-move/today", async (req, res) => {
+    try {
+      const cacheKey = "ooda:daily-move:today";
+      
+      let todayMove = serverCache.get<any>(cacheKey);
+      if (!todayMove) {
+        const result = await db.select().from(dailyMoves)
+          .where(eq(dailyMoves.date, new Date().toISOString().split('T')[0]))
+          .limit(1);
+        todayMove = result[0] || null;
+        serverCache.set(cacheKey, todayMove, CACHE_TTL.DEFAULT);
+      }
+      
+      res.json(todayMove);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching today's daily move" });
+    }
+  });
+  
+  app.get("/api/ooda/streak", async (req, res) => {
+    try {
+      const cacheKey = "ooda:streak";
+      
+      let streak = serverCache.get<number>(cacheKey);
+      if (streak === null) {
+        // Calculate streak by counting consecutive days with daily moves
+        const recentMoves = await db.select().from(dailyMoves)
+          .orderBy(desc(dailyMoves.date))
+          .limit(30);
+        
+        streak = 0;
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+          const checkDate = new Date(today);
+          checkDate.setDate(today.getDate() - i);
+          const dateStr = checkDate.toISOString().split('T')[0];
+          
+          const hasMove = recentMoves.some(move => move.date === dateStr);
+          if (hasMove) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        
+        serverCache.set(cacheKey, streak, CACHE_TTL.DEFAULT);
+      }
+      
+      res.json({ streak });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching OODA streak" });
+    }
+  });
+  
   // Serve MoneyBot logo
   app.get("/moneybot-logo.png", (req, res) => {
     res.sendFile(path.resolve("public/moneybot-logo.png"));

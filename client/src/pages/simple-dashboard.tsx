@@ -230,6 +230,17 @@ const SimpleDashboard = () => {
                 </div>
                 <Button 
                   variant="outline"
+                  onClick={() => {
+                    window.history.pushState({}, '', '/ooda');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="border-orange-500 text-orange-400 hover:bg-gray-800 hover:border-orange-400"
+                >
+                  <Target className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">OODA Loop</span>
+                </Button>
+                <Button 
+                  variant="outline"
                   onClick={handleRefreshData} 
                   disabled={isRefreshing}
                   className="border-green-500 text-green-400 hover:bg-gray-800 hover:border-green-400"

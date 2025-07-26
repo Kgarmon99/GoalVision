@@ -231,4 +231,92 @@ export const insertProspectSchema = createInsertSchema(prospects).pick({
 export type InsertProspect = z.infer<typeof insertProspectSchema>;
 export type Prospect = typeof prospects.$inferSelect;
 
+// OODA Loop system for Daily Revenue Ritual
+export const oodaLoops = pgTable("ooda_loops", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  observeNotes: text("observe_notes").default(""), // What was observed today
+  orientStrategy: text("orient_strategy").default(""), // Strategic direction chosen
+  decideMoves: text("decide_moves").default(""), // Array of planned moves as JSON
+  actResult: text("act_result").default(""), // What was actually executed
+  revenueImpact: real("revenue_impact").default(0), // Dollar amount generated/expected
+  streakCount: integer("streak_count").default(0), // Current streak
+  completed: boolean("completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOodaLoopSchema = createInsertSchema(oodaLoops).pick({
+  date: true,
+  observeNotes: true,
+  orientStrategy: true,
+  decideMoves: true,
+  actResult: true,
+  revenueImpact: true,
+  streakCount: true,
+  completed: true,
+});
+
+export type InsertOodaLoop = z.infer<typeof insertOodaLoopSchema>;
+export type OodaLoop = typeof oodaLoops.$inferSelect;
+
+// Daily revenue opportunities
+export const oodaOpportunities = pgTable("ooda_opportunities", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // "cold-outreach", "partnerships", "content", "conversion", "retention", "product"
+  estimatedRevenue: real("estimated_revenue").default(0),
+  effortLevel: integer("effort_level").default(1), // 1-5 scale
+  timeRequired: integer("time_required").default(30), // in minutes
+  priority: integer("priority").default(0), // calculated score
+  isCompleted: boolean("is_completed").default(false),
+  dateCompleted: date("date_completed"),
+  actualRevenue: real("actual_revenue").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOodaOpportunitySchema = createInsertSchema(oodaOpportunities).pick({
+  title: true,
+  description: true,
+  category: true,
+  estimatedRevenue: true,
+  effortLevel: true,
+  timeRequired: true,
+  priority: true,
+  isCompleted: true,
+  dateCompleted: true,
+  actualRevenue: true,
+});
+
+export type InsertOodaOpportunity = z.infer<typeof insertOodaOpportunitySchema>;
+export type OodaOpportunity = typeof oodaOpportunities.$inferSelect;
+
+// Daily moves tracking
+export const dailyMoves = pgTable("daily_moves", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  move: text("move").notNull(), // The specific action taken
+  category: text("category").notNull(),
+  outcome: text("outcome").default(""), // Results/response
+  revenueGenerated: real("revenue_generated").default(0),
+  signalStrength: integer("signal_strength").default(1), // 1-5 rating
+  lessons: text("lessons").default(""), // What was learned
+  nextAction: text("next_action").default(""), // Follow-up needed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDailyMoveSchema = createInsertSchema(dailyMoves).pick({
+  date: true,
+  move: true,
+  category: true,
+  outcome: true,
+  revenueGenerated: true,
+  signalStrength: true,
+  lessons: true,
+  nextAction: true,
+});
+
+export type InsertDailyMove = z.infer<typeof insertDailyMoveSchema>;
+export type DailyMove = typeof dailyMoves.$inferSelect;
+
 
