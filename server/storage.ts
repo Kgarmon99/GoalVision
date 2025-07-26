@@ -22,7 +22,16 @@ import {
   type Prospect,
   type InsertProspect,
   type Subtask,
-  type InsertSubtask
+  type InsertSubtask,
+  oodaOpportunities,
+  type OodaOpportunity,
+  type InsertOodaOpportunity,
+  oodaDailyMoves,
+  type OodaDailyMove,
+  type InsertOodaDailyMove,
+  oodaStreaks,
+  type OodaStreak,
+  type InsertOodaStreak
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -86,6 +95,26 @@ export interface IStorage {
   createProspect(prospect: InsertProspect): Promise<Prospect>;
   updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined>;
   deleteProspect(id: number): Promise<boolean>;
+  
+  // OODA Revenue Engine methods
+  getAllOodaOpportunities(): Promise<OodaOpportunity[]>;
+  getOodaOpportunity(id: number): Promise<OodaOpportunity | undefined>;
+  getTopOodaOpportunities(limit: number): Promise<OodaOpportunity[]>;
+  createOodaOpportunity(opportunity: InsertOodaOpportunity): Promise<OodaOpportunity>;
+  updateOodaOpportunity(id: number, opportunity: Partial<InsertOodaOpportunity>): Promise<OodaOpportunity | undefined>;
+  deleteOodaOpportunity(id: number): Promise<boolean>;
+  
+  getAllOodaDailyMoves(): Promise<OodaDailyMove[]>;
+  getOodaDailyMove(id: number): Promise<OodaDailyMove | undefined>;
+  getTodaysDailyMove(): Promise<OodaDailyMove | undefined>;
+  getDailyMovesByDate(date: string): Promise<OodaDailyMove[]>;
+  createOodaDailyMove(move: InsertOodaDailyMove): Promise<OodaDailyMove>;
+  updateOodaDailyMove(id: number, move: Partial<InsertOodaDailyMove>): Promise<OodaDailyMove | undefined>;
+  deleteOodaDailyMove(id: number): Promise<boolean>;
+  
+  getOodaStreak(): Promise<OodaStreak | undefined>;
+  updateOodaStreak(streak: Partial<InsertOodaStreak>): Promise<OodaStreak | undefined>;
+  createOodaStreak(streak: InsertOodaStreak): Promise<OodaStreak>;
 }
 
 export class MemStorage implements IStorage {
@@ -97,6 +126,9 @@ export class MemStorage implements IStorage {
   private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
   private prospectsData: Map<number, Prospect>;
+  private oodaOpportunitiesData: Map<number, OodaOpportunity>;
+  private oodaDailyMovesData: Map<number, OodaDailyMove>;
+  private oodaStreakData: OodaStreak | null;
 
   
   private currentUserId: number;
@@ -107,6 +139,8 @@ export class MemStorage implements IStorage {
   private currentSubtaskId: number;
   private currentWeekId: number;
   private currentProspectId: number;
+  private currentOodaOpportunityId: number;
+  private currentOodaDailyMoveId: number;
 
 
   constructor() {
@@ -118,6 +152,9 @@ export class MemStorage implements IStorage {
     this.subtasksData = new Map();
     this.weeksData = new Map();
     this.prospectsData = new Map();
+    this.oodaOpportunitiesData = new Map();
+    this.oodaDailyMovesData = new Map();
+    this.oodaStreakData = null;
 
     
     this.currentUserId = 1;
@@ -128,6 +165,8 @@ export class MemStorage implements IStorage {
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
     this.currentProspectId = 1;
+    this.currentOodaOpportunityId = 1;
+    this.currentOodaDailyMoveId = 1;
 
     
     // Call initializeData as async function
@@ -908,6 +947,108 @@ export class DatabaseStorage implements IStorage {
     return !!result;
   }
   
+  // OODA Revenue Engine methods
+  async getAllOodaOpportunities(): Promise<OodaOpportunity[]> {
+    return await db.select().from(oodaOpportunities);
+  }
+  
+  async getOodaOpportunity(id: number): Promise<OodaOpportunity | undefined> {
+    const [opportunity] = await db.select().from(oodaOpportunities).where(eq(oodaOpportunities.id, id));
+    return opportunity;
+  }
+  
+  async getTopOodaOpportunities(limit: number): Promise<OodaOpportunity[]> {
+    const allOpportunities = await db.select().from(oodaOpportunities);
+    return allOpportunities
+      .sort((a, b) => {
+        // Sort by ROI score first, then effort/impact ratio
+        if (a.roiScore !== b.roiScore) {
+          return b.roiScore - a.roiScore;
+        }
+        return b.effortImpactRatio - a.effortImpactRatio;
+      })
+      .slice(0, limit);
+  }
+  
+  async createOodaOpportunity(insertOpportunity: InsertOodaOpportunity): Promise<OodaOpportunity> {
+    const [opportunity] = await db.insert(oodaOpportunities).values(insertOpportunity).returning();
+    return opportunity;
+  }
+  
+  async updateOodaOpportunity(id: number, opportunity: Partial<InsertOodaOpportunity>): Promise<OodaOpportunity | undefined> {
+    const [updatedOpportunity] = await db
+      .update(oodaOpportunities)
+      .set(opportunity)
+      .where(eq(oodaOpportunities.id, id))
+      .returning();
+    return updatedOpportunity;
+  }
+  
+  async deleteOodaOpportunity(id: number): Promise<boolean> {
+    const result = await db.delete(oodaOpportunities).where(eq(oodaOpportunities.id, id));
+    return !!result;
+  }
+  
+  async getAllOodaDailyMoves(): Promise<OodaDailyMove[]> {
+    return await db.select().from(oodaDailyMoves);
+  }
+  
+  async getOodaDailyMove(id: number): Promise<OodaDailyMove | undefined> {
+    const [move] = await db.select().from(oodaDailyMoves).where(eq(oodaDailyMoves.id, id));
+    return move;
+  }
+  
+  async getTodaysDailyMove(): Promise<OodaDailyMove | undefined> {
+    const today = new Date().toISOString().split('T')[0];
+    const [move] = await db.select().from(oodaDailyMoves).where(eq(oodaDailyMoves.date, today));
+    return move;
+  }
+  
+  async getDailyMovesByDate(date: string): Promise<OodaDailyMove[]> {
+    return await db.select().from(oodaDailyMoves).where(eq(oodaDailyMoves.date, date));
+  }
+  
+  async createOodaDailyMove(insertMove: InsertOodaDailyMove): Promise<OodaDailyMove> {
+    const [move] = await db.insert(oodaDailyMoves).values(insertMove).returning();
+    return move;
+  }
+  
+  async updateOodaDailyMove(id: number, move: Partial<InsertOodaDailyMove>): Promise<OodaDailyMove | undefined> {
+    const [updatedMove] = await db
+      .update(oodaDailyMoves)
+      .set(move)
+      .where(eq(oodaDailyMoves.id, id))
+      .returning();
+    return updatedMove;
+  }
+  
+  async deleteOodaDailyMove(id: number): Promise<boolean> {
+    const result = await db.delete(oodaDailyMoves).where(eq(oodaDailyMoves.id, id));
+    return !!result;
+  }
+  
+  async getOodaStreak(): Promise<OodaStreak | undefined> {
+    const [streak] = await db.select().from(oodaStreaks);
+    return streak;
+  }
+  
+  async updateOodaStreak(streak: Partial<InsertOodaStreak>): Promise<OodaStreak | undefined> {
+    const [existingStreak] = await db.select().from(oodaStreaks);
+    if (existingStreak) {
+      const [updatedStreak] = await db
+        .update(oodaStreaks)
+        .set(streak)
+        .where(eq(oodaStreaks.id, existingStreak.id))
+        .returning();
+      return updatedStreak;
+    }
+    return undefined;
+  }
+  
+  async createOodaStreak(insertStreak: InsertOodaStreak): Promise<OodaStreak> {
+    const [streak] = await db.insert(oodaStreaks).values(insertStreak).returning();
+    return streak;
+  }
 
 
   // Initialize database with sample data
@@ -1121,6 +1262,101 @@ export class DatabaseStorage implements IStorage {
       ];
       
       await Promise.all(sampleProspects.map(prospect => this.createProspect(prospect)));
+      
+      // Initialize OODA Revenue Engine data
+      const sampleOodaOpportunities: InsertOodaOpportunity[] = [
+        {
+          title: "Close Shelby County Schools Deal",
+          description: "Finalize $250K contract with 1,200+ student district. Key decision maker: Principal Sarah Johnson",
+          category: "Revenue Now",
+          roiScore: 9.5,
+          effortImpactRatio: 8.2,
+          urgencyLevel: "high",
+          leverageType: "Asymmetric",
+          stage: "oriented",
+          potentialRevenue: 250000,
+          deadline: "2024-08-15"
+        },
+        {
+          title: "Launch TikTok Upsell Campaign",
+          description: "Create viral content driving free→premium conversion with 90-sec videos targeting parents",
+          category: "Revenue Now",
+          roiScore: 8.7,
+          effortImpactRatio: 9.1,
+          urgencyLevel: "medium",
+          leverageType: "AI",
+          stage: "observed",
+          potentialRevenue: 150000,
+          deadline: "2024-07-30"
+        },
+        {
+          title: "Build AI-Powered Partnership Pipeline",
+          description: "Automate co-brand pitch sequences using Loom + email bots for EdTech partnerships",
+          category: "Compounders",
+          roiScore: 8.9,
+          effortImpactRatio: 7.8,
+          urgencyLevel: "medium",
+          leverageType: "Automation",
+          stage: "observed",
+          potentialRevenue: 500000,
+          deadline: "2024-09-15"
+        },
+        {
+          title: "24-Hour Flash Sale Experiment",
+          description: "Test countdown urgency CTA with bonus credits for existing customers",
+          category: "Revenue Now",
+          roiScore: 7.5,
+          effortImpactRatio: 8.9,
+          urgencyLevel: "low",
+          leverageType: "Assets",
+          stage: "observed",
+          potentialRevenue: 75000,
+          deadline: "2024-07-20"
+        },
+        {
+          title: "AI Personalized Cold Outreach",
+          description: "GPT-powered DM sequence targeting 100 top-of-funnel K-12 decision makers",
+          category: "Revenue Later",
+          roiScore: 8.2,
+          effortImpactRatio: 7.3,
+          urgencyLevel: "medium",
+          leverageType: "AI",
+          stage: "observed",
+          potentialRevenue: 300000,
+          deadline: "2024-08-30"
+        }
+      ];
+      
+      await Promise.all(sampleOodaOpportunities.map(opp => this.createOodaOpportunity(opp)));
+      
+      // Initialize OODA streak
+      const initialStreak: InsertOodaStreak = {
+        currentStreak: 5,
+        longestStreak: 12,
+        totalMoves: 47,
+        totalRevenue: 1240000,
+        lastMoveDate: new Date().toISOString().split('T')[0],
+        badges: ["First Move", "Week Warrior", "Revenue Catalyst", "Deal Closer"]
+      };
+      
+      await this.createOodaStreak(initialStreak);
+      
+      // Add today's daily move
+      const todayMove: InsertOodaDailyMove = {
+        date: new Date().toISOString().split('T')[0],
+        opportunityId: 1,
+        moveTitle: "Close Shelby County Schools Deal",
+        moveDescription: "Follow up with Principal Sarah Johnson on budget approval and contract terms",
+        actionType: "execute",
+        assignedTo: "self",
+        status: "planned",
+        outcome: "",
+        revenueImpact: 0,
+        roiScore: 9.5,
+        compoundingStatus: "none"
+      };
+      
+      await this.createOodaDailyMove(todayMove);
     }
   }
 }

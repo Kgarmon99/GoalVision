@@ -231,4 +231,92 @@ export const insertProspectSchema = createInsertSchema(prospects).pick({
 export type InsertProspect = z.infer<typeof insertProspectSchema>;
 export type Prospect = typeof prospects.$inferSelect;
 
+// OODA Revenue Engine Tables
+export const oodaOpportunities = pgTable("ooda_opportunities", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // "Revenue Now", "Revenue Later", "Compounders"
+  roiScore: real("roi_score").notNull(), // 0-10 scale
+  effortImpactRatio: real("effort_impact_ratio").notNull(),
+  urgencyLevel: text("urgency_level").notNull(), // "high", "medium", "low"
+  leverageType: text("leverage_type").notNull(), // "AI", "Automation", "Assets", "Asymmetric"
+  stage: text("stage").notNull(), // "observed", "oriented", "decided", "acted"
+  potentialRevenue: real("potential_revenue").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  deadline: text("deadline").default(""), // ISO date string
+});
+
+export const insertOodaOpportunitySchema = createInsertSchema(oodaOpportunities).pick({
+  title: true,
+  description: true,
+  category: true,
+  roiScore: true,
+  effortImpactRatio: true,
+  urgencyLevel: true,
+  leverageType: true,
+  stage: true,
+  potentialRevenue: true,
+  deadline: true,
+});
+
+export const oodaDailyMoves = pgTable("ooda_daily_moves", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(), // ISO date string
+  opportunityId: integer("opportunity_id").notNull(),
+  moveTitle: text("move_title").notNull(),
+  moveDescription: text("move_description").notNull(),
+  actionType: text("action_type").notNull(), // "execute", "delegate", "automate"
+  assignedTo: text("assigned_to").default("self"),
+  status: text("status").notNull(), // "planned", "in-progress", "completed", "failed"
+  outcome: text("outcome").default(""),
+  revenueImpact: real("revenue_impact").default(0),
+  roiScore: real("roi_score").default(0),
+  compoundingStatus: text("compounding_status").default("none"), // "none", "building", "active"
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertOodaDailyMoveSchema = createInsertSchema(oodaDailyMoves).pick({
+  date: true,
+  opportunityId: true,
+  moveTitle: true,
+  moveDescription: true,
+  actionType: true,
+  assignedTo: true,
+  status: true,
+  outcome: true,
+  revenueImpact: true,
+  roiScore: true,
+  compoundingStatus: true,
+});
+
+export const oodaStreaks = pgTable("ooda_streaks", {
+  id: serial("id").primaryKey(),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  totalMoves: integer("total_moves").default(0),
+  totalRevenue: real("total_revenue").default(0),
+  lastMoveDate: text("last_move_date").default(""), // ISO date string
+  badges: text("badges").array().default([]), // Array of earned badges
+});
+
+export const insertOodaStreakSchema = createInsertSchema(oodaStreaks).pick({
+  currentStreak: true,
+  longestStreak: true,
+  totalMoves: true,
+  totalRevenue: true,
+  lastMoveDate: true,
+  badges: true,
+});
+
+export type InsertOodaOpportunity = z.infer<typeof insertOodaOpportunitySchema>;
+export type OodaOpportunity = typeof oodaOpportunities.$inferSelect;
+
+export type InsertOodaDailyMove = z.infer<typeof insertOodaDailyMoveSchema>;
+export type OodaDailyMove = typeof oodaDailyMoves.$inferSelect;
+
+export type InsertOodaStreak = z.infer<typeof insertOodaStreakSchema>;
+export type OodaStreak = typeof oodaStreaks.$inferSelect;
+
 
