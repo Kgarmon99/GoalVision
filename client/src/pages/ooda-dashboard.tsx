@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,13 +73,29 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function OodaDashboard() {
+  // Atomic Habits: Make it Obvious - Start with current time and visual cues
+  const [currentTime] = useState(new Date());
+  const isLoopCompleted = Boolean(localStorage.getItem(`ooda-${currentTime.toDateString()}`));
   const [currentPhase, setCurrentPhase] = useState<'observe' | 'orient' | 'decide' | 'act'>('observe');
-  const [todaysNotes, setTodaysNotes] = useState({
-    observe: "",
-    orient: "",
-    decide: "",
-    act: ""
+  const [completedPhases, setCompletedPhases] = useState<string[]>(() => {
+    const saved = localStorage.getItem(`ooda-phases-${currentTime.toDateString()}`);
+    return saved ? JSON.parse(saved) : [];
   });
+  
+  // Make it Easy - Simple form with minimal friction
+  const [todaysNotes, setTodaysNotes] = useState(() => {
+    const saved = localStorage.getItem(`ooda-notes-${currentTime.toDateString()}`);
+    return saved ? JSON.parse(saved) : {
+      observe: "",
+      orient: "",
+      decide: "",
+      act: ""
+    };
+  });
+
+  // Make it Satisfying - Progress tracking
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const progressPercentage = (completedPhases.length / 4) * 100;
 
   const { data: topOpportunities = [], isLoading: opportunitiesLoading } = useQuery<OodaOpportunity[]>({
     queryKey: ['/api/ooda/opportunities/top/3']
@@ -92,6 +108,44 @@ export default function OodaDashboard() {
   const { data: streakData, isLoading: streakLoading } = useQuery<{ streak: number }>({
     queryKey: ['/api/ooda/streak']
   });
+
+  // Atomic Habits Functions
+  const saveProgress = () => {
+    localStorage.setItem(`ooda-notes-${currentTime.toDateString()}`, JSON.stringify(todaysNotes));
+    localStorage.setItem(`ooda-phases-${currentTime.toDateString()}`, JSON.stringify(completedPhases));
+  };
+
+  const completePhase = (phase: string) => {
+    if (!completedPhases.includes(phase)) {
+      const newCompleted = [...completedPhases, phase];
+      setCompletedPhases(newCompleted);
+      localStorage.setItem(`ooda-phases-${currentTime.toDateString()}`, JSON.stringify(newCompleted));
+      
+      // Satisfying feedback
+      if (newCompleted.length === 4) {
+        localStorage.setItem(`ooda-${currentTime.toDateString()}`, 'completed');
+        // Celebration effect could go here
+      }
+    }
+  };
+
+  const getTimeBasedGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 10) return "🌅 Morning OODA Loop";
+    if (hour < 14) return "☀️ Midday Revenue Check";
+    if (hour < 18) return "🌆 Afternoon Power Hour";
+    return "🌙 Evening Reflection";
+  };
+
+  const getMinimumViableAction = (phase: string) => {
+    const actions = {
+      observe: "Spend 2 minutes scanning your CRM for one warm lead",
+      orient: "Choose ONE growth lever: Sales, Partnerships, or Content", 
+      decide: "Pick your single highest-impact 30-minute task",
+      act: "Execute for 25 minutes, then log the result"
+    };
+    return actions[phase as keyof typeof actions] || "Take action";
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -142,7 +196,7 @@ export default function OodaDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
+        {/* Header with Atomic Habits principles */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,18 +213,59 @@ export default function OodaDashboard() {
             >
               ← MoneyBot Dashboard
             </Button>
-            <div className="flex items-center gap-2">
-              <Activity className="h-8 w-8 text-orange-500" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                Trillion-Dollar Daily Revenue Ritual
-              </h1>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Activity className="h-6 w-6 text-orange-500" />
+                <h1 className="text-2xl font-bold text-gray-800">
+                  {getTimeBasedGreeting()}
+                </h1>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-white rounded-full px-4 py-2 shadow-sm border">
+                  <span className="text-sm text-gray-600">Progress: </span>
+                  <span className="font-bold text-orange-600">{Math.round(progressPercentage)}%</span>
+                </div>
+                {isLoopCompleted && (
+                  <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    ✓ Today's Loop Complete
+                  </div>
+                )}
+              </div>
             </div>
-            <div></div> {/* Spacer for centering */}
+            <div className="text-right">
+              <div className="text-sm text-gray-500">
+                {currentTime.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </div>
+              <div className="text-xs text-gray-400">
+                {currentTime.toLocaleTimeString('en-US', { 
+                  hour: 'numeric', 
+                  minute: '2-digit' 
+                })}
+              </div>
+            </div>
           </div>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center">
-            Transform your daily routine into a revenue-generating machine with the OODA Loop system. 
-            Make money a daily reflex, not an event.
-          </p>
+          
+          {/* Progress Bar - Make it Obvious */}
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-200 rounded-full h-3 relative overflow-hidden">
+              <motion.div 
+                className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full"
+                style={{ width: `${progressPercentage}%` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercentage}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-medium text-gray-700">
+                  {completedPhases.length}/4 phases complete
+                </span>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Streak and Stats */}
@@ -222,116 +317,121 @@ export default function OodaDashboard() {
           </Card>
         </motion.div>
 
-        {/* Main Content */}
+        {/* Simplified OODA Workflow - Atomic Habits Style */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* OODA Loop Process */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Daily OODA Loop
-                </CardTitle>
-                <CardDescription>
-                  Your high-performance daily operating system for compounding revenue
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={currentPhase} onValueChange={(value) => setCurrentPhase(value as any)}>
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="observe" className="text-xs">Observe</TabsTrigger>
-                    <TabsTrigger value="orient" className="text-xs">Orient</TabsTrigger>
-                    <TabsTrigger value="decide" className="text-xs">Decide</TabsTrigger>
-                    <TabsTrigger value="act" className="text-xs">Act</TabsTrigger>
-                  </TabsList>
-
-                  {Object.entries(phaseContent).map(([phase, content]) => (
-                    <TabsContent key={phase} value={phase} className="mt-6">
-                      <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="space-y-4"
+          {/* OODA Workflow - One Phase at a Time */}
+          <div className="lg:col-span-2 space-y-4">
+            
+            {/* Today's Quick Action - Make it Easy */}
+            {!isLoopCompleted && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-orange-800">
+                      🎯 Your 2-Minute Revenue Action
+                    </CardTitle>
+                    <CardDescription className="text-orange-700">
+                      {getMinimumViableAction(currentPhase)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`p-2 rounded-lg ${phaseContent[currentPhase].color} text-white`}>
+                        {React.createElement(phaseContent[currentPhase].icon, { className: "h-4 w-4" })}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">{phaseContent[currentPhase].title}</h3>
+                        <p className="text-sm text-gray-600">{phaseContent[currentPhase].description}</p>
+                      </div>
+                    </div>
+                    
+                    <Textarea
+                      placeholder="Quick note: What did you discover or do?"
+                      value={todaysNotes[currentPhase as keyof typeof todaysNotes]}
+                      onChange={(e) => {
+                        const newNotes = { ...todaysNotes, [currentPhase]: e.target.value };
+                        setTodaysNotes(newNotes);
+                        saveProgress();
+                      }}
+                      className="min-h-[80px] mb-4"
+                    />
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => {
+                          completePhase(currentPhase);
+                          const phases = ['observe', 'orient', 'decide', 'act'];
+                          const currentIndex = phases.indexOf(currentPhase);
+                          if (currentIndex < phases.length - 1) {
+                            setCurrentPhase(phases[currentIndex + 1] as any);
+                          }
+                        }}
+                        className="bg-orange-500 hover:bg-orange-600"
+                        disabled={completedPhases.includes(currentPhase)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${content.color} text-white`}>
-                            <content.icon className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{content.title}</h3>
-                            <p className="text-sm text-muted-foreground">{content.description}</p>
-                          </div>
-                        </div>
+                        {completedPhases.includes(currentPhase) ? '✓ Done' : 'Complete & Next'}
+                      </Button>
+                      
+                      {currentPhase !== 'observe' && (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const phases = ['observe', 'orient', 'decide', 'act'];
+                            const currentIndex = phases.indexOf(currentPhase);
+                            if (currentIndex > 0) {
+                              setCurrentPhase(phases[currentIndex - 1] as any);
+                            }
+                          }}
+                        >
+                          ← Back
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
-                        <div className="space-y-2">
-                          <Label htmlFor={`${phase}-notes`}>Today's Notes</Label>
-                          <Textarea
-                            id={`${phase}-notes`}
-                            placeholder={`What did you ${phase} today?`}
-                            value={todaysNotes[phase as keyof typeof todaysNotes]}
-                            onChange={(e) => setTodaysNotes(prev => ({
-                              ...prev,
-                              [phase]: e.target.value
-                            }))}
-                            className="min-h-[100px]"
-                          />
-                        </div>
-
-                        {phase === 'act' && (
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="revenue-impact">Revenue Impact ($)</Label>
-                              <Input
-                                id="revenue-impact"
-                                type="number"
-                                placeholder="0"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="signal-strength">Signal Strength (1-5)</Label>
-                              <Input
-                                id="signal-strength"
-                                type="number"
-                                min="1"
-                                max="5"
-                                placeholder="3"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-
-                <div className="mt-6 flex justify-between">
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      const phases = ['observe', 'orient', 'decide', 'act'];
-                      const currentIndex = phases.indexOf(currentPhase);
-                      if (currentIndex > 0) {
-                        setCurrentPhase(phases[currentIndex - 1] as any);
-                      }
-                    }}
-                    disabled={currentPhase === 'observe'}
+            {/* Phase Progress Visual */}
+            <div className="grid grid-cols-4 gap-2">
+              {['observe', 'orient', 'decide', 'act'].map((phase, index) => {
+                const isCompleted = completedPhases.includes(phase);
+                const isCurrent = currentPhase === phase;
+                const PhaseIcon = phaseContent[phase as keyof typeof phaseContent].icon;
+                
+                return (
+                  <motion.div
+                    key={phase}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    Previous Phase
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const phases = ['observe', 'orient', 'decide', 'act'];
-                      const currentIndex = phases.indexOf(currentPhase);
-                      if (currentIndex < phases.length - 1) {
-                        setCurrentPhase(phases[currentIndex + 1] as any);
-                      }
-                    }}
-                    disabled={currentPhase === 'act'}
-                  >
-                    Next Phase
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                    <Card 
+                      className={`text-center cursor-pointer transition-all ${
+                        isCompleted ? 'bg-green-100 border-green-300' :
+                        isCurrent ? 'bg-orange-100 border-orange-300' :
+                        'bg-gray-50 border-gray-200'
+                      }`}
+                      onClick={() => setCurrentPhase(phase as any)}
+                    >
+                      <CardContent className="p-3">
+                        <div className={`mx-auto w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                          isCompleted ? 'bg-green-500 text-white' :
+                          isCurrent ? 'bg-orange-500 text-white' :
+                          'bg-gray-300 text-gray-600'
+                        }`}>
+                          {isCompleted ? <CheckCircle className="h-4 w-4" /> : <PhaseIcon className="h-4 w-4" />}
+                        </div>
+                        <p className="text-xs font-medium capitalize">{phase}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
 
             {/* Today's Move */}
             {todayMove && (
@@ -482,24 +582,56 @@ export default function OodaDashboard() {
           </div>
         </div>
 
-        {/* Bottom Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white">
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-2">Ready to Make Your Move?</h2>
-              <p className="text-slate-300 mb-6">
-                "You don't rise to the level of your goals, you fall to the level of your systems." — James Clear
-              </p>
-              <Button size="lg" className="bg-orange-500 hover:bg-orange-600">
-                Complete Today's OODA Loop
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {/* Completion Celebration */}
+        {isLoopCompleted && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center"
+          >
+            <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <CardContent className="p-8">
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-3xl font-bold mb-2">OODA Loop Complete!</h2>
+                <p className="text-green-100 mb-4 text-lg">
+                  You've built today's revenue momentum. Every loop compounds into exponential growth.
+                </p>
+                <div className="flex justify-center gap-4 text-sm">
+                  <div className="bg-white/20 rounded-lg px-3 py-2">
+                    <div className="font-bold">Streak: {streakData?.streak || 0} days</div>
+                  </div>
+                  <div className="bg-white/20 rounded-lg px-3 py-2">
+                    <div className="font-bold">Revenue: {formatCurrency(todayMove?.revenueGenerated || 0)}</div>
+                  </div>
+                </div>
+                <p className="text-green-200 text-sm mt-4 italic">
+                  "You don't rise to the level of your goals, you fall to the level of your systems." — James Clear
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Daily Habit Reminder */}
+        {!isLoopCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold mb-2">Build Your Revenue Habit</h3>
+                <p className="text-slate-300 mb-4 text-sm">
+                  Every completed OODA loop builds compound momentum. Small daily actions create exponential results.
+                </p>
+                <div className="text-xs text-slate-400">
+                  Complete all 4 phases to earn today's streak point
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
     </div>
   );

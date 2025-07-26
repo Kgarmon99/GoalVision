@@ -47,6 +47,7 @@ The application uses a relational database schema with the following main entiti
 - **Task Board**: Drag-and-drop Kanban board for task management
 - **Visualizations**: Multiple chart types and 3D globe for data visualization
 - **Gamification**: XP bars, celebrations, and achievement recognition
+- **OODA Dashboard**: Trillion-Dollar Daily Revenue Ritual with Atomic Habits principles built-in
 
 ### API Endpoints
 - Goals CRUD operations (`/api/goals`)
@@ -55,6 +56,40 @@ The application uses a relational database schema with the following main entiti
 - Status tracking (`/api/goal-statuses`)
 - User management (`/api/users`)
 - Weekly planning (`/api/weeks`)
+- OODA Loop system (`/api/ooda/*`)
+
+## OODA Dashboard System
+
+### Overview
+The OODA Dashboard implements a "Trillion-Dollar Daily Revenue Ritual" based on the military OODA Loop (Observe, Orient, Decide, Act) combined with Atomic Habits principles. It transforms daily revenue activities into a systematic, habit-forming process.
+
+### Atomic Habits Integration
+1. **Make it Obvious**: Clear visual progress, time-based greetings, immediate visual feedback
+2. **Make it Easy**: 2-minute minimum actions, simple one-field inputs, guided workflow
+3. **Make it Attractive**: Progressive completion rewards, streak tracking, celebration animations
+4. **Make it Satisfying**: Immediate feedback, progress bars, completion celebrations
+
+### Key Features
+- **Daily OODA Loop**: 4-phase guided workflow (Observe → Orient → Decide → Act)
+- **Habit Persistence**: Local storage saves progress and notes automatically
+- **Minimum Viable Actions**: Each phase has a 2-minute default action to reduce friction
+- **Progress Tracking**: Visual progress bar and phase completion indicators
+- **Streak System**: Daily completion tracking with celebration effects
+- **Revenue Opportunities**: AI-suggested high-leverage actions with priority scoring
+- **Time-Based Context**: Dynamic greetings and context based on time of day
+
+### User Experience Flow
+1. User opens OODA dashboard with clear progress indicator
+2. Current phase highlighted with specific 2-minute action suggestion
+3. Simple text input for quick notes with auto-save
+4. One-click completion advances to next phase
+5. Visual feedback and celebration upon full loop completion
+6. Streak tracking encourages daily consistency
+
+### Database Schema
+- `ooda_loops`: Daily loop completion tracking
+- `ooda_opportunities`: Revenue opportunities with priority scoring
+- `daily_moves`: Individual actions and outcomes tracking
 
 ## Data Flow
 
