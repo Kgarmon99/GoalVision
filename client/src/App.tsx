@@ -5,8 +5,8 @@ import { GoalCelebrationProvider } from "./context/goal-celebration-context";
 import { Suspense, lazy, useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-// OODA Revenue Engine dashboard
-const Dashboard = lazy(() => import("@/pages/ooda-dashboard"));
+// Simple MoneyBot dashboard only
+const Dashboard = lazy(() => import("@/pages/simple-dashboard"));
 
 function App() {
   const [currentPage, setCurrentPage] = useState<JSX.Element>(<Dashboard />);
