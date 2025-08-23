@@ -29,6 +29,7 @@ import {
   Activity
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PomodoroTimer } from "@/components/pomodoro-timer";
 
 interface OodaOpportunity {
   id: number;

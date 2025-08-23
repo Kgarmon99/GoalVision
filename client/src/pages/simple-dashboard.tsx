@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { GoalProgressCard } from "@/components/goal-progress-card";
 import { TopProspects } from "@/components/top-prospects";
+import { PomodoroTimer } from "@/components/pomodoro-timer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { 
   Star, 
@@ -377,72 +379,94 @@ const SimpleDashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Three Main Goals Section */}
-          <motion.div 
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
-                  <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
-                  <p className="text-xs text-green-200/70 italic">"A goal is a dream with a deadline." - Napoleon Hill</p>
-                </div>
-                <img 
-                  src="/moneybot-logo.png" 
-                  alt="MoneyBot" 
-                  className="h-6 w-6 opacity-50 ml-3 drop-shadow-lg"
-                />
-              </div>
-              <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Goal
-              </Button>
-            </div>
+          {/* Main Content Grid - Goals and Focus Timer */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
             
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((_, index) => (
-                  <div key={index} className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6 h-48 animate-pulse">
-                    <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-                    <div className="h-8 bg-gray-700 rounded w-3/4 mb-4"></div>
-                    <div className="h-2 bg-gray-700 rounded w-full mb-2"></div>
-                    <div className="h-4 bg-gray-700 rounded w-1/3"></div>
+            {/* Three Main Goals Section */}
+            <motion.div 
+              className="lg:col-span-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="bg-green-500/20 p-2 rounded-full mr-3 shadow-lg shadow-green-500/20 ring-1 ring-green-500/30">
+                    <Target className="h-6 w-6 text-green-300 drop-shadow-lg" />
                   </div>
-                ))}
+                  <div>
+                    <h2 className="text-2xl font-bold text-green-300 drop-shadow-lg">Three Main Goals</h2>
+                    <p className="text-xs text-green-200/70 italic">"A goal is a dream with a deadline." - Napoleon Hill</p>
+                  </div>
+                  <img 
+                    src="/moneybot-logo.png" 
+                    alt="MoneyBot" 
+                    className="h-6 w-6 opacity-50 ml-3 drop-shadow-lg"
+                  />
+                </div>
+                <Button variant="outline" className="border-green-500/60 text-green-300 hover:bg-green-900/20 hover:border-green-400/80 backdrop-blur-sm shadow-lg hover:shadow-green-500/25 transition-all duration-200">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Goal
+                </Button>
               </div>
-            ) : topThreeGoals.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {topThreeGoals.map((goal, index) => (
-                  <motion.div
-                    key={goal.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <GoalProgressCard goal={goal} />
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <Card className="border-dashed border-gray-600 bg-gray-900/30">
-                <CardContent className="p-8 text-center">
-                  <Target className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-300 mb-2">No Goals Yet</h3>
-                  <p className="text-gray-500 mb-4">Add your first goal to start tracking your progress</p>
-                  <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Goal
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </motion.div>
+              
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((_, index) => (
+                    <div key={index} className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6 h-48 animate-pulse">
+                      <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+                      <div className="h-8 bg-gray-700 rounded w-3/4 mb-4"></div>
+                      <div className="h-2 bg-gray-700 rounded w-full mb-2"></div>
+                      <div className="h-4 bg-gray-700 rounded w-1/3"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : topThreeGoals.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {topThreeGoals.map((goal, index) => (
+                    <motion.div
+                      key={goal.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
+                    >
+                      <GoalProgressCard goal={goal} />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <Card className="border-dashed border-gray-600 bg-gray-900/30">
+                  <CardContent className="p-8 text-center">
+                    <Target className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-300 mb-2">No Goals Yet</h3>
+                    <p className="text-gray-500 mb-4">Add your first goal to start tracking your progress</p>
+                    <Button variant="outline" className="border-green-500 text-green-400 hover:bg-gray-800">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your First Goal
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+
+            {/* Focus Timer Sidebar */}
+            <motion.div 
+              className="lg:col-span-1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <PomodoroTimer 
+                onComplete={() => {
+                  toast({
+                    title: "Focus Session Complete!",
+                    description: "Great work! Time for a well-deserved break.",
+                    duration: 5000,
+                  });
+                }}
+              />
+            </motion.div>
+          </div>
 
           {/* Kentucky School Prospects Section */}
           <motion.div 

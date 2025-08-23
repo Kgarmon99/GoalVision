@@ -48,6 +48,7 @@ The application uses a relational database schema with the following main entiti
 - **Visualizations**: Multiple chart types and 3D globe for data visualization
 - **Gamification**: XP bars, celebrations, and achievement recognition
 - **OODA Dashboard**: Trillion-Dollar Daily Revenue Ritual with Atomic Habits principles built-in
+- **Pomodoro Timer**: Focus timer with work/break cycles, notifications, and session tracking
 
 ### API Endpoints
 - Goals CRUD operations (`/api/goals`)
