@@ -29,25 +29,28 @@ const TIMER_DURATIONS = {
 
 const MODE_CONFIG = {
   work: {
-    label: 'Focus Time',
+    label: 'FOCUS MODE',
     icon: Target,
-    color: 'bg-red-500',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200'
+    color: 'from-green-500 to-green-600',
+    bgColor: 'from-green-900/40 to-emerald-900/40',
+    borderColor: 'border-green-500/60',
+    glowColor: 'shadow-green-500/20'
   },
   'short-break': {
-    label: 'Short Break',
+    label: 'QUICK BREAK',
     icon: Coffee,
-    color: 'bg-green-500',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200'
+    color: 'from-orange-500 to-orange-600',
+    bgColor: 'from-orange-900/40 to-yellow-900/40',
+    borderColor: 'border-orange-500/60',
+    glowColor: 'shadow-orange-500/20'
   },
   'long-break': {
-    label: 'Long Break',
+    label: 'LONG BREAK',
     icon: Coffee,
-    color: 'bg-blue-500',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200'
+    color: 'from-blue-500 to-blue-600',
+    bgColor: 'from-blue-900/40 to-indigo-900/40',
+    borderColor: 'border-blue-500/60',
+    glowColor: 'shadow-blue-500/20'
   }
 };
 
@@ -224,65 +227,75 @@ export function PomodoroTimer({ onComplete, className = "" }: PomodoroTimerProps
       animate={{ opacity: 1, scale: 1 }}
       className={className}
     >
-      <Card className={`${currentConfig.bgColor} ${currentConfig.borderColor} border-2`}>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <currentConfig.icon className="h-5 w-5" />
-            Pomodoro Focus
+      <Card className={`relative bg-gradient-to-br ${currentConfig.bgColor} ${currentConfig.borderColor} shadow-2xl backdrop-blur-sm overflow-hidden group hover:border-opacity-80 transition-all duration-300`}>
+        {/* Cyberpunk glow effects */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${currentConfig.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+        <div className={`absolute inset-0 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]`}></div>
+        
+        <CardHeader className="pb-3 relative z-10">
+          <CardTitle className="flex items-center justify-between text-lg text-white drop-shadow-lg">
+            <div className="flex items-center gap-2">
+              <div className={`bg-gradient-to-r ${currentConfig.color} p-2 rounded-full ${currentConfig.glowColor} shadow-lg ring-1 ring-white/20`}>
+                <currentConfig.icon className="h-4 w-4 text-white drop-shadow-lg" />
+              </div>
+              FOCUS SYSTEM
+            </div>
+            <img 
+              src="/moneybot-logo.png" 
+              alt="MoneyBot" 
+              className="h-6 w-6 opacity-60 drop-shadow-lg"
+            />
           </CardTitle>
+          <p className="text-xs text-gray-300/80 italic">
+            "Deep work is the ability to focus without distraction." - Cal Newport
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Mode Selector */}
-          <div className="flex gap-1">
-            {Object.entries(MODE_CONFIG).map(([mode, config]) => (
-              <Button
-                key={mode}
-                variant={timer.mode === mode ? "default" : "outline"}
-                size="sm"
-                onClick={() => switchMode(mode as TimerMode)}
-                className="flex-1 text-xs"
-                disabled={timer.isRunning}
-              >
-                <config.icon className="h-3 w-3 mr-1" />
-                {mode === 'work' ? 'Focus' : mode === 'short-break' ? 'Break' : 'Long'}
-              </Button>
-            ))}
-          </div>
-
-          {/* Timer Display */}
-          <div className="text-center space-y-3">
-            <div className="space-y-1">
-              <Badge variant="secondary" className="text-xs">
+        
+        <CardContent className="space-y-4 relative z-10">
+          {/* Mode Status */}
+          <div className="text-center space-y-2">
+            <div className={`bg-black/40 border ${currentConfig.borderColor} rounded-lg p-3 backdrop-blur-sm shadow-inner`}>
+              <Badge variant="secondary" className={`bg-gradient-to-r ${currentConfig.color} text-white border-0 mb-2 font-bold text-xs tracking-wider`}>
                 {currentConfig.label}
               </Badge>
-              <div className="text-4xl font-mono font-bold text-gray-800">
+              <div className="text-5xl font-mono font-bold text-white drop-shadow-lg">
                 {String(timer.minutes).padStart(2, '0')}:{String(timer.seconds).padStart(2, '0')}
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <Progress 
-              value={progress} 
-              className="h-2"
-            />
+            {/* Cyberpunk Progress Bar */}
+            <div className="relative">
+              <div className="bg-gray-800 rounded-full h-2 relative overflow-hidden border border-gray-600">
+                <motion.div 
+                  className={`bg-gradient-to-r ${currentConfig.color} h-full rounded-full relative`}
+                  style={{ width: `${progress}%` }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                </motion.div>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+            </div>
           </div>
 
           {/* Controls */}
           <div className="flex gap-2">
             <Button
               onClick={startPause}
-              className={`flex-1 ${currentConfig.color} hover:opacity-90`}
+              className={`flex-1 bg-gradient-to-r ${currentConfig.color} hover:opacity-90 text-white font-bold shadow-lg ${currentConfig.glowColor} transition-all duration-200`}
               size="sm"
             >
               {timer.isRunning ? (
                 <>
-                  <Pause className="h-4 w-4 mr-1" />
-                  Pause
+                  <Pause className="h-4 w-4 mr-2" />
+                  PAUSE
                 </>
               ) : (
                 <>
-                  <Play className="h-4 w-4 mr-1" />
-                  Start
+                  <Play className="h-4 w-4 mr-2" />
+                  START
                 </>
               )}
             </Button>
@@ -291,23 +304,46 @@ export function PomodoroTimer({ onComplete, className = "" }: PomodoroTimerProps
               variant="outline"
               size="sm"
               disabled={timer.isRunning}
+              className="border-gray-500/60 text-gray-300 hover:bg-gray-800/50 hover:border-gray-400"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Sessions Counter */}
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              Sessions Today: {timer.completedSessions}
+          {/* Mode Quick Switch */}
+          <div className="grid grid-cols-3 gap-1">
+            {Object.entries(MODE_CONFIG).map(([mode, config]) => (
+              <Button
+                key={mode}
+                variant={timer.mode === mode ? "default" : "ghost"}
+                size="sm"
+                onClick={() => switchMode(mode as TimerMode)}
+                className={`text-xs transition-all duration-200 ${
+                  timer.mode === mode 
+                    ? `bg-gradient-to-r ${config.color} text-white ${config.glowColor} shadow-lg` 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+                }`}
+                disabled={timer.isRunning}
+              >
+                <config.icon className="h-3 w-3 mr-1" />
+                {mode === 'work' ? 'FOCUS' : mode === 'short-break' ? 'BREAK' : 'LONG'}
+              </Button>
+            ))}
+          </div>
+
+          {/* Stats Display */}
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-black/40 border border-gray-600/60 rounded-lg p-2 backdrop-blur-sm">
+              <div className="text-xs text-gray-400 mb-1">SESSIONS</div>
+              <div className="text-lg font-bold text-green-400 drop-shadow-lg">
+                {timer.completedSessions}
+              </div>
             </div>
-            <div className="text-xs">
-              {timer.completedSessions > 0 && (
-                <span className="text-green-600 font-medium">
-                  {timer.completedSessions * 25} min focused
-                </span>
-              )}
+            <div className="bg-black/40 border border-gray-600/60 rounded-lg p-2 backdrop-blur-sm">
+              <div className="text-xs text-gray-400 mb-1">FOCUSED</div>
+              <div className="text-lg font-bold text-orange-400 drop-shadow-lg">
+                {timer.completedSessions * 25}m
+              </div>
             </div>
           </div>
         </CardContent>
