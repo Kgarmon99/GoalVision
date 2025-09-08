@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { GoalProgressCard } from "@/components/goal-progress-card";
 import { TopProspects } from "@/components/top-prospects";
 import { PomodoroTimer } from "@/components/pomodoro-timer";
+import { NotificationSettings } from "@/components/notification-settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -21,7 +22,10 @@ import {
   DollarSign,
   Edit,
   Check,
-  X
+  X,
+  Bell,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +47,9 @@ const SimpleDashboard = () => {
   const [isEditingTask, setIsEditingTask] = useState(false);
   const [editTaskTitle, setEditTaskTitle] = useState(priorityTask.title);
   const [editTaskDescription, setEditTaskDescription] = useState(priorityTask.description);
+  
+  // Notification settings toggle
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
   // Motivational quotes
   const motivationalQuotes = [
@@ -222,6 +229,15 @@ const SimpleDashboard = () => {
               </div>
               
               <div className="flex items-center gap-4">
+                <Button
+                  onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border border-blue-500/50"
+                  size="sm"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  iPhone Alerts
+                  {showNotificationSettings ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2" />}
+                </Button>
                 <div className="bg-gradient-to-r from-yellow-900/60 to-orange-900/60 rounded-md shadow-sm border border-yellow-500/60 p-2 hidden sm:block">
                   <span className="text-sm text-yellow-300">🏆 Building Empire:</span>
                   <span className="text-sm font-bold text-yellow-200 ml-1">Global Financial Dominance</span>
@@ -261,6 +277,19 @@ const SimpleDashboard = () => {
                 </Button>
               </div>
             </div>
+          </motion.div>
+
+          {/* Notification Settings Section */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: showNotificationSettings ? 1 : 0, 
+              height: showNotificationSettings ? 'auto' : 0 
+            }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden mb-8"
+          >
+            {showNotificationSettings && <NotificationSettings />}
           </motion.div>
 
           {/* Priority Task Section */}
