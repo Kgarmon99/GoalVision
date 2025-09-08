@@ -188,6 +188,12 @@ export const users = pgTable("users", {
   lastActive: timestamp("last_active").defaultNow(),
   goalsCreated: integer("goals_created").default(0),
   tasksCompleted: integer("tasks_completed").default(0),
+  // Notification settings
+  phoneNumber: text("phone_number").default(""),
+  notificationEnabled: boolean("notification_enabled").default(false),
+  dailyReminderTime: text("daily_reminder_time").default("09:00"), // HH:MM format
+  weeklyReminderDay: text("weekly_reminder_day").default("Monday"),
+  notificationPreferences: text("notification_preferences").default("{}"), // JSON string for custom preferences
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -199,6 +205,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   city: true,
   goalsCreated: true,
   tasksCompleted: true,
+  phoneNumber: true,
+  notificationEnabled: true,
+  dailyReminderTime: true,
+  weeklyReminderDay: true,
+  notificationPreferences: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
