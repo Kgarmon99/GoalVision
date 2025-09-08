@@ -632,6 +632,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Notification routes
+  
+  // Get user notification settings
+  app.get("/api/notifications/settings", async (req, res) => {
+    try {
+      const userId = 1; // For now, using a single user
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user[0]) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const settings = {
+        phoneNumber: user[0].phoneNumber || '',
+        notificationEnabled: user[0].notificationEnabled || false,
+        dailyReminderTime: user[0].dailyReminderTime || '09:00',
+        weeklyReminderDay: user[0].weeklyReminderDay || 'Monday',
+        notificationPreferences: JSON.parse(user[0].notificationPreferences || '{}')
+      };
+
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching notification settings:', error);
+      res.status(500).json({ message: "Error fetching notification settings" });
+    }
+  });
+
+  // Update user notification settings
+  app.patch("/api/notifications/settings", async (req, res) => {
+    try {
+      const userId = 1; // For now, using a single user
+      const {
+        phoneNumber,
+        notificationEnabled,
+        dailyReminderTime,
+        weeklyReminderDay,
+        notificationPreferences
+      } = req.body;
+
+      const updateData: any = {};
+      if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+      if (notificationEnabled !== undefined) updateData.notificationEnabled = notificationEnabled;
+      if (dailyReminderTime !== undefined) updateData.dailyReminderTime = dailyReminderTime;
+      if (weeklyReminderDay !== undefined) updateData.weeklyReminderDay = weeklyReminderDay;
+      if (notificationPreferences !== undefined) {
+        updateData.notificationPreferences = JSON.stringify(notificationPreferences);
+      }
+
+      const [updatedUser] = await db.update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ message: "Settings updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error('Error updating notification settings:', error);
+      res.status(500).json({ message: "Error updating notification settings" });
+    }
+  });
+
+  // Send test notification
+  app.post("/api/notifications/test", async (req, res) => {
+    try {
+      const { notificationService } = await import('./notification-service');
+      const userId = 1; // For now, using a single user
+      
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user[0]) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user[0].phoneNumber || !user[0].notificationEnabled) {
+        return res.status(400).json({ message: "Phone number not set or notifications disabled" });
+      }
+
+      if (!notificationService.isConfigured()) {
+        return res.status(400).json({ message: "SMS service not configured. Please add Twilio credentials." });
+      }
+
+      const success = await notificationService.sendTestMessage(user[0].phoneNumber);
+      
+      if (success) {
+        res.json({ message: "Test notification sent successfully!" });
+      } else {
+        res.status(500).json({ message: "Failed to send test notification" });
+      }
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      res.status(500).json({ message: "Error sending test notification" });
+    }
+  });
+
+  // Send daily reminder
+  app.post("/api/notifications/daily-reminder", async (req, res) => {
+    try {
+      const { notificationService } = await import('./notification-service');
+      const userId = 1; // For now, using a single user
+      
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user[0] || !user[0].phoneNumber || !user[0].notificationEnabled) {
+        return res.status(400).json({ message: "User not found or notifications not configured" });
+      }
+
+      if (!notificationService.isConfigured()) {
+        return res.status(400).json({ message: "SMS service not configured. Please add Twilio credentials." });
+      }
+
+      // Get user's top goals
+      const allGoals = await storage.getAllGoals();
+      const goalReminders = allGoals.map(goal => ({
+        goalName: goal.name,
+        current: goal.current,
+        target: goal.target,
+        unit: goal.unit || '',
+        progressPercentage: (goal.current / goal.target) * 100,
+        deadline: goal.deadline
+      }));
+
+      const success = await notificationService.sendDailyReminder(user[0].phoneNumber, goalReminders);
+      
+      if (success) {
+        res.json({ message: "Daily reminder sent successfully!" });
+      } else {
+        res.status(500).json({ message: "Failed to send daily reminder" });
+      }
+    } catch (error) {
+      console.error('Error sending daily reminder:', error);
+      res.status(500).json({ message: "Error sending daily reminder" });
+    }
+  });
+
+  // Send weekly reminder
+  app.post("/api/notifications/weekly-reminder", async (req, res) => {
+    try {
+      const { notificationService } = await import('./notification-service');
+      const userId = 1; // For now, using a single user
+      
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user[0] || !user[0].phoneNumber || !user[0].notificationEnabled) {
+        return res.status(400).json({ message: "User not found or notifications not configured" });
+      }
+
+      if (!notificationService.isConfigured()) {
+        return res.status(400).json({ message: "SMS service not configured. Please add Twilio credentials." });
+      }
+
+      // Get user's goals
+      const allGoals = await storage.getAllGoals();
+      const goalReminders = allGoals.map(goal => ({
+        goalName: goal.name,
+        current: goal.current,
+        target: goal.target,
+        unit: goal.unit || '',
+        progressPercentage: (goal.current / goal.target) * 100,
+        deadline: goal.deadline
+      }));
+
+      const success = await notificationService.sendWeeklyReminder(user[0].phoneNumber, goalReminders);
+      
+      if (success) {
+        res.json({ message: "Weekly reminder sent successfully!" });
+      } else {
+        res.status(500).json({ message: "Failed to send weekly reminder" });
+      }
+    } catch (error) {
+      console.error('Error sending weekly reminder:', error);
+      res.status(500).json({ message: "Error sending weekly reminder" });
+    }
+  });
+
   // Serve MoneyBot logo
   app.get("/moneybot-logo.png", (req, res) => {
     res.sendFile(path.resolve("public/moneybot-logo.png"));
