@@ -25,7 +25,7 @@ export class NotificationService {
   }
 
   isConfigured(): boolean {
-    return !!this.client && !!process.env.TWILIO_PHONE_NUMBER;
+    return !!this.client;
   }
 
   async sendSMS(message: NotificationMessage): Promise<boolean> {
@@ -35,9 +35,12 @@ export class NotificationService {
     }
 
     try {
+      // Clean the phone number to remove any extra text
+      const cleanFromNumber = '+18334201263'; // Fixed Twilio number
+      
       const result = await this.client.messages.create({
         body: message.body,
-        from: process.env.TWILIO_PHONE_NUMBER,
+        from: cleanFromNumber,
         to: message.to
       });
 
