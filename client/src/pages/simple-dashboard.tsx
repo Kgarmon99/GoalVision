@@ -15,7 +15,7 @@ import { GoalDialog } from "@/components/goal-dialog";
 import { ProspectDialog } from "@/components/prospect-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SearchBar } from "@/components/search-bar";
-import { RegionMap } from "@/components/region-map";
+import { KentuckyRegionMap } from "@/components/kentucky-region-map";
 import { useState, useEffect, useMemo } from "react";
 
 const SimpleDashboard = () => {
@@ -164,7 +164,7 @@ const SimpleDashboard = () => {
         <div className="mb-8">
           <Card className="glow-card bg-black/80 border-primary/40" data-testid="card-region-map">
             <CardContent className="p-6">
-              <RegionMap />
+              <KentuckyRegionMap />
             </CardContent>
           </Card>
         </div>
