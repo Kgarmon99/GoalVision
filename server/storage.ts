@@ -31,7 +31,10 @@ import {
   type InsertOodaOpportunity,
   dailyMoves,
   type DailyMove,
-  type InsertDailyMove
+  type InsertDailyMove,
+  regions,
+  type Region,
+  type InsertRegion
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -95,6 +98,12 @@ export interface IStorage {
   createProspect(prospect: InsertProspect): Promise<Prospect>;
   updateProspect(id: number, prospect: Partial<InsertProspect>): Promise<Prospect | undefined>;
   deleteProspect(id: number): Promise<boolean>;
+  
+  // Region methods
+  getAllRegions(): Promise<Region[]>;
+  getRegion(id: number): Promise<Region | undefined>;
+  getRegionByNumber(regionNumber: number): Promise<Region | undefined>;
+  updateRegion(id: number, region: Partial<InsertRegion>): Promise<Region | undefined>;
   
   // OODA Loop methods
   getTodayOodaLoop(): Promise<OodaLoop | undefined>;
@@ -932,6 +941,30 @@ export class DatabaseStorage implements IStorage {
   async deleteProspect(id: number): Promise<boolean> {
     const result = await db.delete(prospects).where(eq(prospects.id, id));
     return !!result;
+  }
+  
+  // Region methods
+  async getAllRegions(): Promise<Region[]> {
+    return await db.select().from(regions).orderBy(asc(regions.regionNumber));
+  }
+  
+  async getRegion(id: number): Promise<Region | undefined> {
+    const [region] = await db.select().from(regions).where(eq(regions.id, id));
+    return region;
+  }
+  
+  async getRegionByNumber(regionNumber: number): Promise<Region | undefined> {
+    const [region] = await db.select().from(regions).where(eq(regions.regionNumber, regionNumber));
+    return region;
+  }
+  
+  async updateRegion(id: number, region: Partial<InsertRegion>): Promise<Region | undefined> {
+    const [updatedRegion] = await db
+      .update(regions)
+      .set(region)
+      .where(eq(regions.id, id))
+      .returning();
+    return updatedRegion;
   }
   
 

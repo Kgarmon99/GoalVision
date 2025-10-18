@@ -8,11 +8,13 @@ import {
   insertGoalStatusSchema, 
   insertUserSchema,
   insertProspectSchema,
+  insertRegionSchema,
   goals,
   metrics,
   goalStatus,
   users,
   prospects,
+  regions,
   oodaOpportunities,
   dailyMoves
 } from "@shared/schema";
@@ -555,6 +557,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Error deleting prospect" });
+    }
+  });
+
+  // Region Routes
+  
+  // Get all regions
+  app.get("/api/regions", async (req, res) => {
+    try {
+      const cacheKey = "regions:all";
+      const cachedRegions = serverCache.get(cacheKey);
+      
+      if (cachedRegions) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedRegions);
+      }
+      
+      const regions = await storage.getAllRegions();
+      serverCache.set(cacheKey, regions, CACHE_TTL.DEFAULT);
+      
+      res.set('X-Cache', 'MISS');
+      res.json(regions);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching regions" });
+    }
+  });
+  
+  // Get a specific region
+  app.get("/api/regions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const region = await storage.getRegion(id);
+      
+      if (!region) {
+        return res.status(404).json({ message: "Region not found" });
+      }
+      
+      res.json(region);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching region" });
+    }
+  });
+  
+  // Update a region (toggle conquest, update notes, etc.)
+  app.patch("/api/regions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const regionData = insertRegionSchema.partial().parse(req.body);
+      const updatedRegion = await storage.updateRegion(id, regionData);
+      
+      if (!updatedRegion) {
+        return res.status(404).json({ message: "Region not found" });
+      }
+      
+      // Invalidate cache
+      serverCache.invalidate("regions:all");
+      
+      res.json(updatedRegion);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid region data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating region" });
     }
   });
 
