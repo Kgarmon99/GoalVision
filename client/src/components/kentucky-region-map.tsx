@@ -48,6 +48,23 @@ export function KentuckyRegionMap() {
     queryKey: ["/api/regions"],
   });
 
+  // Query schools for data-dense overlays (Elon Algorithm: show all relevant data)
+  const { data: schools } = useQuery<any[]>({
+    queryKey: ["/api/schools"],
+  });
+
+  // Calculate metrics per region (First principles: raw data drives decisions)
+  const getRegionStats = (regionId: number) => {
+    if (!schools) return { total: 0, contacted: 0, percentage: 0 };
+    const regionSchools = schools.filter(s => s.regionId === regionId);
+    const contacted = regionSchools.filter(s => s.contacted).length;
+    return {
+      total: regionSchools.length,
+      contacted,
+      percentage: regionSchools.length > 0 ? Math.round((contacted / regionSchools.length) * 100) : 0
+    };
+  };
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<Region> }) => {
       return await apiRequest("PATCH", `/api/regions/${id}`, data);
@@ -139,13 +156,18 @@ export function KentuckyRegionMap() {
             }}
           />
           
-          {/* Emerald tint overlay for cyber aesthetic */}
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/30 via-transparent to-emerald-950/40 mix-blend-overlay" />
+          {/* Mission Control Grid Overlay (Elon Algorithm: tactical display) */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+            <defs>
+              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(16, 185, 129, 0.3)" strokeWidth="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
           
-          {/* Subtle border glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            boxShadow: "inset 0 0 80px rgba(16, 185, 129, 0.12), inset 0 0 40px rgba(0, 0, 0, 0.5)"
-          }} />
+          {/* Data-Dense Overlay Tint */}
+          <div className="absolute inset-0 bg-black/40" />
           
           <svg
             viewBox="0 0 100 100"
@@ -156,7 +178,7 @@ export function KentuckyRegionMap() {
             }}
           >
 
-          {/* Individual Regional Markers */}
+          {/* ELON ALGORITHM: Data-Dense Regional Markers */}
           {regions?.map((region) => {
             const pos = regionPositions[region.regionNumber];
             if (!pos) return null;
@@ -164,128 +186,104 @@ export function KentuckyRegionMap() {
             const isConquered = region.conquered;
             const isStarting = region.regionNumber === 4;
             const isHovered = hoveredRegion === region.regionNumber;
+            const stats = getRegionStats(region.id);
             
             return (
               <g key={region.id}>
-                {/* Outer glow ring for conquered regions */}
-                {isConquered && (
-                  <motion.circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={40}
-                    fill="none"
-                    stroke="rgba(16, 185, 129, 0.3)"
-                    strokeWidth="2"
-                    className="pointer-events-none"
-                    animate={{
-                      r: [38, 42, 38],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                )}
-
-                {/* Main Region Circle */}
+                {/* Minimalist Region Circle - First Principles Design */}
                 <motion.circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={isHovered ? 36 : 32}
-                  fill={
-                    isConquered
-                      ? "rgba(16, 185, 129, 0.65)"
-                      : isStarting
-                      ? "rgba(234, 179, 8, 0.5)"
-                      : "rgba(255, 255, 255, 0.15)"
-                  }
-                  stroke={
-                    isConquered
-                      ? "#10b981"
-                      : isStarting
-                      ? "#eab308"
-                      : "rgba(255, 255, 255, 0.5)"
-                  }
-                  strokeWidth={isHovered ? 4.5 : 3.5}
-                  className="cursor-pointer transition-all duration-200"
+                  r={isHovered ? 28 : 24}
+                  fill={isConquered ? "#10b981" : isStarting ? "#eab308" : "#1f2937"}
+                  stroke={isConquered ? "#10b981" : isStarting ? "#eab308" : "#6b7280"}
+                  strokeWidth={isHovered ? 3 : 2}
+                  className="cursor-pointer transition-all duration-150"
                   onClick={() => setSelectedRegion(region)}
                   onMouseEnter={() => setHoveredRegion(region.regionNumber)}
                   onMouseLeave={() => setHoveredRegion(null)}
-                  whileHover={{ scale: 1.15 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   style={{
-                    filter: isConquered
-                      ? "drop-shadow(0 0 18px rgba(16, 185, 129, 1)) drop-shadow(0 0 8px rgba(16, 185, 129, 0.7))"
-                      : isStarting
-                      ? "drop-shadow(0 0 15px rgba(234, 179, 8, 0.9)) drop-shadow(0 0 6px rgba(234, 179, 8, 0.6))"
-                      : isHovered
-                      ? "drop-shadow(0 0 12px rgba(255, 255, 255, 0.7))"
-                      : "drop-shadow(0 2px 6px rgba(0,0,0,0.6))",
+                    filter: isConquered 
+                      ? "drop-shadow(0 0 8px rgba(16, 185, 129, 0.8))" 
+                      : "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
                   }}
                   data-testid={`region-circle-${region.regionNumber}`}
                 />
                 
-                {/* Region Number Label */}
+                {/* Region Number - Mission Critical Data */}
                 <text
                   x={pos.x}
-                  y={pos.y}
-                  fill={isConquered ? "#fff" : isStarting ? "#fef08a" : "#fff"}
-                  fontSize="22"
-                  fontWeight="900"
-                  fontFamily="system-ui, -apple-system, sans-serif"
+                  y={pos.y - 1}
+                  fill={isConquered ? "#000" : "#fff"}
+                  fontSize="18"
+                  fontWeight="800"
+                  fontFamily="monospace"
                   textAnchor="middle"
                   dominantBaseline="middle"
                   className="pointer-events-none select-none"
                   style={{
-                    textShadow: isConquered 
-                      ? "0 0 12px rgba(16, 185, 129, 1), 0 2px 4px rgba(0,0,0,0.9)" 
-                      : "0 2px 6px rgba(0,0,0,0.95)",
-                    letterSpacing: "-0.5px",
+                    textShadow: isConquered ? "none" : "0 2px 4px rgba(0,0,0,0.9)",
                   }}
                 >
                   {region.regionNumber}
                 </text>
                 
-                {/* Conquered Checkmark Badge */}
-                {isConquered && (
-                  <motion.g
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    transform={`translate(${pos.x + 18}, ${pos.y - 18})`}
-                    className="pointer-events-none"
-                  >
-                    <circle cx="0" cy="0" r="11" fill="#10b981" stroke="#fff" strokeWidth="2" />
-                    <path
-                      d="M -5,0 L -2,5 L 5,-5"
-                      stroke="white"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                {/* DATA OVERLAY: School Stats (Elon Algorithm - Maximum Information Density) */}
+                {stats.total > 0 && (
+                  <g className="pointer-events-none">
+                    {/* Background for data label */}
+                    <rect
+                      x={pos.x - 16}
+                      y={pos.y + 30}
+                      width="32"
+                      height="14"
+                      fill="#000"
+                      stroke={isConquered ? "#10b981" : "#6b7280"}
+                      strokeWidth="1"
+                      rx="2"
+                      opacity="0.9"
                     />
-                  </motion.g>
+                    {/* School completion data */}
+                    <text
+                      x={pos.x}
+                      y={pos.y + 40}
+                      fill={isConquered ? "#10b981" : "#fff"}
+                      fontSize="10"
+                      fontWeight="700"
+                      fontFamily="monospace"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {stats.contacted}/{stats.total}
+                    </text>
+                  </g>
                 )}
-                
-                {/* Starting Region Animated Target */}
-                {isStarting && !isConquered && (
-                  <g transform={`translate(${pos.x}, ${pos.y - 25})`} className="pointer-events-none">
-                    <motion.circle
-                      cx="0"
-                      cy="0"
-                      r="9"
-                      stroke="#eab308"
-                      strokeWidth="2.5"
-                      fill="none"
-                      animate={{ 
-                        scale: [1, 1.3, 1],
-                        opacity: [1, 0.5, 1],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
+
+                {/* Completion Percentage Badge (When > 0%) */}
+                {stats.percentage > 0 && (
+                  <g className="pointer-events-none">
+                    <circle
+                      cx={pos.x + 22}
+                      cy={pos.y - 20}
+                      r="12"
+                      fill="#10b981"
+                      stroke="#000"
+                      strokeWidth="2"
                     />
-                    <circle cx="0" cy="0" r="4" fill="#eab308" />
+                    <text
+                      x={pos.x + 22}
+                      y={pos.y - 19}
+                      fill="#000"
+                      fontSize="9"
+                      fontWeight="900"
+                      fontFamily="monospace"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {stats.percentage}%
+                    </text>
                   </g>
                 )}
               </g>
@@ -332,36 +330,56 @@ export function KentuckyRegionMap() {
         )}
       </div>
 
-      {/* Enhanced Legend */}
-      <div className="flex flex-wrap gap-8 justify-center pt-6 border-t border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full border-[3.5px] border-emerald-500 bg-emerald-500/60" 
-              style={{ boxShadow: "0 0 15px rgba(16, 185, 129, 0.6)" }} 
-            />
-            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
-              <CheckCircle2 className="w-3 h-3 text-white" strokeWidth={3} />
-            </div>
-          </div>
-          <span className="text-sm text-white/80 font-semibold">Conquered</span>
+      {/* MISSION CONTROL DATA PANEL - Elon Algorithm: Pure Functionality */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-emerald-500/20 font-mono">
+        {/* Total Schools Metric */}
+        <div className="bg-black/50 border border-emerald-500/30 rounded p-3">
+          <div className="text-emerald-400/70 text-xs uppercase tracking-wider mb-1">Total Schools</div>
+          <div className="text-white text-2xl font-bold">{schools?.length || 0}</div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full border-[3.5px] border-yellow-500 bg-yellow-500/40" />
-            <Target className="w-5 h-5 text-yellow-400 absolute -top-1 -right-1" strokeWidth={2.5} />
+        
+        {/* Contacted Metric */}
+        <div className="bg-black/50 border border-emerald-500/30 rounded p-3">
+          <div className="text-emerald-400/70 text-xs uppercase tracking-wider mb-1">Contacted</div>
+          <div className="text-emerald-400 text-2xl font-bold">
+            {schools?.filter(s => s.contacted).length || 0}
           </div>
-          <span className="text-sm text-white/80 font-semibold">Starting Region</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-[3.5px] border-white/40 bg-white/12" />
-          <span className="text-sm text-white/80 font-semibold">Available</span>
+        
+        {/* Completion Rate */}
+        <div className="bg-black/50 border border-emerald-500/30 rounded p-3">
+          <div className="text-emerald-400/70 text-xs uppercase tracking-wider mb-1">Completion</div>
+          <div className="text-white text-2xl font-bold">
+            {schools && schools.length > 0 
+              ? Math.round((schools.filter(s => s.contacted).length / schools.length) * 100) 
+              : 0}%
+          </div>
+        </div>
+        
+        {/* Regions Active */}
+        <div className="bg-black/50 border border-emerald-500/30 rounded p-3">
+          <div className="text-emerald-400/70 text-xs uppercase tracking-wider mb-1">Regions</div>
+          <div className="text-white text-2xl font-bold">{conqueredCount}/{totalRegions}</div>
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="text-center text-sm text-emerald-400/80 font-mono border-t border-white/5 pt-5 space-y-1">
-        <div className="font-bold">Click any region to view school checklist</div>
-        <div className="text-emerald-400/60 text-xs">Begin your conquest with Region 4 • Track middle & high schools across all 18 KASS regions</div>
+      {/* Minimalist Legend */}
+      <div className="flex items-center justify-center gap-6 pt-3 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-emerald-500 border-2 border-emerald-500" />
+          <span className="text-white/70">CONQUERED</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-yellow-500 border-2 border-yellow-500" />
+          <span className="text-white/70">START</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-gray-800 border-2 border-gray-600" />
+          <span className="text-white/70">PENDING</span>
+        </div>
+        <div className="text-white/50 border-l border-white/20 pl-4">
+          Click region → View schools
+        </div>
       </div>
 
       {/* School Checklist Dialog */}
