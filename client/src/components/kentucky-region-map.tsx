@@ -6,27 +6,29 @@ import { CheckCircle2, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
-// Approximate clickable regions based on the KASS map image
-// Coordinates as percentages of image width/height (x, y, width, height)
-const regionAreas: Record<number, { x: number; y: number; width: number; height: number }> = {
-  1: { x: 2, y: 55, width: 12, height: 15 }, // Far West
-  2: { x: 12, y: 48, width: 10, height: 17 }, // Graves/Calloway area
-  3: { x: 18, y: 35, width: 10, height: 15 }, // Henderson/Union/Webster
-  4: { x: 15, y: 75, width: 12, height: 12 }, // Daviess/McLean
-  5: { x: 25, y: 42, width: 12, height: 15 }, // Breckinridge/Grayson
-  6: { x: 28, y: 25, width: 12, height: 15 }, // Trimble/Carroll area
-  7: { x: 82, y: 15, width: 10, height: 12 }, // Boone/Campbell/Kenton
-  8: { x: 35, y: 32, width: 10, height: 12 }, // Region 8 area
-  9: { x: 92, y: 20, width: 8, height: 12 }, // Boyd/Carter/Greenup
-  10: { x: 93, y: 35, width: 7, height: 15 }, // Lawrence/Martin/Pike
-  11: { x: 93, y: 52, width: 7, height: 15 }, // Bell/Clay/Harlan
-  12: { x: 82, y: 70, width: 12, height: 12 }, // Clinton/McCreary/Pulaski
-  13: { x: 85, y: 80, width: 15, height: 10 }, // Adair/Casey/Russell
-  14: { x: 58, y: 82, width: 14, height: 12 }, // Barren/Hart
-  15: { x: 35, y: 78, width: 14, height: 12 }, // Christian/Hopkins
-  16: { x: 45, y: 82, width: 10, height: 10 }, // Hardin area
-  17: { x: 72, y: 20, width: 10, height: 12 }, // Fayette/Jessamine/Woodford
-  18: { x: 45, y: 32, width: 12, height: 14 }, // Additional region
+// Simplified Kentucky state outline (approximate shape)
+const KENTUCKY_OUTLINE = "M 50,150 L 100,140 L 200,135 L 350,130 L 500,125 L 650,120 L 750,115 L 850,110 L 900,120 L 920,140 L 900,160 L 880,180 L 850,200 L 820,220 L 780,240 L 740,255 L 680,270 L 620,280 L 560,285 L 500,288 L 440,290 L 380,288 L 320,285 L 260,280 L 200,270 L 150,255 L 100,235 L 70,210 L 50,180 Z";
+
+// Region positions for a 3x6 grid layout overlay on Kentucky shape
+const regionGrid: Record<number, { x: number; y: number; col: number; row: number }> = {
+  1: { x: 80, y: 200, col: 0, row: 2 },    // Far West
+  2: { x: 150, y: 230, col: 1, row: 2 },   // West
+  3: { x: 150, y: 170, col: 1, row: 1 },   // North West
+  4: { x: 80, y: 260, col: 0, row: 3 },    // SW (Starting)
+  5: { x: 220, y: 200, col: 2, row: 2 },   // North Central
+  6: { x: 220, y: 140, col: 2, row: 1 },   // North
+  7: { x: 800, y: 140, col: 10, row: 1 },  // Far North East
+  8: { x: 290, y: 170, col: 3, row: 1 },   // North Central
+  9: { x: 870, y: 150, col: 11, row: 1 },  // North East Corner
+  10: { x: 870, y: 200, col: 11, row: 2 }, // East
+  11: { x: 870, y: 250, col: 11, row: 3 }, // South East
+  12: { x: 750, y: 240, col: 9, row: 3 },  // South Central East
+  13: { x: 680, y: 260, col: 8, row: 3 },  // South Central
+  14: { x: 560, y: 270, col: 6, row: 3 },  // South
+  15: { x: 290, y: 240, col: 3, row: 3 },  // South West
+  16: { x: 430, y: 270, col: 5, row: 3 },  // South Central West
+  17: { x: 650, y: 180, col: 8, row: 2 },  // Central
+  18: { x: 430, y: 200, col: 5, row: 2 },  // Central West
 };
 
 export function KentuckyRegionMap() {
@@ -86,122 +88,191 @@ export function KentuckyRegionMap() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Kentucky KASS Regional Conquest</h2>
-          <div className="text-emerald-400 font-mono">
-            {conqueredCount}/{totalRegions} Regions Conquered
+          <div className="text-emerald-400 font-mono text-xl">
+            {conqueredCount}/{totalRegions}
           </div>
         </div>
         
         {/* Progress Bar */}
-        <div className="relative h-3 bg-black/50 rounded-full overflow-hidden border border-emerald-500/30">
+        <div className="relative h-4 bg-black/50 rounded-full overflow-hidden border border-emerald-500/30">
           <motion.div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-400"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             style={{
-              boxShadow: "0 0 20px rgba(16, 185, 129, 0.5)",
+              boxShadow: "0 0 20px rgba(16, 185, 129, 0.6)",
             }}
           />
         </div>
       </div>
 
-      {/* Interactive Kentucky Map with Image Background */}
-      <div className="relative w-full rounded-lg border border-emerald-500/20 overflow-hidden bg-black/30">
-        {/* Background KASS Map Image */}
-        <img
-          src="/kass-map.png"
-          alt="Kentucky KASS Regions Map"
-          className="w-full h-auto opacity-70"
-        />
-        
-        {/* Interactive Overlay Regions */}
-        <div className="absolute inset-0">
+      {/* Kentucky SVG Map */}
+      <div className="relative w-full bg-black/30 rounded-lg border border-emerald-500/20 p-8">
+        <svg
+          viewBox="0 0 950 350"
+          className="w-full h-full"
+          style={{ 
+            filter: "drop-shadow(0 0 15px rgba(16, 185, 129, 0.2))",
+            minHeight: "400px"
+          }}
+        >
+          {/* Kentucky State Outline */}
+          <path
+            d={KENTUCKY_OUTLINE}
+            fill="rgba(0, 0, 0, 0.4)"
+            stroke="rgba(255, 255, 255, 0.3)"
+            strokeWidth="2"
+          />
+
+          {/* Grid lines for visual reference (subtle) */}
+          <g opacity="0.1">
+            {[...Array(12)].map((_, i) => (
+              <line
+                key={`v-${i}`}
+                x1={80 + i * 70}
+                y1={100}
+                x2={80 + i * 70}
+                y2={300}
+                stroke="white"
+                strokeWidth="1"
+              />
+            ))}
+            {[...Array(4)].map((_, i) => (
+              <line
+                key={`h-${i}`}
+                x1={50}
+                y1={140 + i * 60}
+                x2={920}
+                y2={140 + i * 60}
+                stroke="white"
+                strokeWidth="1"
+              />
+            ))}
+          </g>
+
+          {/* Individual clickable regions */}
           {regions?.map((region) => {
-            const area = regionAreas[region.regionNumber];
-            if (!area) return null;
+            const pos = regionGrid[region.regionNumber];
+            if (!pos) return null;
 
             const isConquered = region.conquered;
             const isStarting = region.regionNumber === 4;
             const isHovered = hoveredRegion === region.regionNumber;
             
             return (
-              <motion.div
-                key={region.id}
-                className={`absolute cursor-pointer transition-all duration-200 ${
-                  isConquered
-                    ? "bg-emerald-500/40 border-2 border-emerald-500"
-                    : isStarting
-                    ? "bg-yellow-500/20 border-2 border-yellow-500/50"
-                    : "bg-white/5 border-2 border-white/20 hover:border-emerald-500/50"
-                }`}
-                style={{
-                  left: `${area.x}%`,
-                  top: `${area.y}%`,
-                  width: `${area.width}%`,
-                  height: `${area.height}%`,
-                  boxShadow: isConquered
-                    ? "0 0 20px rgba(16, 185, 129, 0.6)"
-                    : isHovered
-                    ? "0 0 15px rgba(16, 185, 129, 0.4)"
-                    : "none",
-                }}
-                onClick={() => handleToggleConquest(region)}
-                onMouseEnter={() => setHoveredRegion(region.regionNumber)}
-                onMouseLeave={() => setHoveredRegion(null)}
-                whileHover={{ scale: 1.05 }}
-                data-testid={`region-area-${region.regionNumber}`}
-              >
-                {/* Region Number Label */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div
-                      className={`text-2xl md:text-3xl font-bold font-mono ${
-                        isConquered
-                          ? "text-emerald-400"
-                          : isStarting
-                          ? "text-yellow-400"
-                          : "text-white"
-                      }`}
-                      style={{
-                        textShadow: isConquered
-                          ? "0 0 10px rgba(16, 185, 129, 0.8)"
-                          : "0 2px 8px rgba(0,0,0,0.9)",
-                      }}
-                    >
-                      {region.regionNumber}
-                    </div>
-                    
-                    {/* Icons */}
-                    <div className="flex items-center justify-center mt-1">
-                      {isConquered && (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      )}
-                      {isStarting && !isConquered && (
-                        <Target className="w-5 h-5 text-yellow-400" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+              <g key={region.id}>
+                {/* Region Circle */}
+                <motion.circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={isHovered ? 32 : 28}
+                  fill={
+                    isConquered
+                      ? "rgba(16, 185, 129, 0.5)"
+                      : isStarting
+                      ? "rgba(234, 179, 8, 0.3)"
+                      : "rgba(255, 255, 255, 0.1)"
+                  }
+                  stroke={
+                    isConquered
+                      ? "#10b981"
+                      : isStarting
+                      ? "#eab308"
+                      : "rgba(255, 255, 255, 0.3)"
+                  }
+                  strokeWidth={isHovered ? 4 : 3}
+                  className="cursor-pointer transition-all duration-200"
+                  onClick={() => handleToggleConquest(region)}
+                  onMouseEnter={() => setHoveredRegion(region.regionNumber)}
+                  onMouseLeave={() => setHoveredRegion(null)}
+                  whileHover={{ scale: 1.1 }}
+                  style={{
+                    filter: isConquered
+                      ? "drop-shadow(0 0 12px rgba(16, 185, 129, 0.8))"
+                      : isHovered
+                      ? "drop-shadow(0 0 8px rgba(16, 185, 129, 0.5))"
+                      : "none",
+                  }}
+                  data-testid={`region-circle-${region.regionNumber}`}
+                />
+                
+                {/* Region Number */}
+                <text
+                  x={pos.x}
+                  y={pos.y}
+                  fill={isConquered ? "#10b981" : isStarting ? "#eab308" : "#fff"}
+                  fontSize="20"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="pointer-events-none select-none"
+                  style={{
+                    textShadow: isConquered 
+                      ? "0 0 8px rgba(16, 185, 129, 1)" 
+                      : "0 2px 4px rgba(0,0,0,0.9)",
+                  }}
+                >
+                  {region.regionNumber}
+                </text>
+                
+                {/* Conquered Checkmark */}
+                {isConquered && (
+                  <g transform={`translate(${pos.x + 15}, ${pos.y - 15})`} className="pointer-events-none">
+                    <circle cx="0" cy="0" r="10" fill="rgba(16, 185, 129, 0.9)" />
+                    <path
+                      d="M -4,0 L -1,4 L 4,-4"
+                      stroke="white"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                )}
+                
+                {/* Starting Region Target */}
+                {isStarting && !isConquered && (
+                  <g transform={`translate(${pos.x}, ${pos.y - 20})`} className="pointer-events-none">
+                    <motion.circle
+                      cx="0"
+                      cy="0"
+                      r="8"
+                      stroke="#eab308"
+                      strokeWidth="2"
+                      fill="none"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <circle cx="0" cy="0" r="3" fill="#eab308" />
+                  </g>
+                )}
+              </g>
             );
           })}
-        </div>
+        </svg>
 
         {/* Hovered Region Tooltip */}
         {hoveredRegion && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute top-4 right-4 bg-black/90 border border-emerald-500/40 rounded-lg p-3 backdrop-blur-sm z-10"
+            className="absolute top-4 right-4 bg-black/95 border border-emerald-500/50 rounded-lg p-4 backdrop-blur-sm z-10"
+            style={{
+              boxShadow: "0 0 20px rgba(16, 185, 129, 0.3)",
+            }}
           >
-            <div className="text-emerald-400 font-mono text-sm font-bold">
+            <div className="text-emerald-400 font-mono text-lg font-bold">
               Region {hoveredRegion}
             </div>
-            <div className="text-white/70 text-xs mt-1">
+            <div className="text-white/80 text-sm mt-1">
               {regions?.find(r => r.regionNumber === hoveredRegion)?.name}
             </div>
-            <div className="text-white/50 text-xs mt-1">
-              Click to {regions?.find(r => r.regionNumber === hoveredRegion)?.conquered ? 'un-conquer' : 'conquer'}
+            <div className="text-white/50 text-xs mt-2 border-t border-white/10 pt-2">
+              {regions?.find(r => r.regionNumber === hoveredRegion)?.conquered 
+                ? '✓ Conquered' 
+                : 'Click to conquer'}
             </div>
           </motion.div>
         )}
@@ -209,23 +280,31 @@ export function KentuckyRegionMap() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-6 justify-center pt-4 border-t border-white/10">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded border-2 border-emerald-500 bg-emerald-500/40" />
-          <span className="text-sm text-white/70">Conquered</span>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full border-3 border-emerald-500 bg-emerald-500/50" 
+              style={{ boxShadow: "0 0 10px rgba(16, 185, 129, 0.5)" }} 
+            />
+            <CheckCircle2 className="w-4 h-4 text-white absolute -top-1 -right-1" />
+          </div>
+          <span className="text-sm text-white/70 font-medium">Conquered</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded border-2 border-yellow-500 bg-yellow-500/20" />
-          <span className="text-sm text-white/70">Starting Region (4)</span>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full border-3 border-yellow-500 bg-yellow-500/30" />
+            <Target className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1" />
+          </div>
+          <span className="text-sm text-white/70 font-medium">Starting (Region 4)</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded border-2 border-white/20 bg-white/5" />
-          <span className="text-sm text-white/70">Not Conquered</span>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-3 border-white/30 bg-white/10" />
+          <span className="text-sm text-white/70 font-medium">Not Conquered</span>
         </div>
       </div>
 
       {/* Instructions */}
-      <div className="text-center text-xs text-white/50">
-        Click on any region to mark it as conquered. Start with Region 4!
+      <div className="text-center text-sm text-emerald-400/70 font-mono border-t border-white/5 pt-4">
+        Click any region circle to toggle conquest status • Start with Region 4
       </div>
     </div>
   );
