@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import kassMapUrl from "@assets/image_1760828489046.png";
 
 // Approximate clickable regions based on the KASS map image
 // Coordinates as percentages of image width/height (x, y, width, height)
@@ -110,7 +109,7 @@ export function KentuckyRegionMap() {
       <div className="relative w-full rounded-lg border border-emerald-500/20 overflow-hidden bg-black/30">
         {/* Background KASS Map Image */}
         <img
-          src={kassMapUrl}
+          src="/kass-map.png"
           alt="Kentucky KASS Regions Map"
           className="w-full h-auto opacity-70"
         />
