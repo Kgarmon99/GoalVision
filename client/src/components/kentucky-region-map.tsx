@@ -5,45 +5,44 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-
-// Accurate Kentucky state outline SVG path (from public domain geographic data)
-const KENTUCKY_OUTLINE = "M 920,180 L 915,175 L 905,172 L 895,170 L 885,168 L 875,167 L 865,166 L 855,165 L 845,165 L 835,165 L 825,166 L 815,167 L 805,168 L 795,170 L 785,172 L 775,174 L 765,177 L 755,180 L 745,183 L 735,187 L 725,191 L 715,195 L 705,200 L 695,205 L 685,210 L 675,216 L 665,222 L 655,228 L 645,235 L 635,241 L 625,248 L 615,255 L 605,262 L 595,269 L 585,276 L 575,283 L 565,289 L 555,295 L 545,300 L 535,305 L 525,309 L 515,313 L 505,316 L 495,319 L 485,321 L 475,323 L 465,324 L 455,325 L 445,326 L 435,326 L 425,326 L 415,326 L 405,325 L 395,324 L 385,323 L 375,321 L 365,319 L 355,316 L 345,313 L 335,309 L 325,305 L 315,300 L 305,295 L 295,289 L 285,283 L 275,276 L 265,269 L 255,262 L 245,255 L 235,248 L 225,241 L 215,235 L 205,228 L 195,222 L 185,216 L 175,210 L 165,205 L 155,200 L 145,195 L 135,191 L 125,187 L 115,183 L 105,180 L 95,177 L 85,174 L 75,172 L 65,170 L 55,168 L 45,167 L 35,166 L 25,166 L 15,167 L 10,169 L 8,172 L 7,176 L 8,180 L 10,184 L 13,188 L 17,192 L 22,196 L 28,200 L 35,203 L 42,206 L 50,208 L 58,210 L 67,211 L 76,212 L 85,212 L 94,212 L 103,211 L 112,210 L 121,208 L 130,206 L 139,203 L 148,200 L 157,196 L 166,192 L 175,188 L 184,184 L 193,180 L 202,177 L 211,174 L 220,172 L 229,170 L 238,169 L 247,168 L 256,168 L 265,169 L 274,170 L 283,172 L 292,174 L 301,177 L 310,180 L 319,184 L 328,188 L 337,192 L 346,196 L 355,200 L 364,203 L 373,206 L 382,208 L 391,210 L 400,211 L 409,212 L 418,212 L 427,212 L 436,211 L 445,210 L 454,208 L 463,206 L 472,203 L 481,200 L 490,196 L 499,192 L 508,188 L 517,184 L 526,180 L 535,177 L 544,174 L 553,172 L 562,170 L 571,169 L 580,168 L 589,168 L 598,169 L 607,170 L 616,172 L 625,174 L 634,177 L 643,180 L 652,184 L 661,188 L 670,192 L 679,196 L 688,200 L 697,203 L 706,206 L 715,208 L 724,210 L 733,211 L 742,212 L 751,212 L 760,212 L 769,211 L 778,210 L 787,208 L 796,206 L 805,203 L 814,200 L 823,196 L 832,192 L 841,188 L 850,184 L 859,180 L 868,177 L 877,175 L 886,173 L 895,172 L 904,172 L 913,173 L 920,175 Z";
+import { SchoolChecklistDialog } from "./school-checklist-dialog";
 
 // Geographically accurate KASS region positions based on Kentucky counties
-// Note: KASS officially has 17 regions. Region 18 is included per user's database
+// Positions are in percentage (0-100) for responsive positioning on actual KY map
 const regionPositions: Record<number, { x: number; y: number; name: string }> = {
   // Western Kentucky
-  1: { x: 120, y: 240, name: "Region 1 - Far West" },        // Fulton, Hickman, Carlisle, Ballard
-  2: { x: 180, y: 265, name: "Region 2 - Purchase" },        // McCracken, Marshall, Calloway, Graves
-  3: { x: 220, y: 210, name: "Region 3 - West" },            // Henderson, Union, Webster
-  4: { x: 175, y: 305, name: "Region 4 - Pennyrile" },       // Caldwell, Lyon, Livingston, Crittenden
-  5: { x: 265, y: 250, name: "Region 5 - Green River" },     // Daviess, McLean, Hancock, Ohio
+  1: { x: 8, y: 48, name: "Region 1 - Far West" },        // Fulton, Hickman, Carlisle, Ballard
+  2: { x: 15, y: 55, name: "Region 2 - Purchase" },        // McCracken, Marshall, Calloway, Graves
+  3: { x: 20, y: 38, name: "Region 3 - West" },            // Henderson, Union, Webster
+  4: { x: 14, y: 68, name: "Region 4 - Pennyrile" },       // Caldwell, Lyon, Livingston, Crittenden
+  5: { x: 25, y: 52, name: "Region 5 - Green River" },     // Daviess, McLean, Hancock, Ohio
   
   // North Central Kentucky  
-  6: { x: 355, y: 185, name: "Region 6 - Jefferson" },       // Jefferson County (Louisville Metro)
-  7: { x: 885, y: 170, name: "Region 7 - Northern KY" },     // Boone, Campbell, Kenton (Cincinnati area)
-  8: { x: 430, y: 210, name: "Region 8 - Lincoln Trail" },   // Hardin, Breckinridge, Meade
+  6: { x: 38, y: 35, name: "Region 6 - Jefferson" },       // Jefferson County (Louisville Metro)
+  7: { x: 92, y: 22, name: "Region 7 - Northern KY" },     // Boone, Campbell, Kenton (Cincinnati area)
+  8: { x: 45, y: 40, name: "Region 8 - Lincoln Trail" },   // Hardin, Breckinridge, Meade
   
   // Eastern Kentucky
-  9: { x: 905, y: 195, name: "Region 9 - FIVCO" },           // Boyd, Carter, Greenup, Lawrence, Elliott
-  10: { x: 870, y: 250, name: "Region 10 - Big Sandy" },     // Pike, Martin, Floyd, Johnson, Magoffin
-  11: { x: 820, y: 295, name: "Region 11 - Southeast" },     // Bell, Harlan, Letcher, Knott, Perry
-  12: { x: 720, y: 310, name: "Region 12 - Cumberland" },    // Clay, Knox, Whitley, McCreary
+  9: { x: 95, y: 32, name: "Region 9 - FIVCO" },           // Boyd, Carter, Greenup, Lawrence, Elliott
+  10: { x: 90, y: 52, name: "Region 10 - Big Sandy" },     // Pike, Martin, Floyd, Johnson, Magoffin
+  11: { x: 84, y: 68, name: "Region 11 - Southeast" },     // Bell, Harlan, Letcher, Knott, Perry
+  12: { x: 72, y: 72, name: "Region 12 - Cumberland" },    // Clay, Knox, Whitley, McCreary
   
   // South Central Kentucky
-  13: { x: 625, y: 305, name: "Region 13 - Lake Cumberland" }, // Pulaski, Casey, Russell, Wayne
-  14: { x: 465, y: 315, name: "Region 14 - Barren River" },  // Barren, Hart, Edmonson, Warren
-  15: { x: 315, y: 300, name: "Region 15 - Hopkinsville" },  // Christian, Todd, Trigg, Muhlenberg
+  13: { x: 62, y: 70, name: "Region 13 - Lake Cumberland" }, // Pulaski, Casey, Russell, Wayne
+  14: { x: 45, y: 72, name: "Region 14 - Barren River" },  // Barren, Hart, Edmonson, Warren
+  15: { x: 30, y: 68, name: "Region 15 - Hopkinsville" },  // Christian, Todd, Trigg, Muhlenberg
   
   // Central/Bluegrass
-  16: { x: 540, y: 260, name: "Region 16 - Central KY" },    // Marion, Taylor, Green, Adair
-  17: { x: 665, y: 210, name: "Region 17 - Bluegrass" },     // Fayette (Lexington), Jessamine, Woodford, Clark
-  18: { x: 520, y: 225, name: "Region 18 - Additional" },    // Additional region
+  16: { x: 54, y: 58, name: "Region 16 - Central KY" },    // Marion, Taylor, Green, Adair
+  17: { x: 68, y: 42, name: "Region 17 - Bluegrass" },     // Fayette (Lexington), Jessamine, Woodford, Clark
+  18: { x: 52, y: 45, name: "Region 18 - Additional" },    // Additional region
 };
 
 export function KentuckyRegionMap() {
   const { toast } = useToast();
   const [hoveredRegion, setHoveredRegion] = useState<number | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
   
   const { data: regions, isLoading } = useQuery<Region[]>({
     queryKey: ["/api/regions"],
@@ -122,43 +121,34 @@ export function KentuckyRegionMap() {
         </div>
       </div>
 
-      {/* Kentucky SVG Map with Accurate Outline */}
-      <div className="relative w-full bg-gradient-to-b from-black/40 to-black/30 rounded-xl border-2 border-emerald-500/20 p-6 md:p-10"
+      {/* Kentucky Map with Region Markers */}
+      <div className="relative w-full bg-gradient-to-b from-black/40 to-black/30 rounded-xl border-2 border-emerald-500/20 overflow-hidden"
         style={{
           boxShadow: "0 0 40px rgba(16, 185, 129, 0.15), inset 0 0 60px rgba(0,0,0,0.5)",
         }}
       >
-        <svg
-          viewBox="0 0 950 380"
-          className="w-full h-full"
-          style={{ 
-            filter: "drop-shadow(0 0 20px rgba(16, 185, 129, 0.2))",
-            minHeight: "450px"
-          }}
-        >
-          {/* Kentucky State Outline - Accurate geographic shape */}
-          <path
-            d={KENTUCKY_OUTLINE}
-            fill="rgba(0, 0, 0, 0.5)"
-            stroke="rgba(255, 255, 255, 0.4)"
-            strokeWidth="3"
+        {/* Kentucky Map Image */}
+        <div className="relative w-full" style={{ paddingBottom: "40%" }}>
+          <img 
+            src="/attached_assets/stock_images/kentucky_state_map_o_3d1d25ce.jpg" 
+            alt="Kentucky State Map"
+            className="absolute inset-0 w-full h-full object-cover opacity-70"
             style={{
-              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+              filter: "brightness(0.6) contrast(1.3) sepia(0.4) hue-rotate(140deg)",
             }}
           />
-
-          {/* Subtle state fill gradient */}
-          <defs>
-            <radialGradient id="stateGlow" cx="50%" cy="50%">
-              <stop offset="0%" stopColor="rgba(16, 185, 129, 0.05)" />
-              <stop offset="100%" stopColor="rgba(0, 0, 0, 0.3)" />
-            </radialGradient>
-          </defs>
-          <path
-            d={KENTUCKY_OUTLINE}
-            fill="url(#stateGlow)"
-            stroke="none"
-          />
+          
+          {/* Dark overlay for better marker visibility */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/40" />
+          
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full"
+            style={{ 
+              filter: "drop-shadow(0 0 20px rgba(16, 185, 129, 0.2))"
+            }}
+          >
 
           {/* Individual Regional Markers */}
           {regions?.map((region) => {
@@ -214,7 +204,7 @@ export function KentuckyRegionMap() {
                   }
                   strokeWidth={isHovered ? 5 : 3.5}
                   className="cursor-pointer transition-all duration-200"
-                  onClick={() => handleToggleConquest(region)}
+                  onClick={() => setSelectedRegion(region)}
                   onMouseEnter={() => setHoveredRegion(region.regionNumber)}
                   onMouseLeave={() => setHoveredRegion(null)}
                   whileHover={{ scale: 1.15 }}
@@ -293,7 +283,8 @@ export function KentuckyRegionMap() {
               </g>
             );
           })}
-        </svg>
+          </svg>
+        </div>
 
         {/* Floating Region Info Tooltip */}
         {hoveredRegion && (
@@ -325,7 +316,7 @@ export function KentuckyRegionMap() {
                 </div>
               ) : (
                 <div className="text-white/60">
-                  <span className="font-medium">Click to conquer →</span>
+                  <span className="font-medium">Click to view schools →</span>
                 </div>
               )}
             </div>
@@ -361,9 +352,20 @@ export function KentuckyRegionMap() {
 
       {/* Instructions */}
       <div className="text-center text-sm text-emerald-400/80 font-mono border-t border-white/5 pt-5 space-y-1">
-        <div className="font-bold">Click any region to mark conquered</div>
-        <div className="text-emerald-400/60 text-xs">Begin your conquest with Region 4 • Track progress across all 18 KASS regions</div>
+        <div className="font-bold">Click any region to view school checklist</div>
+        <div className="text-emerald-400/60 text-xs">Begin your conquest with Region 4 • Track middle & high schools across all 18 KASS regions</div>
       </div>
+
+      {/* School Checklist Dialog */}
+      {selectedRegion && (
+        <SchoolChecklistDialog
+          open={!!selectedRegion}
+          onOpenChange={(open) => !open && setSelectedRegion(null)}
+          regionId={selectedRegion.id}
+          regionName={selectedRegion.name}
+          regionNumber={selectedRegion.regionNumber}
+        />
+      )}
     </div>
   );
 }
