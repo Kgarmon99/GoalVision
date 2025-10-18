@@ -319,4 +319,27 @@ export const insertDailyMoveSchema = createInsertSchema(dailyMoves).pick({
 export type InsertDailyMove = z.infer<typeof insertDailyMoveSchema>;
 export type DailyMove = typeof dailyMoves.$inferSelect;
 
+// Regional conquest tracking
+export const regions = pgTable("regions", {
+  id: serial("id").primaryKey(),
+  regionNumber: integer("region_number").notNull().unique(), // 1-18
+  name: text("name").notNull(),
+  conquered: boolean("conquered").default(false),
+  conqueredDate: text("conquered_date"), // ISO date string when conquered
+  targetDate: text("target_date"), // ISO date string for target
+  notes: text("notes").default(""),
+});
+
+export const insertRegionSchema = createInsertSchema(regions).pick({
+  regionNumber: true,
+  name: true,
+  conquered: true,
+  conqueredDate: true,
+  targetDate: true,
+  notes: true,
+});
+
+export type InsertRegion = z.infer<typeof insertRegionSchema>;
+export type Region = typeof regions.$inferSelect;
+
 
