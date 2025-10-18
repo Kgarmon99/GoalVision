@@ -15,7 +15,7 @@ export function RegionMap() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<Region> }) => {
-      return await apiRequest(`/api/regions/${id}`, "PATCH", data);
+      return await apiRequest("PATCH", `/api/regions/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/regions"] });
