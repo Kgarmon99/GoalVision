@@ -339,7 +339,47 @@ export const insertRegionSchema = createInsertSchema(regions).pick({
   notes: true,
 });
 
+export const regionsRelations = relations(regions, ({ many }) => ({
+  schools: many(schools)
+}));
+
 export type InsertRegion = z.infer<typeof insertRegionSchema>;
 export type Region = typeof regions.$inferSelect;
+
+// Schools table for tracking middle and high schools in each region
+export const schools = pgTable("schools", {
+  id: serial("id").primaryKey(),
+  regionId: integer("region_id").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // "middle" or "high"
+  district: text("district").notNull(), // School district name
+  contacted: boolean("contacted").default(false),
+  contactedDate: text("contacted_date"), // ISO date string
+  responseStatus: text("response_status").default("pending"), // "pending", "interested", "not-interested", "meeting-scheduled", "closed"
+  notes: text("notes").default(""),
+  priority: integer("priority").default(0), // 0-5, higher = more important
+});
+
+export const schoolsRelations = relations(schools, ({ one }) => ({
+  region: one(regions, {
+    fields: [schools.regionId],
+    references: [regions.id]
+  })
+}));
+
+export const insertSchoolSchema = createInsertSchema(schools).pick({
+  regionId: true,
+  name: true,
+  type: true,
+  district: true,
+  contacted: true,
+  contactedDate: true,
+  responseStatus: true,
+  notes: true,
+  priority: true,
+});
+
+export type InsertSchool = z.infer<typeof insertSchoolSchema>;
+export type School = typeof schools.$inferSelect;
 
 
