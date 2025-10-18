@@ -128,18 +128,24 @@ export function KentuckyRegionMap() {
         }}
       >
         {/* Kentucky Map Image */}
-        <div className="relative w-full" style={{ paddingBottom: "40%" }}>
+        <div className="relative w-full" style={{ paddingBottom: "42%" }}>
           <img 
-            src="/attached_assets/stock_images/kentucky_state_map_o_3d1d25ce.jpg" 
+            src="/attached_assets/stock_images/kentucky_state_map_o_ed6ccd16.jpg" 
             alt="Kentucky State Map"
-            className="absolute inset-0 w-full h-full object-cover opacity-70"
+            className="absolute inset-0 w-full h-full object-contain"
             style={{
-              filter: "brightness(0.6) contrast(1.3) sepia(0.4) hue-rotate(140deg)",
+              filter: "brightness(0.85) contrast(1.3) saturate(0.1) sepia(0.3) hue-rotate(100deg)",
+              opacity: 0.85,
             }}
           />
           
-          {/* Dark overlay for better marker visibility */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/40" />
+          {/* Emerald tint overlay for cyber aesthetic */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/30 via-transparent to-emerald-950/40 mix-blend-overlay" />
+          
+          {/* Subtle border glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            boxShadow: "inset 0 0 80px rgba(16, 185, 129, 0.12), inset 0 0 40px rgba(0, 0, 0, 0.5)"
+          }} />
           
           <svg
             viewBox="0 0 100 100"
@@ -187,22 +193,22 @@ export function KentuckyRegionMap() {
                 <motion.circle
                   cx={pos.x}
                   cy={pos.y}
-                  r={isHovered ? 34 : 30}
+                  r={isHovered ? 36 : 32}
                   fill={
                     isConquered
-                      ? "rgba(16, 185, 129, 0.6)"
+                      ? "rgba(16, 185, 129, 0.65)"
                       : isStarting
-                      ? "rgba(234, 179, 8, 0.4)"
-                      : "rgba(255, 255, 255, 0.12)"
+                      ? "rgba(234, 179, 8, 0.5)"
+                      : "rgba(255, 255, 255, 0.15)"
                   }
                   stroke={
                     isConquered
                       ? "#10b981"
                       : isStarting
                       ? "#eab308"
-                      : "rgba(255, 255, 255, 0.4)"
+                      : "rgba(255, 255, 255, 0.5)"
                   }
-                  strokeWidth={isHovered ? 5 : 3.5}
+                  strokeWidth={isHovered ? 4.5 : 3.5}
                   className="cursor-pointer transition-all duration-200"
                   onClick={() => setSelectedRegion(region)}
                   onMouseEnter={() => setHoveredRegion(region.regionNumber)}
@@ -211,10 +217,12 @@ export function KentuckyRegionMap() {
                   whileTap={{ scale: 0.95 }}
                   style={{
                     filter: isConquered
-                      ? "drop-shadow(0 0 15px rgba(16, 185, 129, 0.9))"
+                      ? "drop-shadow(0 0 18px rgba(16, 185, 129, 1)) drop-shadow(0 0 8px rgba(16, 185, 129, 0.7))"
+                      : isStarting
+                      ? "drop-shadow(0 0 15px rgba(234, 179, 8, 0.9)) drop-shadow(0 0 6px rgba(234, 179, 8, 0.6))"
                       : isHovered
-                      ? "drop-shadow(0 0 10px rgba(16, 185, 129, 0.6))"
-                      : "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                      ? "drop-shadow(0 0 12px rgba(255, 255, 255, 0.7))"
+                      : "drop-shadow(0 2px 6px rgba(0,0,0,0.6))",
                   }}
                   data-testid={`region-circle-${region.regionNumber}`}
                 />
