@@ -34,7 +34,10 @@ import {
   type InsertDailyMove,
   regions,
   type Region,
-  type InsertRegion
+  type InsertRegion,
+  schools,
+  type School,
+  type InsertSchool
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -121,6 +124,14 @@ export interface IStorage {
   createDailyMove(move: InsertDailyMove): Promise<DailyMove>;
   updateDailyMove(id: number, move: Partial<InsertDailyMove>): Promise<DailyMove | undefined>;
   getRecentMoves(limit: number): Promise<DailyMove[]>;
+  
+  // School methods
+  getAllSchools(): Promise<School[]>;
+  getSchoolsByRegion(regionId: number): Promise<School[]>;
+  getSchool(id: number): Promise<School | undefined>;
+  createSchool(school: InsertSchool): Promise<School>;
+  updateSchool(id: number, school: Partial<InsertSchool>): Promise<School | undefined>;
+  deleteSchool(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -967,6 +978,42 @@ export class DatabaseStorage implements IStorage {
     return updatedRegion;
   }
   
+  // School methods
+  async getAllSchools(): Promise<School[]> {
+    return await db.select().from(schools);
+  }
+  
+  async getSchoolsByRegion(regionId: number): Promise<School[]> {
+    return await db
+      .select()
+      .from(schools)
+      .where(eq(schools.regionId, regionId))
+      .orderBy(asc(schools.type), asc(schools.name));
+  }
+  
+  async getSchool(id: number): Promise<School | undefined> {
+    const [school] = await db.select().from(schools).where(eq(schools.id, id));
+    return school;
+  }
+  
+  async createSchool(insertSchool: InsertSchool): Promise<School> {
+    const [school] = await db.insert(schools).values(insertSchool).returning();
+    return school;
+  }
+  
+  async updateSchool(id: number, school: Partial<InsertSchool>): Promise<School | undefined> {
+    const [updatedSchool] = await db
+      .update(schools)
+      .set(school)
+      .where(eq(schools.id, id))
+      .returning();
+    return updatedSchool;
+  }
+  
+  async deleteSchool(id: number): Promise<boolean> {
+    const result = await db.delete(schools).where(eq(schools.id, id));
+    return !!result;
+  }
 
 
   // Initialize database with sample data

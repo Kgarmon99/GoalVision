@@ -9,12 +9,14 @@ import {
   insertUserSchema,
   insertProspectSchema,
   insertRegionSchema,
+  insertSchoolSchema,
   goals,
   metrics,
   goalStatus,
   users,
   prospects,
   regions,
+  schools,
   oodaOpportunities,
   dailyMoves
 } from "@shared/schema";
@@ -619,6 +621,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid region data", errors: error.errors });
       }
       res.status(500).json({ message: "Error updating region" });
+    }
+  });
+
+  // School Routes
+  
+  // Get all schools
+  app.get("/api/schools", async (req, res) => {
+    try {
+      const cacheKey = "schools:all";
+      const cachedSchools = serverCache.get(cacheKey);
+      
+      if (cachedSchools) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedSchools);
+      }
+      
+      const schools = await storage.getAllSchools();
+      serverCache.set(cacheKey, schools, CACHE_TTL.DEFAULT);
+      
+      res.set('X-Cache', 'MISS');
+      res.json(schools);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching schools" });
+    }
+  });
+  
+  // Get schools by region
+  app.get("/api/regions/:regionId/schools", async (req, res) => {
+    try {
+      const regionId = parseInt(req.params.regionId);
+      const cacheKey = `schools:region:${regionId}`;
+      
+      const cachedSchools = serverCache.get(cacheKey);
+      if (cachedSchools) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedSchools);
+      }
+      
+      const schools = await storage.getSchoolsByRegion(regionId);
+      serverCache.set(cacheKey, schools, CACHE_TTL.DEFAULT);
+      
+      res.set('X-Cache', 'MISS');
+      res.json(schools);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching schools for region" });
+    }
+  });
+  
+  // Get a specific school
+  app.get("/api/schools/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const school = await storage.getSchool(id);
+      
+      if (!school) {
+        return res.status(404).json({ message: "School not found" });
+      }
+      
+      res.json(school);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching school" });
+    }
+  });
+  
+  // Create a new school
+  app.post("/api/schools", async (req, res) => {
+    try {
+      const schoolData = insertSchoolSchema.parse(req.body);
+      const newSchool = await storage.createSchool(schoolData);
+      
+      // Invalidate caches
+      serverCache.invalidate("schools:all");
+      serverCache.invalidate(`schools:region:${newSchool.regionId}`);
+      
+      res.status(201).json(newSchool);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid school data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating school" });
+    }
+  });
+  
+  // Update a school (mark as contacted, update status, etc.)
+  app.patch("/api/schools/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const schoolData = insertSchoolSchema.partial().parse(req.body);
+      const updatedSchool = await storage.updateSchool(id, schoolData);
+      
+      if (!updatedSchool) {
+        return res.status(404).json({ message: "School not found" });
+      }
+      
+      // Invalidate caches
+      serverCache.invalidate("schools:all");
+      serverCache.invalidate(`schools:region:${updatedSchool.regionId}`);
+      
+      res.json(updatedSchool);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid school data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error updating school" });
+    }
+  });
+  
+  // Delete a school
+  app.delete("/api/schools/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Get the school first to know which region cache to invalidate
+      const school = await storage.getSchool(id);
+      if (!school) {
+        return res.status(404).json({ message: "School not found" });
+      }
+      
+      const deleted = await storage.deleteSchool(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "School not found" });
+      }
+      
+      // Invalidate caches
+      serverCache.invalidate("schools:all");
+      serverCache.invalidate(`schools:region:${school.regionId}`);
+      
+      res.json({ message: "School deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting school" });
     }
   });
 
