@@ -7,36 +7,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { SchoolChecklistDialog } from "./school-checklist-dialog";
 
-// Geographically accurate KASS region positions based on Kentucky counties
-// Positions are in percentage (0-100) for responsive positioning on actual KY map
+// OFFICIAL KASS Region positions based on the provided KASS map
+// Positions are in percentage (0-100) matching the official KASS regions map
 const regionPositions: Record<number, { x: number; y: number; name: string }> = {
-  // Western Kentucky
-  1: { x: 8, y: 48, name: "Region 1 - Far West" },        // Fulton, Hickman, Carlisle, Ballard
-  2: { x: 15, y: 55, name: "Region 2 - Purchase" },        // McCracken, Marshall, Calloway, Graves
-  3: { x: 20, y: 38, name: "Region 3 - West" },            // Henderson, Union, Webster
-  4: { x: 14, y: 68, name: "Region 4 - Pennyrile" },       // Caldwell, Lyon, Livingston, Crittenden
-  5: { x: 25, y: 52, name: "Region 5 - Green River" },     // Daviess, McLean, Hancock, Ohio
-  
-  // North Central Kentucky  
-  6: { x: 38, y: 35, name: "Region 6 - Jefferson" },       // Jefferson County (Louisville Metro)
-  7: { x: 92, y: 22, name: "Region 7 - Northern KY" },     // Boone, Campbell, Kenton (Cincinnati area)
-  8: { x: 45, y: 40, name: "Region 8 - Lincoln Trail" },   // Hardin, Breckinridge, Meade
-  
-  // Eastern Kentucky
-  9: { x: 95, y: 32, name: "Region 9 - FIVCO" },           // Boyd, Carter, Greenup, Lawrence, Elliott
-  10: { x: 90, y: 52, name: "Region 10 - Big Sandy" },     // Pike, Martin, Floyd, Johnson, Magoffin
-  11: { x: 84, y: 68, name: "Region 11 - Southeast" },     // Bell, Harlan, Letcher, Knott, Perry
-  12: { x: 72, y: 72, name: "Region 12 - Cumberland" },    // Clay, Knox, Whitley, McCreary
-  
-  // South Central Kentucky
-  13: { x: 62, y: 70, name: "Region 13 - Lake Cumberland" }, // Pulaski, Casey, Russell, Wayne
-  14: { x: 45, y: 72, name: "Region 14 - Barren River" },  // Barren, Hart, Edmonson, Warren
-  15: { x: 30, y: 68, name: "Region 15 - Hopkinsville" },  // Christian, Todd, Trigg, Muhlenberg
-  
-  // Central/Bluegrass
-  16: { x: 54, y: 58, name: "Region 16 - Central KY" },    // Marion, Taylor, Green, Adair
-  17: { x: 68, y: 42, name: "Region 17 - Bluegrass" },     // Fayette (Lexington), Jessamine, Woodford, Clark
-  18: { x: 52, y: 45, name: "Region 18 - Additional" },    // Additional region
+  1: { x: 7, y: 72, name: "Region 1" },        // Far West (yellow-green) - Fulton area
+  2: { x: 13, y: 65, name: "Region 2" },       // West (teal) - Calloway area
+  3: { x: 18, y: 52, name: "Region 3" },       // Northwest (blue) - Henderson area
+  4: { x: 21, y: 88, name: "Region 4" },       // Southwest (pink) - Christian/Todd area
+  5: { x: 28, y: 63, name: "Region 5" },       // West Central (purple) - Butler/Muhlenberg area
+  6: { x: 38, y: 47, name: "Region 6" },       // North Central (light purple) - Jefferson County
+  7: { x: 62, y: 20, name: "Region 7" },       // Northern (green) - Kenton/Boone area
+  8: { x: 43, y: 55, name: "Region 8*" },      // Central North (gray) - Shelby area
+  9: { x: 86, y: 28, name: "Region 9" },       // Northeast (coral) - Boyd/Carter area
+  10: { x: 90, y: 45, name: "Region 10" },     // East (orange) - Pike/Floyd area
+  11: { x: 92, y: 58, name: "Region 11" },     // Far East (magenta) - Pike area
+  12: { x: 85, y: 78, name: "Region 12" },     // Southeast (light pink) - Harlan/Letcher area
+  13: { x: 80, y: 88, name: "Region 13" },     // South (red) - Knox/Whitley area
+  14: { x: 58, y: 88, name: "Region 14" },     // South Central (orange) - Pulaski area
+  15: { x: 35, y: 88, name: "Region 15" },     // South (green) - Monroe area
+  16: { x: 47, y: 88, name: "Region 16" },     // South Central (coral) - Cumberland area
+  17: { x: 68, y: 28, name: "Region 17" },     // Central (green) - Fayette/Madison area
+  18: { x: 52, y: 68, name: "Region 18" },     // Central (pink) - Casey area
 };
 
 export function KentuckyRegionMap() {
@@ -144,30 +135,19 @@ export function KentuckyRegionMap() {
           boxShadow: "0 0 40px rgba(16, 185, 129, 0.15), inset 0 0 60px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Kentucky Map Image */}
-        <div className="relative w-full" style={{ paddingBottom: "42%" }}>
+        {/* Official KASS Regions Map */}
+        <div className="relative w-full" style={{ paddingBottom: "62%" }}>
           <img 
-            src="/attached_assets/stock_images/kentucky_state_map_o_ed6ccd16.jpg" 
-            alt="Kentucky State Map"
+            src="/attached_assets/image_1760831626526.png" 
+            alt="Official KASS Regions Map"
             className="absolute inset-0 w-full h-full object-contain"
             style={{
-              filter: "brightness(0.85) contrast(1.3) saturate(0.1) sepia(0.3) hue-rotate(100deg)",
-              opacity: 0.85,
+              opacity: 0.75,
             }}
           />
           
-          {/* Mission Control Grid Overlay (Elon Algorithm: tactical display) */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-            <defs>
-              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(16, 185, 129, 0.3)" strokeWidth="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-          
-          {/* Data-Dense Overlay Tint */}
-          <div className="absolute inset-0 bg-black/40" />
+          {/* Dark overlay for marker visibility */}
+          <div className="absolute inset-0 bg-black/50" />
           
           <svg
             viewBox="0 0 100 100"
