@@ -81,10 +81,7 @@ export default function SchoolsPage() {
 
   const updateSchoolMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<School> }) => {
-      return apiRequest(`/api/schools/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('PATCH', `/api/schools/${id}`, data);
     },
     onSuccess: (_, { data }) => {
       queryClient.invalidateQueries({ queryKey: ['/api/schools'] });
@@ -98,12 +95,9 @@ export default function SchoolsPage() {
 
   const quickContactMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/schools/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          contacted: true,
-          contactedDate: new Date().toISOString().split('T')[0],
-        }),
+      return apiRequest('PATCH', `/api/schools/${id}`, {
+        contacted: true,
+        contactedDate: new Date().toISOString().split('T')[0],
       });
     },
     onSuccess: () => {
