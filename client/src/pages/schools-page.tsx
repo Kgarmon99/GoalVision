@@ -15,7 +15,7 @@ export default function SchoolsPage() {
           <CardContent className="p-6">
             <div className="relative w-full bg-white rounded-lg overflow-hidden">
               <img 
-                src="/attached_assets/image_1760831992153.png" 
+                src="/kass-map.png" 
                 alt="KASS Regions Map"
                 className="w-full h-auto"
               />
