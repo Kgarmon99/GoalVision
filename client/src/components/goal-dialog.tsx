@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,14 +43,38 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: goal?.name || "",
-      current: goal?.current || 0,
-      target: goal?.target || 0,
-      unit: goal?.unit || "",
-      color: goal?.color || "primary",
-      deadline: goal?.deadline || "",
+      name: "",
+      current: 0,
+      target: 0,
+      unit: "",
+      color: "primary",
+      deadline: "",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      if (goal) {
+        form.reset({
+          name: goal.name,
+          current: goal.current,
+          target: goal.target,
+          unit: goal.unit || "",
+          color: goal.color || "primary",
+          deadline: goal.deadline || "",
+        });
+      } else {
+        form.reset({
+          name: "",
+          current: 0,
+          target: 0,
+          unit: "",
+          color: "primary",
+          deadline: "",
+        });
+      }
+    }
+  }, [open, goal, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
