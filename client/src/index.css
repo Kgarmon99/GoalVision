@@ -20,8 +20,14 @@
   }
 
   body {
-    @apply font-sans antialiased bg-black text-white;
-    background: radial-gradient(circle at center, rgb(2, 9, 15) 0%, rgb(0, 0, 0) 100%);
+    @apply font-sans antialiased text-white;
+    background: linear-gradient(135deg, 
+      rgb(0, 20, 30) 0%, 
+      rgb(0, 10, 15) 25%,
+      rgb(5, 25, 20) 50%,
+      rgb(0, 15, 20) 75%,
+      rgb(0, 8, 12) 100%);
+    background-attachment: fixed;
   }
 
   :root {
@@ -49,6 +55,290 @@
 }
 
 @layer components {
+  /* ========== LIQUID GLASS DESIGN SYSTEM ========== */
+  
+  /* Base Glass Surface */
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.37),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 40px rgba(74, 222, 128, 0.1);
+  }
+  
+  /* Frosted Glass */
+  .glass-frosted {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    box-shadow: 
+      0 8px 32px 0 rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+      0 0 60px rgba(74, 222, 128, 0.15);
+  }
+  
+  /* Premium Glass with Depth */
+  .glass-premium {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+    border: 1px solid;
+    border-image: linear-gradient(
+      135deg,
+      rgba(74, 222, 128, 0.4),
+      rgba(16, 185, 129, 0.2),
+      rgba(74, 222, 128, 0.1)
+    ) 1;
+    box-shadow: 
+      0 12px 48px 0 rgba(0, 0, 0, 0.5),
+      inset 0 2px 4px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -2px 4px 0 rgba(0, 0, 0, 0.3),
+      0 0 80px rgba(74, 222, 128, 0.2);
+    position: relative;
+  }
+  
+  .glass-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: glass-shimmer 8s infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes glass-shimmer {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+  
+  /* Glass Button */
+  .glass-button {
+    background: rgba(74, 222, 128, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 20px rgba(74, 222, 128, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .glass-button:hover {
+    background: rgba(74, 222, 128, 0.15);
+    border-color: rgba(74, 222, 128, 0.5);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 40px rgba(74, 222, 128, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .glass-button:active::after {
+    width: 300px;
+    height: 300px;
+  }
+  
+  /* Glass Card with Parallax */
+  .glass-card {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    box-shadow: 
+      0 10px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+      0 0 50px rgba(74, 222, 128, 0.12);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(74, 222, 128, 0.1) 0%,
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(74, 222, 128, 0.35);
+    box-shadow: 
+      0 16px 56px rgba(0, 0, 0, 0.5),
+      inset 0 2px 0 rgba(255, 255, 255, 0.12),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+      0 0 70px rgba(74, 222, 128, 0.2);
+  }
+  
+  .glass-card:hover::before {
+    opacity: 1;
+  }
+  
+  /* Liquid Ripple Effect */
+  .liquid-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .liquid-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: rgba(74, 222, 128, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  
+  .liquid-ripple:active::after {
+    animation: ripple-effect 0.6s ease-out;
+  }
+  
+  @keyframes ripple-effect {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(20);
+      opacity: 0;
+    }
+  }
+  
+  /* Volumetric Light Sweep */
+  .volumetric-light {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .volumetric-light::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -10%;
+    width: 40%;
+    height: 300%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(74, 222, 128, 0.15) 50%,
+      transparent 100%
+    );
+    transform: rotate(25deg);
+    animation: volumetric-sweep 6s ease-in-out infinite;
+    pointer-events: none;
+    filter: blur(30px);
+  }
+  
+  @keyframes volumetric-sweep {
+    0% { 
+      left: -50%; 
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    40% {
+      left: 100%;
+      opacity: 1;
+    }
+    100% { 
+      left: 100%; 
+      opacity: 0;
+    }
+  }
+  
+  /* Chromatic Edge Highlight */
+  .chromatic-edge {
+    position: relative;
+  }
+  
+  .chromatic-edge::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+      60deg,
+      rgba(74, 222, 128, 0.5),
+      rgba(6, 182, 212, 0.3),
+      rgba(16, 185, 129, 0.5),
+      rgba(74, 222, 128, 0.3)
+    );
+    background-size: 300% 300%;
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s;
+    animation: chromatic-flow 8s linear infinite;
+  }
+  
+  .chromatic-edge:hover::after {
+    opacity: 1;
+  }
+  
+  @keyframes chromatic-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
   /* Glow Effects from glow-effects.css */
   .glow-border {
     position: relative;

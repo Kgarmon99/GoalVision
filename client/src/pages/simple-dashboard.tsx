@@ -87,8 +87,8 @@ const SimpleDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen cosmic-bg">
-      <div className="border-b border-primary/30 bg-black/50 backdrop-blur-sm">
+    <div className="min-h-screen cosmic-bg volumetric-light">
+      <div className="glass-frosted chromatic-edge">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -113,11 +113,11 @@ const SimpleDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 entrance-animation">
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="glow-card bg-black/80 border-primary/40 hover-lift" data-testid="card-pipeline-value">
+          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-pipeline-value">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">Pipeline Value</p>
+                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Pipeline Value</p>
                   <p className="text-2xl font-bold text-white text-glow-sm mt-1">
                     ${Math.round(totalPipeline).toLocaleString()}
                   </p>
@@ -127,11 +127,11 @@ const SimpleDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="glow-card bg-black/80 border-primary/40 hover-lift" data-testid="card-monthly-burn">
+          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-monthly-burn">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">Monthly Burn</p>
+                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Monthly Burn</p>
                   <p className="text-2xl font-bold text-white text-glow-sm mt-1">
                     ${financials.monthlyBurnRate.toLocaleString()}
                   </p>
@@ -141,11 +141,11 @@ const SimpleDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="glow-card bg-black/80 border-primary/40 hover-lift" data-testid="card-runway">
+          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-runway">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">Runway</p>
+                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Runway</p>
                   <p className="text-2xl font-bold text-white text-glow-sm mt-1">
                     {runway.toFixed(1)} months
                   </p>
@@ -155,11 +155,11 @@ const SimpleDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="glow-card bg-black/80 border-primary/40 hover-lift" data-testid="card-goals-progress">
+          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-goals-progress">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">Goals Progress</p>
+                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Goals Progress</p>
                   <p className="text-2xl font-bold text-white text-glow-sm mt-1">
                     {completedGoals}/{totalGoals}
                   </p>
@@ -190,7 +190,7 @@ const SimpleDashboard = () => {
               return (
                 <Card 
                   key={goal.id} 
-                  className={`gradient-border glow-card bg-black/80 border-primary/40 ${isComplete ? 'celebration-card' : ''}`}
+                  className={`glass-premium chromatic-edge volumetric-light liquid-ripple ${isComplete ? 'celebration-card' : ''}`}
                   data-testid={`card-goal-${goal.id}`}
                 >
                   <CardContent className="p-6">
