@@ -100,7 +100,7 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
 
   const updateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest(`/api/goals/${goal?.id}`, "PATCH", data);
+      return await apiRequest("PATCH", `/api/goals/${goal?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
@@ -121,7 +121,7 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/goals/${goal?.id}`, "DELETE");
+      return await apiRequest("DELETE", `/api/goals/${goal?.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
