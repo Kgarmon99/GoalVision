@@ -65,7 +65,7 @@ export function ProspectDialog({ prospect, trigger }: ProspectDialogProps) {
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest("/api/prospects", "POST", data);
+      return await apiRequest("POST", "/api/prospects", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/prospects'] });
@@ -88,7 +88,7 @@ export function ProspectDialog({ prospect, trigger }: ProspectDialogProps) {
 
   const updateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest(`/api/prospects/${prospect?.id}`, "PATCH", data);
+      return await apiRequest("PATCH", `/api/prospects/${prospect?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/prospects'] });
@@ -110,7 +110,7 @@ export function ProspectDialog({ prospect, trigger }: ProspectDialogProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/prospects/${prospect?.id}`, "DELETE");
+      return await apiRequest("DELETE", `/api/prospects/${prospect?.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/prospects'] });

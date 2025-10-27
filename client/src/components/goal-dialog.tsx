@@ -78,7 +78,7 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest("/api/goals", "POST", data);
+      return await apiRequest("POST", "/api/goals", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
