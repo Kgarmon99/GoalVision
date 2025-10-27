@@ -37,9 +37,11 @@ export function GamificationHUD() {
   });
 
   useEffect(() => {
-    // Update streak when component mounts
-    updateStreakMutation.mutate();
-  }, []);
+    // Update streak when component mounts (only once)
+    if (profile) {
+      updateStreakMutation.mutate();
+    }
+  }, [profile?.id]);
 
   useEffect(() => {
     // Check for level up

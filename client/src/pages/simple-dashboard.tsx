@@ -16,10 +16,17 @@ import { ProspectDialog } from "@/components/prospect-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SearchBar } from "@/components/search-bar";
 import { GamificationHUD } from "@/components/gamification-hud";
+import { XpFeed } from "@/components/xp-feed";
+import { AchievementShowcase } from "@/components/achievement-showcase";
+import { XpNotification } from "@/components/xp-notification";
+import { useXpNotifications } from "@/hooks/use-xp-notifications";
 import { useState, useEffect, useMemo } from "react";
 import moneybotLogo from "../assets/moneybot-logo.png";
 
 const SimpleDashboard = () => {
+  const notifications = useXpNotifications((state) => state.notifications);
+  const removeNotification = useXpNotifications((state) => state.removeNotification);
+  
   const [financials, setFinancials] = useState({
     monthlyBurnRate: 250000,
     currentCash: 1000000,
@@ -89,6 +96,18 @@ const SimpleDashboard = () => {
 
   return (
     <div className="min-h-screen cosmic-bg volumetric-light">
+      {/* XP Notifications */}
+      {notifications.map((notification) => (
+        <XpNotification
+          key={notification.id}
+          xpAmount={notification.xpAmount}
+          description={notification.description}
+          eventType={notification.eventType}
+          show={true}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+      
       <div className="glass-frosted chromatic-edge">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
@@ -113,9 +132,19 @@ const SimpleDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8 entrance-animation">
         
-        {/* Gamification HUD */}
+        {/* Gamification Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <GamificationHUD />
+          </div>
+          <div>
+            <XpFeed />
+          </div>
+        </div>
+        
+        {/* Achievements Showcase */}
         <div className="mb-8">
-          <GamificationHUD />
+          <AchievementShowcase />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
