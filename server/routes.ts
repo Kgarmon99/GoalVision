@@ -829,6 +829,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Gamification Routes - Psychology-driven motivation system
+  app.get("/api/gamification/profile", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1); // Default user
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching gamification profile" });
+    }
+  });
+  
+  app.post("/api/gamification/xp", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const xpEvent = await storage.addXpEvent({
+        profileId: profile.id,
+        eventType: req.body.eventType,
+        xpAmount: req.body.xpAmount,
+        multiplier: req.body.multiplier || 1.0,
+        goalId: req.body.goalId,
+        prospectId: req.body.prospectId,
+        achievementId: req.body.achievementId,
+        description: req.body.description
+      });
+      
+      // Calculate new level from XP (simple formula: level = sqrt(xp / 100))
+      const newXp = (profile.xp ?? 0) + (req.body.xpAmount * (req.body.multiplier || 1.0));
+      const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+      
+      // Update profile with new XP and level
+      const updatedProfile = await storage.updateProfile(profile.id, {
+        xp: newXp,
+        level: newLevel
+      });
+      
+      res.json({ xpEvent, profile: updatedProfile });
+    } catch (error) {
+      res.status(500).json({ message: "Error adding XP event" });
+    }
+  });
+  
+  app.get("/api/gamification/xp/recent/:limit?", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const limit = parseInt(req.params.limit || "10");
+      const events = await storage.getRecentXpEvents(profile.id, limit);
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching XP events" });
+    }
+  });
+  
+  app.get("/api/gamification/achievements", async (req, res) => {
+    try {
+      const achievements = await storage.getAllAchievements();
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching achievements" });
+    }
+  });
+  
+  app.get("/api/gamification/achievements/user", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const userAchievements = await storage.getUserAchievements(profile.id);
+      res.json(userAchievements);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user achievements" });
+    }
+  });
+  
+  app.post("/api/gamification/achievements/progress", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const { achievementId, progress } = req.body;
+      const updated = await storage.updateAchievementProgress(profile.id, achievementId, progress);
+      
+      // Check if should unlock achievement
+      const achievements = await storage.getAllAchievements();
+      const achievement = achievements.find(a => a.id === achievementId);
+      
+      if (achievement && progress >= achievement.requirement && updated && !updated.unlocked) {
+        await storage.unlockAchievement(profile.id, achievementId);
+        // Award XP for unlocking
+        await storage.addXpEvent({
+          profileId: profile.id,
+          eventType: "achievement",
+          xpAmount: achievement.xpReward ?? 0,
+          multiplier: 1.0,
+          achievementId: achievementId,
+          description: `Unlocked: ${achievement.name}`
+        });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating achievement progress" });
+    }
+  });
+  
+  app.get("/api/gamification/challenge/today", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const challenge = await storage.getTodayChallenge(profile.id);
+      res.json(challenge);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching today's challenge" });
+    }
+  });
+  
+  app.post("/api/gamification/challenge/progress", async (req, res) => {
+    try {
+      const { challengeId, progress } = req.body;
+      const updated = await storage.updateDailyChallengeProgress(challengeId, progress);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating challenge progress" });
+    }
+  });
+  
+  app.post("/api/gamification/challenge/complete", async (req, res) => {
+    try {
+      const { challengeId, xpEarned } = req.body;
+      const completed = await storage.completeDailyChallenge(challengeId, xpEarned);
+      res.json(completed);
+    } catch (error) {
+      res.status(500).json({ message: "Error completing challenge" });
+    }
+  });
+  
+  app.post("/api/gamification/streak/update", async (req, res) => {
+    try {
+      const profile = await storage.getOrCreateProfile(1);
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Check if already updated today
+      if (profile.lastActiveDate === today) {
+        res.json({ message: "Streak already updated today", profile });
+        return;
+      }
+      
+      // Check if streak should continue or reset
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      let newStreak = profile.currentStreak ?? 0;
+      if (profile.lastActiveDate === yesterdayStr) {
+        // Continue streak
+        newStreak = (profile.currentStreak ?? 0) + 1;
+      } else if (profile.lastActiveDate !== today) {
+        // Streak broken - check for streak freeze
+        if ((profile.streakFreezeCount ?? 0) > 0) {
+          // Use streak freeze
+          await storage.updateProfile(profile.id, {
+            streakFreezeCount: (profile.streakFreezeCount ?? 0) - 1
+          });
+        } else {
+          // Reset streak
+          newStreak = 1;
+        }
+      }
+      
+      const updatedProfile = await storage.updateProfile(profile.id, {
+        currentStreak: newStreak,
+        longestStreak: Math.max(profile.longestStreak ?? 0, newStreak),
+        lastActiveDate: today
+      });
+      
+      res.json(updatedProfile);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating streak" });
+    }
+  });
 
   // Serve MoneyBot logo
   app.get("/moneybot-logo.png", (req, res) => {
