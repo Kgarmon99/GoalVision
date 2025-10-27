@@ -327,6 +327,8 @@
     opacity: 0;
     transition: opacity 0.4s;
     animation: chromatic-flow 8s linear infinite;
+    pointer-events: none;
+    z-index: -1;
   }
   
   .chromatic-edge:hover::after {
