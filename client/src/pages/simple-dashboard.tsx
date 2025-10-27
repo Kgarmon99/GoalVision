@@ -16,6 +16,7 @@ import { ProspectDialog } from "@/components/prospect-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SearchBar } from "@/components/search-bar";
 import { useState, useEffect, useMemo } from "react";
+import moneybotLogo from "../assets/moneybot-logo.png";
 
 const SimpleDashboard = () => {
   const [financials, setFinancials] = useState({
@@ -90,9 +91,12 @@ const SimpleDashboard = () => {
       <div className="border-b border-primary/30 bg-black/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white text-glow">Numbers Dashboard</h1>
-              <p className="text-sm text-gray-400 mt-1">Your business at a glance</p>
+            <div className="flex items-center gap-4">
+              <img src={moneybotLogo} alt="Moneybot" className="h-16 w-16 rounded-full" />
+              <div>
+                <h1 className="text-3xl font-bold text-white text-glow">Moneybot Dashboard</h1>
+                <p className="text-sm text-gray-400 mt-1">Your business at a glance</p>
+              </div>
             </div>
             <SettingsDialog />
           </div>
