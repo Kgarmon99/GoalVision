@@ -18,8 +18,15 @@ function App() {
         <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={moneybotLogo} alt="Moneybot" className="h-10 w-10 rounded-full" />
-              <span className="text-xl font-bold text-primary">Moneybot Dashboard</span>
+              <img 
+                src={moneybotLogo} 
+                alt="Moneybot" 
+                className="h-10 w-10 rounded-full drop-shadow-glow" 
+                style={{
+                  boxShadow: '0 0 20px rgba(74, 222, 128, 0.6), 0 0 40px rgba(74, 222, 128, 0.4), 0 0 60px rgba(16, 185, 129, 0.2)'
+                }}
+              />
+              <span className="text-xl font-bold text-primary text-glow">Moneybot Dashboard</span>
             </div>
             <div className="flex items-center gap-6">
               <Link href="/" className="flex items-center gap-2 text-white hover:text-primary transition-colors">

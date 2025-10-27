@@ -92,10 +92,17 @@ const SimpleDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={moneybotLogo} alt="Moneybot" className="h-16 w-16 rounded-full" />
+              <img 
+                src={moneybotLogo} 
+                alt="Moneybot" 
+                className="h-16 w-16 rounded-full drop-shadow-glow float-effect" 
+                style={{
+                  boxShadow: '0 0 30px rgba(74, 222, 128, 0.7), 0 0 60px rgba(74, 222, 128, 0.5), 0 0 90px rgba(16, 185, 129, 0.3)'
+                }}
+              />
               <div>
                 <h1 className="text-3xl font-bold text-white text-glow">Moneybot Dashboard</h1>
-                <p className="text-sm text-gray-400 mt-1">Your business at a glance</p>
+                <p className="text-sm text-primary text-glow-sm">Your business at a glance</p>
               </div>
             </div>
             <SettingsDialog />

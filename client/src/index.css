@@ -263,36 +263,42 @@
     }
   }
 
-  /* Dreamlike Glow Effects */
+  /* Dreamlike Glow Effects - ENHANCED */
   .text-glow {
-    text-shadow: 0 0 10px rgba(74, 222, 128, 0.5), 
-                 0 0 20px rgba(74, 222, 128, 0.3), 
-                 0 0 30px rgba(74, 222, 128, 0.2),
-                 0 0 40px rgba(21, 128, 61, 0.1);
+    text-shadow: 0 0 20px rgba(74, 222, 128, 0.9), 
+                 0 0 40px rgba(74, 222, 128, 0.6), 
+                 0 0 60px rgba(74, 222, 128, 0.4),
+                 0 0 80px rgba(21, 128, 61, 0.3),
+                 0 0 100px rgba(21, 128, 61, 0.2);
     transition: text-shadow 0.5s ease;
   }
 
   .text-glow:hover {
-    text-shadow: 0 0 15px rgba(74, 222, 128, 0.7), 
-                 0 0 25px rgba(74, 222, 128, 0.5), 
-                 0 0 35px rgba(74, 222, 128, 0.3),
-                 0 0 45px rgba(21, 128, 61, 0.2);
+    text-shadow: 0 0 25px rgba(74, 222, 128, 1), 
+                 0 0 50px rgba(74, 222, 128, 0.8), 
+                 0 0 75px rgba(74, 222, 128, 0.6),
+                 0 0 100px rgba(21, 128, 61, 0.4),
+                 0 0 125px rgba(21, 128, 61, 0.3);
   }
   
   .text-glow-sm {
-    text-shadow: 0 0 5px rgba(74, 222, 128, 0.4), 
-                 0 0 10px rgba(74, 222, 128, 0.2), 
-                 0 0 15px rgba(74, 222, 128, 0.1);
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.8), 
+                 0 0 20px rgba(74, 222, 128, 0.5), 
+                 0 0 30px rgba(74, 222, 128, 0.3),
+                 0 0 40px rgba(21, 128, 61, 0.2);
     transition: text-shadow 0.5s ease;
   }
 
   .drop-shadow-glow {
-    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.5));
+    filter: drop-shadow(0 0 15px rgba(74, 222, 128, 0.8)) 
+            drop-shadow(0 0 30px rgba(74, 222, 128, 0.5))
+            drop-shadow(0 0 45px rgba(21, 128, 61, 0.3));
   }
 
   .glow-card {
-    box-shadow: 0 0 15px rgba(74, 222, 128, 0.1),
-                0 0 30px rgba(21, 128, 61, 0.05);
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.3),
+                0 0 50px rgba(21, 128, 61, 0.2),
+                0 0 75px rgba(16, 185, 129, 0.1);
     transition: all 0.5s ease;
     position: relative;
     overflow: hidden;
@@ -302,24 +308,38 @@
   .glow-card:before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background: radial-gradient(circle at center, rgba(74, 222, 128, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(circle at center, rgba(74, 222, 128, 0.3) 0%, rgba(16, 185, 129, 0.15) 40%, rgba(0, 0, 0, 0) 70%);
     z-index: -1;
     opacity: 0;
     transition: opacity 0.5s ease;
+    animation: aura-breathe 4s ease-in-out infinite;
   }
 
   .glow-card:hover {
-    box-shadow: 0 0 20px rgba(74, 222, 128, 0.2),
-                0 0 40px rgba(21, 128, 61, 0.1);
+    box-shadow: 0 0 35px rgba(74, 222, 128, 0.5),
+                0 0 70px rgba(21, 128, 61, 0.3),
+                0 0 105px rgba(16, 185, 129, 0.2),
+                0 0 140px rgba(6, 95, 70, 0.1);
     transform: translateY(-2px);
   }
   
   .glow-card:hover:before {
     opacity: 1;
+  }
+
+  @keyframes aura-breathe {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
   }
   
   .glow-element {
@@ -368,7 +388,7 @@
     }
   }
 
-  /* Cosmic Background Effects */
+  /* Cosmic Background Effects - ENHANCED */
   .cosmic-bg {
     position: relative;
     overflow: hidden;
@@ -382,27 +402,28 @@
     right: 0;
     bottom: 0;
     background-image: 
-      radial-gradient(circle at 20% 20%, rgba(74, 222, 128, 0.1) 0%, transparent 20%),
-      radial-gradient(circle at 80% 40%, rgba(37, 99, 235, 0.1) 0%, transparent 25%),
-      radial-gradient(circle at 10% 70%, rgba(192, 38, 211, 0.05) 0%, transparent 15%),
-      radial-gradient(circle at 90% 90%, rgba(236, 72, 153, 0.05) 0%, transparent 20%);
+      radial-gradient(circle at 20% 20%, rgba(74, 222, 128, 0.25) 0%, rgba(74, 222, 128, 0.1) 30%, transparent 50%),
+      radial-gradient(circle at 80% 40%, rgba(16, 185, 129, 0.2) 0%, rgba(6, 95, 70, 0.1) 30%, transparent 45%),
+      radial-gradient(circle at 10% 70%, rgba(74, 222, 128, 0.15) 0%, transparent 35%),
+      radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.18) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(74, 222, 128, 0.1) 0%, transparent 60%);
     z-index: -1;
-    filter: blur(40px);
+    filter: blur(60px);
     animation: cosmic-shift 20s ease infinite alternate;
   }
 
   @keyframes cosmic-shift {
     0% {
-      background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%;
-      opacity: 0.5;
+      background-position: 0% 0%, 100% 0%, 0% 100%, 100% 100%, 50% 50%;
+      opacity: 0.7;
     }
     50% {
-      background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%;
-      opacity: 0.8;
+      background-position: 50% 50%, 50% 50%, 50% 50%, 50% 50%, 0% 0%;
+      opacity: 1;
     }
     100% {
-      background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%;
-      opacity: 0.5;
+      background-position: 100% 100%, 0% 100%, 100% 0%, 0% 0%, 100% 100%;
+      opacity: 0.7;
     }
   }
 
@@ -475,17 +496,21 @@
     }
   }
 
-  /* Neon Glow Buttons */
+  /* Neon Glow Buttons - ENHANCED */
   .neon-glow, .glow-button {
-    box-shadow: 0 0 5px rgba(74, 222, 128, 0.3),
-                0 0 10px rgba(74, 222, 128, 0.2);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.6),
+                0 0 20px rgba(74, 222, 128, 0.4),
+                0 0 30px rgba(16, 185, 129, 0.3),
+                inset 0 0 10px rgba(74, 222, 128, 0.2);
     transition: all 0.3s ease;
   }
 
   .neon-glow:hover, .glow-button:hover {
-    box-shadow: 0 0 10px rgba(74, 222, 128, 0.5),
-                0 0 20px rgba(74, 222, 128, 0.3),
-                0 0 30px rgba(74, 222, 128, 0.1);
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.8),
+                0 0 40px rgba(74, 222, 128, 0.6),
+                0 0 60px rgba(16, 185, 129, 0.4),
+                0 0 80px rgba(6, 95, 70, 0.3),
+                inset 0 0 15px rgba(74, 222, 128, 0.3);
   }
 
   /* Iridescent Hovering Effect */
