@@ -15,6 +15,7 @@ import { GoalDialog } from "@/components/goal-dialog";
 import { ProspectDialog } from "@/components/prospect-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SearchBar } from "@/components/search-bar";
+import { GamificationHUD } from "@/components/gamification-hud";
 import { useState, useEffect, useMemo } from "react";
 import moneybotLogo from "../assets/moneybot-logo.png";
 
@@ -111,6 +112,11 @@ const SimpleDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 entrance-animation">
+        
+        {/* Gamification HUD */}
+        <div className="mb-8">
+          <GamificationHUD />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-pipeline-value">

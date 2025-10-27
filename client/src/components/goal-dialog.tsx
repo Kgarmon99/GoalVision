@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { insertGoalSchema, type Goal } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { awardXp, calculateGoalXp } from "@/lib/gamification";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = insertGoalSchema.extend({
   current: z.coerce.number().min(0),
-  target: z.coerce.number().min(0),
+  target: z.coerce.number().min(1, "Target must be greater than 0"),
 });
 
 type GoalDialogProps = {
@@ -80,8 +81,17 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
     mutationFn: async (data: z.infer<typeof formSchema>) => {
       return await apiRequest("POST", "/api/goals", data);
     },
-    onSuccess: () => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      
+      // Award XP for creating a new goal
+      await awardXp({
+        eventType: "goal_created",
+        xpAmount: 50, // Base XP for creating a goal
+        goalId: data.id,
+        description: `Created new goal: ${variables.name}`
+      });
+      
       toast({
         title: "Goal created",
         description: "Your goal has been created successfully.",
@@ -102,8 +112,31 @@ export function GoalDialog({ goal, trigger }: GoalDialogProps) {
     mutationFn: async (data: z.infer<typeof formSchema>) => {
       return await apiRequest("PATCH", `/api/goals/${goal?.id}`, data);
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      
+      // Award XP for goal progress
+      if (goal) {
+        const xpAmount = calculateGoalXp(variables.current, variables.target);
+        const progress = (variables.current / variables.target) * 100;
+        
+        let description = `Updated goal: ${variables.name}`;
+        if (progress >= 100) {
+          description = `🎉 Completed goal: ${variables.name}!`;
+        } else if (progress >= 75) {
+          description = `⭐ 75% milestone: ${variables.name}`;
+        } else if (progress >= 50) {
+          description = `📈 50% milestone: ${variables.name}`;
+        }
+        
+        await awardXp({
+          eventType: progress >= 100 ? "goal_completed" : "goal_progress",
+          xpAmount,
+          goalId: goal.id,
+          description
+        });
+      }
+      
       toast({
         title: "Goal updated",
         description: "Your goal has been updated successfully.",
