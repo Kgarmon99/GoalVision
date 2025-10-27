@@ -31,12 +31,6 @@ if (import.meta.hot) {
   import.meta.hot.on('vite:connect', () => {
     connected = true;
     console.log('HMR connected successfully');
-    
-    // Hide emergency navigation if it's showing
-    const emergencyNav = document.getElementById('emergency-nav');
-    if (emergencyNav) {
-      emergencyNav.style.display = 'none';
-    }
   });
   
   import.meta.hot.on('vite:disconnect', () => {
