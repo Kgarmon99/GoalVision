@@ -382,4 +382,122 @@ export const insertSchoolSchema = createInsertSchema(schools).pick({
 export type InsertSchool = z.infer<typeof insertSchoolSchema>;
 export type School = typeof schools.$inferSelect;
 
+// Gamification System - Psychology-driven addiction mechanics
+export const gamificationProfiles = pgTable("gamification_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").default(1), // Default user for single-player mode
+  xp: integer("xp").default(0),
+  level: integer("level").default(1),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastActiveDate: text("last_active_date"), // ISO date string for streak tracking
+  totalGoalsCompleted: integer("total_goals_completed").default(0),
+  totalProspectsWon: integer("total_prospects_won").default(0),
+  streakFreezeCount: integer("streak_freeze_count").default(1), // Forgiveness mechanic
+  motivationScore: real("motivation_score").default(100), // 0-100 energy bar
+});
+
+export const insertGamificationProfileSchema = createInsertSchema(gamificationProfiles).omit({
+  id: true,
+});
+
+export type InsertGamificationProfile = z.infer<typeof insertGamificationProfileSchema>;
+export type GamificationProfile = typeof gamificationProfiles.$inferSelect;
+
+// XP Events Ledger - Track every XP gain for analytics
+export const xpEvents = pgTable("xp_events", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull(),
+  eventType: text("event_type").notNull(), // "goal_completed", "prospect_won", "daily_challenge", "streak_bonus", "achievement"
+  xpAmount: integer("xp_amount").notNull(),
+  multiplier: real("multiplier").default(1.0), // Streak multipliers
+  goalId: integer("goal_id"),
+  prospectId: integer("prospect_id"),
+  achievementId: integer("achievement_id"),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertXpEventSchema = createInsertSchema(xpEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertXpEvent = z.infer<typeof insertXpEventSchema>;
+export type XpEvent = typeof xpEvents.$inferSelect;
+
+// Achievements - Badge system
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // Emoji or icon identifier
+  tier: text("tier").notNull(), // "bronze", "silver", "gold", "platinum", "diamond"
+  category: text("category").notNull(), // "goals", "streaks", "prospects", "speed", "mastery"
+  requirement: integer("requirement").notNull(), // Number needed to unlock
+  xpReward: integer("xp_reward").default(0),
+  unlockMessage: text("unlock_message").notNull(),
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+});
+
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+
+// User Achievements - Unlocked badges
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull(),
+  achievementId: integer("achievement_id").notNull(),
+  progress: integer("progress").default(0),
+  unlocked: boolean("unlocked").default(false),
+  unlockedAt: timestamp("unlocked_at"),
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+});
+
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+
+// Daily Challenges - Time-limited urgency mechanic
+export const dailyChallenges = pgTable("daily_challenges", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  challengeType: text("challenge_type").notNull(), // "complete_goals", "win_prospects", "update_progress", "streak_maintain"
+  target: integer("target").notNull(), // Number to achieve
+  xpReward: integer("xp_reward").notNull(),
+  bonusMultiplier: real("bonus_multiplier").default(1.0), // Extra reward for speed
+});
+
+export const insertDailyChallengeSchema = createInsertSchema(dailyChallenges).omit({
+  id: true,
+});
+
+export type InsertDailyChallenge = z.infer<typeof insertDailyChallengeSchema>;
+export type DailyChallenge = typeof dailyChallenges.$inferSelect;
+
+// User Daily Challenges - Personal challenge tracking
+export const userDailyChallenges = pgTable("user_daily_challenges", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull(),
+  challengeId: integer("challenge_id").notNull(),
+  assignedDate: text("assigned_date").notNull(), // ISO date string
+  progress: integer("progress").default(0),
+  completed: boolean("completed").default(false),
+  completedAt: timestamp("completed_at"),
+  xpEarned: integer("xp_earned").default(0),
+});
+
+export const insertUserDailyChallengeSchema = createInsertSchema(userDailyChallenges).omit({
+  id: true,
+});
+
+export type InsertUserDailyChallenge = z.infer<typeof insertUserDailyChallengeSchema>;
+export type UserDailyChallenge = typeof userDailyChallenges.$inferSelect;
+
 

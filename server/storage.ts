@@ -37,7 +37,25 @@ import {
   type InsertRegion,
   schools,
   type School,
-  type InsertSchool
+  type InsertSchool,
+  gamificationProfiles,
+  type GamificationProfile,
+  type InsertGamificationProfile,
+  xpEvents,
+  type XpEvent,
+  type InsertXpEvent,
+  achievements,
+  type Achievement,
+  type InsertAchievement,
+  userAchievements,
+  type UserAchievement,
+  type InsertUserAchievement,
+  dailyChallenges,
+  type DailyChallenge,
+  type InsertDailyChallenge,
+  userDailyChallenges,
+  type UserDailyChallenge,
+  type InsertUserDailyChallenge
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -132,6 +150,20 @@ export interface IStorage {
   createSchool(school: InsertSchool): Promise<School>;
   updateSchool(id: number, school: Partial<InsertSchool>): Promise<School | undefined>;
   deleteSchool(id: number): Promise<boolean>;
+  
+  // Gamification methods
+  getOrCreateProfile(userId?: number): Promise<GamificationProfile>;
+  updateProfile(id: number, profile: Partial<InsertGamificationProfile>): Promise<GamificationProfile | undefined>;
+  addXpEvent(event: InsertXpEvent): Promise<XpEvent>;
+  getRecentXpEvents(profileId: number, limit: number): Promise<XpEvent[]>;
+  getAllAchievements(): Promise<Achievement[]>;
+  getUserAchievements(profileId: number): Promise<UserAchievement[]>;
+  unlockAchievement(profileId: number, achievementId: number): Promise<UserAchievement | undefined>;
+  updateAchievementProgress(profileId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined>;
+  getTodayChallenge(profileId: number): Promise<UserDailyChallenge | undefined>;
+  createDailyChallenge(challenge: InsertUserDailyChallenge): Promise<UserDailyChallenge>;
+  updateDailyChallengeProgress(id: number, progress: number): Promise<UserDailyChallenge | undefined>;
+  completeDailyChallenge(id: number, xpEarned: number): Promise<UserDailyChallenge | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -1013,6 +1045,162 @@ export class DatabaseStorage implements IStorage {
   async deleteSchool(id: number): Promise<boolean> {
     const result = await db.delete(schools).where(eq(schools.id, id));
     return !!result;
+  }
+  
+  // Gamification methods
+  async getOrCreateProfile(userId: number = 1): Promise<GamificationProfile> {
+    const [profile] = await db
+      .select()
+      .from(gamificationProfiles)
+      .where(eq(gamificationProfiles.userId, userId));
+    
+    if (profile) {
+      return profile;
+    }
+    
+    // Create new profile with default values
+    const [newProfile] = await db
+      .insert(gamificationProfiles)
+      .values({
+        userId,
+        xp: 0,
+        level: 1,
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActiveDate: new Date().toISOString().split('T')[0],
+        totalGoalsCompleted: 0,
+        totalProspectsWon: 0,
+        streakFreezeCount: 1,
+        motivationScore: 100
+      })
+      .returning();
+    
+    return newProfile;
+  }
+  
+  async updateProfile(id: number, profile: Partial<InsertGamificationProfile>): Promise<GamificationProfile | undefined> {
+    const [updated] = await db
+      .update(gamificationProfiles)
+      .set(profile)
+      .where(eq(gamificationProfiles.id, id))
+      .returning();
+    return updated;
+  }
+  
+  async addXpEvent(event: InsertXpEvent): Promise<XpEvent> {
+    const [xpEvent] = await db.insert(xpEvents).values(event).returning();
+    return xpEvent;
+  }
+  
+  async getRecentXpEvents(profileId: number, limit: number): Promise<XpEvent[]> {
+    return await db
+      .select()
+      .from(xpEvents)
+      .where(eq(xpEvents.profileId, profileId))
+      .orderBy(asc(xpEvents.createdAt))
+      .limit(limit);
+  }
+  
+  async getAllAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements);
+  }
+  
+  async getUserAchievements(profileId: number): Promise<UserAchievement[]> {
+    return await db
+      .select()
+      .from(userAchievements)
+      .where(eq(userAchievements.profileId, profileId));
+  }
+  
+  async unlockAchievement(profileId: number, achievementId: number): Promise<UserAchievement | undefined> {
+    const [achievement] = await db
+      .update(userAchievements)
+      .set({ unlocked: true, unlockedAt: new Date() })
+      .where(
+        and(
+          eq(userAchievements.profileId, profileId),
+          eq(userAchievements.achievementId, achievementId)
+        )
+      )
+      .returning();
+    return achievement;
+  }
+  
+  async updateAchievementProgress(profileId: number, achievementId: number, progress: number): Promise<UserAchievement | undefined> {
+    const [existing] = await db
+      .select()
+      .from(userAchievements)
+      .where(
+        and(
+          eq(userAchievements.profileId, profileId),
+          eq(userAchievements.achievementId, achievementId)
+        )
+      );
+    
+    if (existing) {
+      const [updated] = await db
+        .update(userAchievements)
+        .set({ progress })
+        .where(eq(userAchievements.id, existing.id))
+        .returning();
+      return updated;
+    }
+    
+    // Create if doesn't exist
+    const [newAchievement] = await db
+      .insert(userAchievements)
+      .values({
+        profileId,
+        achievementId,
+        progress,
+        unlocked: false
+      })
+      .returning();
+    return newAchievement;
+  }
+  
+  async getTodayChallenge(profileId: number): Promise<UserDailyChallenge | undefined> {
+    const today = new Date().toISOString().split('T')[0];
+    const [challenge] = await db
+      .select()
+      .from(userDailyChallenges)
+      .where(
+        and(
+          eq(userDailyChallenges.profileId, profileId),
+          eq(userDailyChallenges.assignedDate, today)
+        )
+      );
+    return challenge;
+  }
+  
+  async createDailyChallenge(challenge: InsertUserDailyChallenge): Promise<UserDailyChallenge> {
+    const [newChallenge] = await db
+      .insert(userDailyChallenges)
+      .values(challenge)
+      .returning();
+    return newChallenge;
+  }
+  
+  async updateDailyChallengeProgress(id: number, progress: number): Promise<UserDailyChallenge | undefined> {
+    const [updated] = await db
+      .update(userDailyChallenges)
+      .set({ progress })
+      .where(eq(userDailyChallenges.id, id))
+      .returning();
+    return updated;
+  }
+  
+  async completeDailyChallenge(id: number, xpEarned: number): Promise<UserDailyChallenge | undefined> {
+    const [completed] = await db
+      .update(userDailyChallenges)
+      .set({
+        completed: true,
+        completedAt: new Date(),
+        xpEarned
+      })
+      .where(eq(userDailyChallenges.id, id))
+      .returning();
+    return completed;
   }
 
 
