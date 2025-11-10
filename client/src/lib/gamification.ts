@@ -1,5 +1,4 @@
 import { apiRequest, queryClient } from "./queryClient";
-import { useXpNotifications } from "@/hooks/use-xp-notifications";
 
 interface XpEvent {
   eventType: string;
@@ -14,14 +13,6 @@ interface XpEvent {
 export async function awardXp(event: XpEvent) {
   try {
     await apiRequest('POST', '/api/gamification/xp', event);
-    
-    // Show notification
-    useXpNotifications.getState().addNotification(
-      event.xpAmount * (event.multiplier || 1),
-      event.description,
-      event.eventType
-    );
-    
     // Invalidate gamification queries to trigger UI update
     queryClient.invalidateQueries({ queryKey: ['/api/gamification/profile'] });
     queryClient.invalidateQueries({ queryKey: ['/api/gamification/xp/recent'] });
