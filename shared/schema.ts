@@ -231,6 +231,84 @@ export const insertProspectSchema = createInsertSchema(prospects).pick({
 export type InsertProspect = z.infer<typeof insertProspectSchema>;
 export type Prospect = typeof prospects.$inferSelect;
 
+// Startup Metrics - Current/Latest snapshot (single row, user-editable)
+export const startupMetrics = pgTable("startup_metrics", {
+  id: serial("id").primaryKey(),
+  mrr: real("mrr").default(0), // Monthly Recurring Revenue (authoritative input)
+  cac: real("cac").default(0), // Customer Acquisition Cost (authoritative input)
+  ltv: real("ltv").default(0), // Lifetime Value (authoritative input)
+  churnRate: real("churn_rate").default(0), // % monthly churn (authoritative input)
+  growthRate: real("growth_rate").default(0), // % month-over-month growth (authoritative input)
+  activeUsers: integer("active_users").default(0), // Monthly Active Users (authoritative input)
+  conversionRate: real("conversion_rate").default(0), // % conversion (authoritative input)
+  burnRate: real("burn_rate").default(0), // Monthly burn (authoritative input)
+  cashOnHand: real("cash_on_hand").default(0), // Current cash balance (authoritative input)
+  totalRevenue: real("total_revenue").default(0), // Total monthly revenue
+  totalCosts: real("total_costs").default(0), // Total monthly costs
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertStartupMetricsSchema = createInsertSchema(startupMetrics).pick({
+  mrr: true,
+  cac: true,
+  ltv: true,
+  churnRate: true,
+  growthRate: true,
+  activeUsers: true,
+  conversionRate: true,
+  burnRate: true,
+  cashOnHand: true,
+  totalRevenue: true,
+  totalCosts: true,
+});
+
+export type InsertStartupMetrics = z.infer<typeof insertStartupMetricsSchema>;
+export type StartupMetrics = typeof startupMetrics.$inferSelect;
+
+// Historical metric snapshots for trend analysis
+export const startupMetricSnapshots = pgTable("startup_metric_snapshots", {
+  id: serial("id").primaryKey(),
+  reportingPeriod: text("reporting_period").notNull(), // YYYY-MM format
+  mrr: real("mrr").default(0),
+  arr: real("arr").default(0), // Calculated: MRR * 12
+  cac: real("cac").default(0),
+  ltv: real("ltv").default(0),
+  churnRate: real("churn_rate").default(0),
+  growthRate: real("growth_rate").default(0), // % month-over-month
+  activeUsers: integer("active_users").default(0),
+  conversionRate: real("conversion_rate").default(0),
+  burnRate: real("burn_rate").default(0),
+  cashOnHand: real("cash_on_hand").default(0),
+  runway: real("runway").default(0), // Calculated: cash / burn
+  grossMargin: real("gross_margin").default(0), // %
+  netRevenue: real("net_revenue").default(0),
+  totalRevenue: real("total_revenue").default(0),
+  totalCosts: real("total_costs").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertStartupMetricSnapshotSchema = createInsertSchema(startupMetricSnapshots).pick({
+  reportingPeriod: true,
+  mrr: true,
+  arr: true,
+  cac: true,
+  ltv: true,
+  churnRate: true,
+  growthRate: true,
+  activeUsers: true,
+  conversionRate: true,
+  burnRate: true,
+  cashOnHand: true,
+  runway: true,
+  grossMargin: true,
+  netRevenue: true,
+  totalRevenue: true,
+  totalCosts: true,
+});
+
+export type InsertStartupMetricSnapshot = z.infer<typeof insertStartupMetricSnapshotSchema>;
+export type StartupMetricSnapshot = typeof startupMetricSnapshots.$inferSelect;
+
 // OODA Loop system for Daily Revenue Ritual
 export const oodaLoops = pgTable("ooda_loops", {
   id: serial("id").primaryKey(),

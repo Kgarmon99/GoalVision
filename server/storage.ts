@@ -55,7 +55,13 @@ import {
   type InsertDailyChallenge,
   userDailyChallenges,
   type UserDailyChallenge,
-  type InsertUserDailyChallenge
+  type InsertUserDailyChallenge,
+  startupMetrics,
+  type StartupMetrics,
+  type InsertStartupMetrics,
+  startupMetricSnapshots,
+  type StartupMetricSnapshot,
+  type InsertStartupMetricSnapshot
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, asc } from "drizzle-orm";
@@ -164,6 +170,12 @@ export interface IStorage {
   createDailyChallenge(challenge: InsertUserDailyChallenge): Promise<UserDailyChallenge>;
   updateDailyChallengeProgress(id: number, progress: number): Promise<UserDailyChallenge | undefined>;
   completeDailyChallenge(id: number, xpEarned: number): Promise<UserDailyChallenge | undefined>;
+  
+  // Startup Metrics methods
+  getStartupMetrics(): Promise<StartupMetrics | undefined>;
+  updateStartupMetrics(metrics: Partial<InsertStartupMetrics>): Promise<StartupMetrics>;
+  getMetricSnapshots(limit?: number): Promise<StartupMetricSnapshot[]>;
+  createMetricSnapshot(snapshot: InsertStartupMetricSnapshot): Promise<StartupMetricSnapshot>;
 }
 
 export class MemStorage implements IStorage {
@@ -1203,6 +1215,47 @@ export class DatabaseStorage implements IStorage {
     return completed;
   }
 
+  // Startup Metrics methods
+  async getStartupMetrics(): Promise<StartupMetrics | undefined> {
+    const [metrics] = await db.select().from(startupMetrics).limit(1);
+    return metrics;
+  }
+
+  async updateStartupMetrics(metrics: Partial<InsertStartupMetrics>): Promise<StartupMetrics> {
+    // Get existing metrics or create if doesn't exist
+    const existing = await this.getStartupMetrics();
+    
+    if (existing) {
+      const [updated] = await db
+        .update(startupMetrics)
+        .set({ ...metrics, updatedAt: new Date() })
+        .where(eq(startupMetrics.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(startupMetrics)
+        .values(metrics as InsertStartupMetrics)
+        .returning();
+      return created;
+    }
+  }
+
+  async getMetricSnapshots(limit: number = 12): Promise<StartupMetricSnapshot[]> {
+    return await db
+      .select()
+      .from(startupMetricSnapshots)
+      .orderBy(asc(startupMetricSnapshots.reportingPeriod))
+      .limit(limit);
+  }
+
+  async createMetricSnapshot(snapshot: InsertStartupMetricSnapshot): Promise<StartupMetricSnapshot> {
+    const [created] = await db
+      .insert(startupMetricSnapshots)
+      .values(snapshot)
+      .returning();
+    return created;
+  }
 
   // Initialize database with sample data
   async initializeData() {

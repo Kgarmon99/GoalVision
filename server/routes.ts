@@ -10,6 +10,7 @@ import {
   insertProspectSchema,
   insertRegionSchema,
   insertSchoolSchema,
+  insertStartupMetricsSchema,
   goals,
   metrics,
   goalStatus,
@@ -559,6 +560,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ message: "Error deleting prospect" });
+    }
+  });
+
+  // Startup Metrics Routes
+  
+  // Get current startup metrics with calculated derived values
+  app.get("/api/startup-metrics", async (req, res) => {
+    try {
+      const cacheKey = "startup-metrics:current";
+      const cachedMetrics = serverCache.get(cacheKey);
+      
+      if (cachedMetrics) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedMetrics);
+      }
+      
+      const metrics = await storage.getStartupMetrics();
+      
+      if (!metrics) {
+        // Return default metrics if none exist
+        const defaultMetrics = {
+          id: 0,
+          mrr: 0,
+          arr: 0,
+          cac: 0,
+          ltv: 0,
+          churnRate: 0,
+          growthRate: 0,
+          activeUsers: 0,
+          conversionRate: 0,
+          burnRate: 0,
+          cashOnHand: 0,
+          runway: 0,
+          grossMargin: 0,
+          netRevenue: 0,
+          totalRevenue: 0,
+          totalCosts: 0,
+          updatedAt: new Date()
+        };
+        return res.json(defaultMetrics);
+      }
+      
+      // Calculate derived values (with null safety)
+      const arr = (metrics.mrr ?? 0) * 12;
+      const runway = (metrics.burnRate ?? 0) > 0 ? (metrics.cashOnHand ?? 0) / (metrics.burnRate ?? 1) : 0;
+      const grossMargin = (metrics.totalRevenue ?? 0) > 0 ? (((metrics.totalRevenue ?? 0) - (metrics.totalCosts ?? 0)) / (metrics.totalRevenue ?? 1)) * 100 : 0;
+      const netRevenue = (metrics.totalRevenue ?? 0) - (metrics.totalCosts ?? 0);
+      const ltvCacRatio = (metrics.cac ?? 0) > 0 ? (metrics.ltv ?? 0) / (metrics.cac ?? 1) : 0;
+      
+      const response = {
+        ...metrics,
+        arr,
+        runway,
+        grossMargin,
+        netRevenue,
+        ltvCacRatio
+      };
+      
+      serverCache.set(cacheKey, response, CACHE_TTL.DEFAULT);
+      res.set('X-Cache', 'MISS');
+      res.json(response);
+    } catch (error) {
+      console.error("Error fetching startup metrics:", error);
+      res.status(500).json({ message: "Error fetching startup metrics" });
+    }
+  });
+  
+  // Update startup metrics
+  app.patch("/api/startup-metrics", async (req, res) => {
+    try {
+      // Validate request body
+      const metricsData = insertStartupMetricsSchema.partial().parse(req.body);
+      const updatedMetrics = await storage.updateStartupMetrics(metricsData);
+      
+      // Calculate derived values (same logic as GET)
+      const arr = (updatedMetrics.mrr ?? 0) * 12;
+      const runway = (updatedMetrics.burnRate ?? 0) > 0 ? (updatedMetrics.cashOnHand ?? 0) / (updatedMetrics.burnRate ?? 1) : 0;
+      const grossMargin = (updatedMetrics.totalRevenue ?? 0) > 0 ? (((updatedMetrics.totalRevenue ?? 0) - (updatedMetrics.totalCosts ?? 0)) / (updatedMetrics.totalRevenue ?? 1)) * 100 : 0;
+      const netRevenue = (updatedMetrics.totalRevenue ?? 0) - (updatedMetrics.totalCosts ?? 0);
+      const ltvCacRatio = (updatedMetrics.cac ?? 0) > 0 ? (updatedMetrics.ltv ?? 0) / (updatedMetrics.cac ?? 1) : 0;
+      
+      const response = {
+        ...updatedMetrics,
+        arr,
+        runway,
+        grossMargin,
+        netRevenue,
+        ltvCacRatio
+      };
+      
+      // Invalidate cache
+      serverCache.invalidate("startup-metrics:current");
+      
+      res.json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid metrics data", errors: error.errors });
+      }
+      console.error("Error updating startup metrics:", error);
+      res.status(500).json({ message: "Error updating startup metrics" });
+    }
+  });
+  
+  // Get historical metric snapshots
+  app.get("/api/startup-metrics/snapshots", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 12;
+      const snapshots = await storage.getMetricSnapshots(limit);
+      res.json(snapshots);
+    } catch (error) {
+      console.error("Error fetching metric snapshots:", error);
+      res.status(500).json({ message: "Error fetching metric snapshots" });
+    }
+  });
+  
+  // Create a metric snapshot
+  app.post("/api/startup-metrics/snapshots", async (req, res) => {
+    try {
+      const snapshot = await storage.createMetricSnapshot(req.body);
+      res.status(201).json(snapshot);
+    } catch (error) {
+      console.error("Error creating metric snapshot:", error);
+      res.status(500).json({ message: "Error creating metric snapshot" });
     }
   });
 

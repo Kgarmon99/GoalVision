@@ -16,6 +16,7 @@ import { ProspectDialog } from "@/components/prospect-dialog";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SearchBar } from "@/components/search-bar";
 import { GamificationHUD } from "@/components/gamification-hud";
+import { StartupMetricsDisplay } from "@/components/startup-metrics-display";
 import { useState, useEffect, useMemo } from "react";
 import moneybotLogo from "../assets/moneybot-logo.png";
 
@@ -116,6 +117,11 @@ const SimpleDashboard = () => {
         {/* Gamification HUD */}
         <div className="mb-8">
           <GamificationHUD />
+        </div>
+
+        {/* Startup Metrics Section */}
+        <div className="mb-8">
+          <StartupMetricsDisplay />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
