@@ -1,19 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   DollarSign, 
   TrendingUp, 
   TrendingDown, 
-  Users,
+  Users, 
   Target,
-  Zap,
   Activity,
+  Zap,
   PieChart
 } from "lucide-react";
 
 type StartupMetrics = {
+  id: number;
   mrr: number;
-  arr: number;
   cac: number;
   ltv: number;
   churnRate: number;
@@ -22,6 +21,9 @@ type StartupMetrics = {
   conversionRate: number;
   burnRate: number;
   cashOnHand: number;
+  totalRevenue: number;
+  totalCosts: number;
+  arr: number;
   runway: number;
   grossMargin: number;
   netRevenue: number;
@@ -37,7 +39,6 @@ export function StartupMetricsDisplay() {
     return null;
   }
 
-  // Ensure all numeric values have defaults
   const safeMetrics = {
     mrr: metrics.mrr ?? 0,
     arr: metrics.arr ?? 0,
@@ -68,275 +69,172 @@ export function StartupMetricsDisplay() {
     if (value >= 1000000) {
       return `${(value / 1000000).toFixed(1)}M`;
     } else if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}K`;
+      return `${(value / 1000).toFixed(1)}K`;
     }
     return value.toFixed(0);
   };
 
   const metricCards = [
-    // Revenue Metrics
     { 
       title: "MRR", 
       value: formatCurrency(safeMetrics.mrr), 
       icon: DollarSign,
-      category: "Revenue",
+      category: "REV",
       testId: "metric-mrr"
     },
     { 
       title: "ARR", 
       value: formatCurrency(safeMetrics.arr), 
       icon: TrendingUp,
-      category: "Revenue",
+      category: "REV",
       testId: "metric-arr"
     },
     { 
-      title: "Net Revenue", 
+      title: "NET REV", 
       value: formatCurrency(safeMetrics.netRevenue), 
       icon: DollarSign,
-      category: "Revenue",
+      category: "REV",
       testId: "metric-net-revenue"
     },
     { 
-      title: "Gross Margin", 
+      title: "MARGIN", 
       value: `${safeMetrics.grossMargin.toFixed(1)}%`, 
       icon: PieChart,
-      category: "Revenue",
+      category: "REV",
       testId: "metric-gross-margin"
     },
-    
-    // Efficiency Metrics
     { 
       title: "CAC", 
       value: formatCurrency(safeMetrics.cac), 
       icon: Target,
-      category: "Efficiency",
+      category: "EFF",
       testId: "metric-cac"
     },
     { 
       title: "LTV", 
       value: formatCurrency(safeMetrics.ltv), 
       icon: TrendingUp,
-      category: "Efficiency",
+      category: "EFF",
       testId: "metric-ltv"
     },
     { 
-      title: "LTV:CAC Ratio", 
+      title: "LTV:CAC", 
       value: `${safeMetrics.ltvCacRatio.toFixed(1)}x`, 
       icon: Activity,
-      status: safeMetrics.ltvCacRatio >= 3 ? "good" : safeMetrics.ltvCacRatio >= 1 ? "warning" : "danger",
-      category: "Efficiency",
+      status: safeMetrics.ltvCacRatio >= 3 ? "good" : safeMetrics.ltvCacRatio >= 1 ? "warning" : "critical",
+      category: "EFF",
       testId: "metric-ltv-cac-ratio"
     },
     { 
-      title: "Conversion Rate", 
+      title: "CONV", 
       value: `${safeMetrics.conversionRate.toFixed(1)}%`, 
       icon: TrendingUp,
-      category: "Efficiency",
+      category: "EFF",
       testId: "metric-conversion-rate"
     },
-    
-    // Retention & Growth
     { 
-      title: "Churn Rate", 
+      title: "CHURN", 
       value: `${safeMetrics.churnRate.toFixed(1)}%`, 
       icon: safeMetrics.churnRate > 5 ? TrendingDown : Activity,
-      status: safeMetrics.churnRate <= 3 ? "good" : safeMetrics.churnRate <= 5 ? "warning" : "danger",
-      category: "Retention",
+      status: safeMetrics.churnRate <= 3 ? "good" : safeMetrics.churnRate <= 5 ? "warning" : "critical",
+      category: "RET",
       testId: "metric-churn-rate"
     },
     { 
-      title: "Growth Rate", 
+      title: "GROWTH", 
       value: `${safeMetrics.growthRate.toFixed(1)}%`, 
       icon: TrendingUp,
-      category: "Retention",
+      status: safeMetrics.growthRate >= 10 ? "good" : safeMetrics.growthRate >= 5 ? "warning" : "critical",
+      category: "RET",
       testId: "metric-growth-rate"
     },
     { 
-      title: "Active Users", 
+      title: "USERS", 
       value: formatNumber(safeMetrics.activeUsers), 
       icon: Users,
-      category: "Retention",
+      category: "RET",
       testId: "metric-active-users"
     },
-    
-    // Cash & Burn
     { 
-      title: "Monthly Burn", 
+      title: "BURN", 
       value: formatCurrency(safeMetrics.burnRate), 
       icon: Zap,
-      category: "Cash",
+      category: "CASH",
       testId: "metric-burn-rate"
     },
     { 
-      title: "Cash on Hand", 
+      title: "CASH", 
       value: formatCurrency(safeMetrics.cashOnHand), 
       icon: DollarSign,
-      category: "Cash",
+      category: "CASH",
       testId: "metric-cash-on-hand"
     },
     { 
-      title: "Runway", 
+      title: "RUNWAY", 
       value: `${safeMetrics.runway.toFixed(1)}mo`, 
       icon: Activity,
-      status: safeMetrics.runway >= 12 ? "good" : safeMetrics.runway >= 6 ? "warning" : "danger",
-      category: "Cash",
+      status: safeMetrics.runway >= 12 ? "good" : safeMetrics.runway >= 6 ? "warning" : "critical",
+      category: "CASH",
       testId: "metric-runway"
     },
   ];
 
-  const getStatusColor = (status?: string) => {
+  const getStatusClass = (status?: string) => {
     switch (status) {
       case "good":
-        return "text-primary";
+        return "status-online";
       case "warning":
-        return "text-yellow-400";
-      case "danger":
-        return "text-red-400";
+        return "status-warning";
+      case "critical":
+        return "status-critical";
       default:
-        return "text-white";
+        return "";
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "REV":
+        return "border-l-emerald-500";
+      case "EFF":
+        return "border-l-cyan-500";
+      case "RET":
+        return "border-l-violet-500";
+      case "CASH":
+        return "border-l-amber-500";
+      default:
+        return "border-l-primary";
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white text-glow">Startup Metrics</h2>
+    <div className="space-y-4">
+      <div className="section-divider">
+        <span className="section-title">System Telemetry</span>
       </div>
-
-      {/* Revenue Metrics */}
-      <div>
-        <h3 className="text-sm font-semibold text-primary/80 uppercase tracking-wide mb-3">Revenue</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {metricCards.filter(m => m.category === "Revenue").map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card 
-                key={metric.title} 
-                className="glass-card chromatic-edge liquid-ripple"
-                data-testid={`card-${metric.testId}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">
-                        {metric.title}
-                      </p>
-                      <p 
-                        className={`text-2xl font-bold text-glow-sm mt-1 ${getStatusColor(metric.status)}`}
-                        data-testid={`value-${metric.testId}`}
-                      >
-                        {metric.value}
-                      </p>
-                    </div>
-                    <Icon className="h-8 w-8 text-primary drop-shadow-glow" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Efficiency Metrics */}
-      <div>
-        <h3 className="text-sm font-semibold text-primary/80 uppercase tracking-wide mb-3">Efficiency</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {metricCards.filter(m => m.category === "Efficiency").map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card 
-                key={metric.title} 
-                className="glass-card chromatic-edge liquid-ripple"
-                data-testid={`card-${metric.testId}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">
-                        {metric.title}
-                      </p>
-                      <p 
-                        className={`text-2xl font-bold text-glow-sm mt-1 ${getStatusColor(metric.status)}`}
-                        data-testid={`value-${metric.testId}`}
-                      >
-                        {metric.value}
-                      </p>
-                    </div>
-                    <Icon className="h-8 w-8 text-primary drop-shadow-glow" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Retention & Growth */}
-      <div>
-        <h3 className="text-sm font-semibold text-primary/80 uppercase tracking-wide mb-3">Retention & Growth</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {metricCards.filter(m => m.category === "Retention").map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card 
-                key={metric.title} 
-                className="glass-card chromatic-edge liquid-ripple"
-                data-testid={`card-${metric.testId}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">
-                        {metric.title}
-                      </p>
-                      <p 
-                        className={`text-2xl font-bold text-glow-sm mt-1 ${getStatusColor(metric.status)}`}
-                        data-testid={`value-${metric.testId}`}
-                      >
-                        {metric.value}
-                      </p>
-                    </div>
-                    <Icon className="h-8 w-8 text-primary drop-shadow-glow" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Cash & Burn */}
-      <div>
-        <h3 className="text-sm font-semibold text-primary/80 uppercase tracking-wide mb-3">Cash & Burn</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {metricCards.filter(m => m.category === "Cash").map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <Card 
-                key={metric.title} 
-                className="glass-card chromatic-edge liquid-ripple"
-                data-testid={`card-${metric.testId}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">
-                        {metric.title}
-                      </p>
-                      <p 
-                        className={`text-2xl font-bold text-glow-sm mt-1 ${getStatusColor(metric.status)}`}
-                        data-testid={`value-${metric.testId}`}
-                      >
-                        {metric.value}
-                      </p>
-                    </div>
-                    <Icon className="h-8 w-8 text-primary drop-shadow-glow" />
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+        {metricCards.map((metric) => {
+          const Icon = metric.icon;
+          return (
+            <div 
+              key={metric.testId}
+              className={`bg-black border border-primary/20 p-3 hover:border-primary/40 transition-all border-l-2 ${getCategoryColor(metric.category)}`}
+              data-testid={metric.testId}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="data-label text-[9px]">{metric.title}</span>
+                <Icon className="w-3 h-3 text-primary/40" />
+              </div>
+              <div className={`font-mono text-sm font-bold ${metric.status ? getStatusClass(metric.status) : 'text-white'}`}>
+                {metric.value}
+              </div>
+              <div className="text-[8px] text-gray-600 mt-1 uppercase tracking-wider">
+                {metric.category}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

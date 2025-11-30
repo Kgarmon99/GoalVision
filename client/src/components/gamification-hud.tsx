@@ -1,7 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Trophy, Flame, Zap, Star } from "lucide-react";
+import { Trophy, Flame, Zap, Star, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Confetti from "react-confetti";
@@ -28,21 +26,18 @@ export function GamificationHUD() {
     queryKey: ['/api/gamification/profile'],
   });
 
-  // Update streak on component mount
   const updateStreakMutation = useMutation({
-    mutationFn: () => apiRequest<GamificationProfile>('POST', '/api/gamification/streak/update', {}),
+    mutationFn: () => apiRequest('POST', '/api/gamification/streak/update', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/gamification/profile'] });
     }
   });
 
   useEffect(() => {
-    // Update streak when component mounts
     updateStreakMutation.mutate();
   }, []);
 
   useEffect(() => {
-    // Check for level up
     if (profile && previousLevel !== null && profile.level > previousLevel) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
@@ -54,18 +49,15 @@ export function GamificationHUD() {
 
   if (isLoading || !profile) {
     return (
-      <Card className="glass-frosted chromatic-edge" data-testid="card-gamification-loading">
-        <CardContent className="p-4">
-          <div className="animate-pulse">
-            <div className="h-4 bg-primary/20 rounded mb-2"></div>
-            <div className="h-8 bg-primary/20 rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="tactical-card p-4" data-testid="card-gamification-loading">
+        <div className="animate-pulse">
+          <div className="h-4 bg-primary/10 mb-2"></div>
+          <div className="h-8 bg-primary/10"></div>
+        </div>
+      </div>
     );
   }
 
-  // Calculate XP needed for next level
   const currentLevelXp = (profile.level - 1) * (profile.level - 1) * 100;
   const nextLevelXp = profile.level * profile.level * 100;
   const xpInLevel = profile.xp - currentLevelXp;
@@ -81,73 +73,93 @@ export function GamificationHUD() {
           recycle={false}
           numberOfPieces={500}
           gravity={0.3}
+          colors={['#10b981', '#059669', '#047857', '#ffffff', '#22c55e']}
         />
       )}
       
-      <Card className="glass-premium chromatic-edge volumetric-light" data-testid="card-gamification-hud">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {/* Level and XP */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-full glass-card chromatic-edge flex items-center justify-center">
-                    <Trophy className="h-7 w-7 text-primary drop-shadow-glow" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-black text-xs font-bold flex items-center justify-center border-2 border-black">
-                    {profile.level}
-                  </div>
+      <div className="tactical-card glow-border-animated" data-testid="card-gamification-hud">
+        <div className="p-5">
+          <div className="flex items-center justify-between gap-6">
+            
+            {/* Level Badge */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-2 border-primary flex items-center justify-center bg-black">
+                  <Shield className="h-8 w-8 text-primary" style={{ filter: 'drop-shadow(0 0 8px rgba(16, 185, 129, 0.6))' }} />
                 </div>
-                <div>
-                  <div className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Level {profile.level}</div>
-                  <div className="text-2xl font-bold text-white text-glow">
-                    {xpInLevel.toLocaleString()} / {xpNeededForLevel.toLocaleString()} XP
-                  </div>
+                <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-primary text-black text-sm font-bold flex items-center justify-center border border-black font-mono">
+                  {profile.level}
                 </div>
               </div>
-              
-              {/* Streak */}
-              <div className="flex items-center gap-2" data-testid="streak-counter">
-                <div className={`transition-transform ${profile.currentStreak > 0 ? 'animate-pulse' : ''}`}>
-                  <Flame className={`h-8 w-8 ${profile.currentStreak > 0 ? 'text-orange-500' : 'text-gray-600'} drop-shadow-glow`} />
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white text-glow">{profile.currentStreak}</div>
-                  <div className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Day Streak</div>
+              <div>
+                <div className="data-label mb-1">OPERATOR RANK</div>
+                <div className="text-white font-bold text-lg" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  LEVEL {profile.level}
                 </div>
               </div>
             </div>
 
-            {/* XP Progress Bar */}
-            <div className="space-y-2">
-              <div className="relative h-3 bg-black/40 rounded-full overflow-hidden border border-primary/30">
-                <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/80 via-primary to-primary/80 transition-all duration-500 ease-out"
-                  style={{ width: `${Math.min(100, progressPercent)}%` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-                </div>
+            {/* XP Bar */}
+            <div className="flex-1 max-w-md">
+              <div className="flex items-center justify-between mb-2">
+                <span className="data-label">EXPERIENCE</span>
+                <span className="font-mono text-sm text-primary">
+                  {xpInLevel.toLocaleString()} / {xpNeededForLevel.toLocaleString()} XP
+                </span>
               </div>
-              
-              {/* Stats Row */}
-              <div className="flex items-center justify-between text-xs text-gray-400">
-                <div className="flex items-center gap-1" data-testid="stat-goals-completed">
-                  <Star className="h-3 w-3 text-primary" />
-                  <span>{profile.totalGoalsCompleted} Goals</span>
+              <div className="progress-tactical">
+                <div 
+                  className="progress-tactical-fill" 
+                  style={{ width: `${Math.min(100, progressPercent)}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between mt-2 text-xs text-gray-500 font-mono">
+                <span>{Math.round(progressPercent)}% TO NEXT RANK</span>
+                <span>TOTAL: {profile.xp.toLocaleString()} XP</span>
+              </div>
+            </div>
+
+            {/* Streak Counter */}
+            <div className="flex items-center gap-3 border border-primary/20 bg-black/50 px-4 py-3" data-testid="streak-counter">
+              <div className={`${profile.currentStreak > 0 ? 'pulse-glow' : ''}`}>
+                <Flame 
+                  className={`h-8 w-8 ${profile.currentStreak > 0 ? 'text-orange-500' : 'text-gray-600'}`} 
+                  style={profile.currentStreak > 0 ? { filter: 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.8))' } : {}}
+                />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white font-mono">{profile.currentStreak}</div>
+                <div className="data-label">DAY STREAK</div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="hidden lg:flex items-center gap-6">
+              <div className="text-center" data-testid="stat-goals-completed">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Star className="h-4 w-4 text-primary" />
+                  <span className="font-mono text-lg text-white">{profile.totalGoalsCompleted}</span>
                 </div>
-                <div className="flex items-center gap-1" data-testid="stat-prospects-won">
-                  <Zap className="h-3 w-3 text-primary" />
-                  <span>{profile.totalProspectsWon} Wins</span>
+                <div className="data-label">OBJECTIVES</div>
+              </div>
+              <div className="text-center" data-testid="stat-prospects-won">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Zap className="h-4 w-4 text-primary" />
+                  <span className="font-mono text-lg text-white">{profile.totalProspectsWon}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Trophy className="h-3 w-3 text-primary" />
-                  <span>Best: {profile.longestStreak} days</span>
+                <div className="data-label">VICTORIES</div>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  <span className="font-mono text-lg text-white">{profile.longestStreak}</span>
                 </div>
+                <div className="data-label">BEST STREAK</div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </>
   );
 }

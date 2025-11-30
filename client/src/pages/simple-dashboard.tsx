@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Goal, Prospect } from "@shared/schema";
 import { 
   DollarSign, 
@@ -9,7 +8,9 @@ import {
   AlertCircle,
   Zap,
   Calendar,
-  Pencil
+  Pencil,
+  Activity,
+  Crosshair
 } from "lucide-react";
 import { GoalDialog } from "@/components/goal-dialog";
 import { ProspectDialog } from "@/components/prospect-dialog";
@@ -27,6 +28,12 @@ const SimpleDashboard = () => {
   });
   const [goalSearch, setGoalSearch] = useState("");
   const [prospectSearch, setProspectSearch] = useState("");
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const loadSettings = () => {
@@ -82,191 +89,226 @@ const SimpleDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen cosmic-bg flex items-center justify-center">
-        <div className="text-white text-glow">Loading numbers...</div>
+      <div className="min-h-screen bg-black tactical-grid flex items-center justify-center">
+        <div className="text-center">
+          <div className="data-value text-2xl">LOADING SYSTEMS...</div>
+          <div className="data-label mt-2">INITIALIZING COMMAND CENTER</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen cosmic-bg volumetric-light">
-      <div className="glass-frosted chromatic-edge">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+    <div className="min-h-screen bg-black tactical-grid scanlines">
+      {/* Header Bar */}
+      <div className="header-bar">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img 
-                src={moneybotLogo} 
-                alt="Moneybot" 
-                className="h-16 w-16 rounded-full drop-shadow-glow float-effect" 
-                style={{
-                  boxShadow: '0 0 30px rgba(74, 222, 128, 0.7), 0 0 60px rgba(74, 222, 128, 0.5), 0 0 90px rgba(16, 185, 129, 0.3)'
-                }}
-              />
+              <div className="relative">
+                <img 
+                  src={moneybotLogo} 
+                  alt="Moneybot" 
+                  className="h-14 w-14 border border-primary/50" 
+                  style={{
+                    filter: 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))'
+                  }}
+                />
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary rounded-full pulse-glow" />
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-white text-glow">Moneybot Dashboard</h1>
-                <p className="text-sm text-primary text-glow-sm">Your business at a glance</p>
+                <h1 className="text-xl font-bold text-white tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                  MONEYBOT COMMAND
+                </h1>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="data-label">MISSION CONTROL ACTIVE</span>
+                  <span className="text-primary text-xs font-mono">
+                    {currentTime.toLocaleTimeString('en-US', { hour12: false })}
+                  </span>
+                </div>
               </div>
             </div>
-            <SettingsDialog />
+            
+            <div className="flex items-center gap-6">
+              <div className="status-bar hidden md:flex">
+                <div className="status-indicator">
+                  <div className="status-dot online" />
+                  <span className="text-gray-400">SYSTEMS NOMINAL</span>
+                </div>
+                <div className="status-indicator">
+                  <Activity className="w-3 h-3 text-primary" />
+                  <span className="text-gray-400">LIVE DATA</span>
+                </div>
+              </div>
+              <SettingsDialog />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 entrance-animation">
+      <div className="max-w-7xl mx-auto px-6 py-6 entrance-animation relative z-10">
         
         {/* Gamification HUD */}
-        <div className="mb-8">
+        <div className="mb-6">
           <GamificationHUD />
         </div>
 
         {/* Startup Metrics Section */}
-        <div className="mb-8">
+        <div className="mb-6">
           <StartupMetricsDisplay />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-pipeline-value">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Pipeline Value</p>
-                  <p className="text-2xl font-bold text-white text-glow-sm mt-1">
-                    ${Math.round(totalPipeline).toLocaleString()}
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-primary drop-shadow-glow" />
+        {/* Primary Metrics Grid */}
+        <div className="section-divider mb-6">
+          <span className="section-title">Primary Metrics</span>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 stagger-children">
+          <div className="tactical-card corner-brackets p-5 hover-lift" data-testid="card-pipeline-value">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="data-label">Pipeline Value</p>
+                <p className="data-value text-2xl mt-2">
+                  ${Math.round(totalPipeline).toLocaleString()}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <DollarSign className="h-8 w-8 text-primary opacity-60" />
+            </div>
+          </div>
 
-          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-monthly-burn">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Monthly Burn</p>
-                  <p className="text-2xl font-bold text-white text-glow-sm mt-1">
-                    ${financials.monthlyBurnRate.toLocaleString()}
-                  </p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-white drop-shadow-glow" />
+          <div className="tactical-card corner-brackets p-5 hover-lift" data-testid="card-monthly-burn">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="data-label">Monthly Burn</p>
+                <p className="data-value text-2xl mt-2">
+                  ${financials.monthlyBurnRate.toLocaleString()}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <AlertCircle className="h-8 w-8 text-yellow-500 opacity-60" />
+            </div>
+          </div>
 
-          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-runway">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Runway</p>
-                  <p className="text-2xl font-bold text-white text-glow-sm mt-1">
-                    {runway.toFixed(1)} months
-                  </p>
-                </div>
-                <Zap className="h-8 w-8 text-primary drop-shadow-glow" />
+          <div className="tactical-card corner-brackets p-5 hover-lift" data-testid="card-runway">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="data-label">Runway</p>
+                <p className={`data-value text-2xl mt-2 ${runway < 6 ? 'text-red-500' : runway < 12 ? 'text-yellow-500' : ''}`}>
+                  {runway.toFixed(1)} MO
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Zap className="h-8 w-8 text-primary opacity-60" />
+            </div>
+          </div>
 
-          <Card className="glass-card chromatic-edge liquid-ripple" data-testid="card-goals-progress">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-primary/80 uppercase tracking-wide font-semibold">Goals Progress</p>
-                  <p className="text-2xl font-bold text-white text-glow-sm mt-1">
-                    {completedGoals}/{totalGoals}
-                  </p>
-                </div>
-                <Target className="h-8 w-8 text-primary drop-shadow-glow" />
+          <div className="tactical-card corner-brackets p-5 hover-lift" data-testid="card-goals-progress">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="data-label">Objectives Complete</p>
+                <p className="data-value text-2xl mt-2">
+                  {completedGoals}/{totalGoals}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <Target className="h-8 w-8 text-primary opacity-60" />
+            </div>
+          </div>
         </div>
 
+        {/* Goals Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-xl font-semibold text-white text-glow">Goals & Targets</h2>
-            <div className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="flex items-center gap-3">
+              <Crosshair className="w-5 h-5 text-primary" />
+              <h2 className="section-title">Active Objectives</h2>
+            </div>
+            <div className="flex items-center gap-3 flex-1 max-w-md">
               <SearchBar 
-                placeholder="Search goals..." 
+                placeholder="Search objectives..." 
                 onSearch={setGoalSearch}
               />
               <GoalDialog />
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 stagger-children">
             {filteredGoals.map((goal) => {
               const progress = Math.min(100, (goal.current / goal.target) * 100);
               const isComplete = progress >= 100;
               const isOnTrack = progress >= 75;
               
               return (
-                <Card 
+                <div 
                   key={goal.id} 
-                  className={`glass-premium chromatic-edge volumetric-light liquid-ripple ${isComplete ? 'celebration-card' : ''}`}
+                  className={`tactical-card p-5 hover-lift ${isComplete ? 'pulse-glow' : ''}`}
                   data-testid={`card-goal-${goal.id}`}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white text-glow-sm" data-testid={`text-goal-name-${goal.id}`}>{goal.name}</h3>
-                        {goal.deadline && (
-                          <div className="flex items-center text-xs text-gray-400 mt-1">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            <span data-testid={`text-goal-deadline-${goal.id}`}>{goal.deadline}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-primary text-glow" data-testid={`text-goal-progress-${goal.id}`}>
-                            {Math.round(progress)}%
-                          </div>
-                          {isComplete ? (
-                            <span className="text-xs text-primary" data-testid={`status-goal-${goal.id}`}>Complete</span>
-                          ) : isOnTrack ? (
-                            <span className="text-xs text-primary/70" data-testid={`status-goal-${goal.id}`}>On Track</span>
-                          ) : (
-                            <span className="text-xs text-white/70" data-testid={`status-goal-${goal.id}`}>Needs Focus</span>
-                          )}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold tracking-wide" data-testid={`text-goal-name-${goal.id}`}>
+                        {goal.name}
+                      </h3>
+                      {goal.deadline && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Calendar className="h-3 w-3 text-gray-500" />
+                          <span className="text-xs text-gray-500 font-mono" data-testid={`text-goal-deadline-${goal.id}`}>
+                            {goal.deadline}
+                          </span>
                         </div>
-                        <GoalDialog 
-                          goal={goal} 
-                          trigger={
-                            <button 
-                              className="p-2 hover:bg-primary/20 rounded-lg transition-colors"
-                              data-testid={`button-edit-goal-${goal.id}`}
-                            >
-                              <Pencil className="h-4 w-4 text-primary" />
-                            </button>
-                          }
-                        />
-                      </div>
+                      )}
                     </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Current</span>
-                        <span className="text-white font-medium" data-testid={`text-goal-current-${goal.id}`}>
-                          {goal.current.toLocaleString()} {goal.unit}
+                    <div className="flex items-start gap-3">
+                      <div className="text-right">
+                        <div className="data-value text-xl" data-testid={`text-goal-progress-${goal.id}`}>
+                          {Math.round(progress)}%
+                        </div>
+                        <span className={`text-xs uppercase tracking-wider ${
+                          isComplete ? 'status-online' : isOnTrack ? 'text-primary/70' : 'status-warning'
+                        }`} data-testid={`status-goal-${goal.id}`}>
+                          {isComplete ? 'COMPLETE' : isOnTrack ? 'ON TRACK' : 'ATTENTION'}
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Target</span>
-                        <span className="text-white font-medium" data-testid={`text-goal-target-${goal.id}`}>
-                          {goal.target.toLocaleString()} {goal.unit}
-                        </span>
-                      </div>
-                      <Progress value={progress} className="h-2 mt-3 glow-neon" />
+                      <GoalDialog 
+                        goal={goal} 
+                        trigger={
+                          <button 
+                            className="btn-tactical p-2"
+                            data-testid={`button-edit-goal-${goal.id}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        }
+                      />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="data-label">Current</span>
+                      <span className="text-white font-mono" data-testid={`text-goal-current-${goal.id}`}>
+                        {goal.current.toLocaleString()} {goal.unit}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="data-label">Target</span>
+                      <span className="text-white font-mono" data-testid={`text-goal-target-${goal.id}`}>
+                        {goal.target.toLocaleString()} {goal.unit}
+                      </span>
+                    </div>
+                    <div className="progress-tactical mt-3">
+                      <div 
+                        className="progress-tactical-fill" 
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
               );
             })}
             
             {filteredGoals.length === 0 && (
-              <div className="col-span-full text-center py-12" data-testid="empty-goals">
-                <p className="text-gray-400 mb-4">
-                  {goalSearch ? "No goals match your search" : "No goals set yet"}
+              <div className="col-span-full text-center py-12 tactical-card" data-testid="empty-goals">
+                <Target className="h-12 w-12 text-primary/30 mx-auto mb-3" />
+                <p className="text-gray-500 mb-4 font-mono">
+                  {goalSearch ? "NO OBJECTIVES MATCH QUERY" : "NO ACTIVE OBJECTIVES"}
                 </p>
                 {!goalSearch && <GoalDialog />}
               </div>
@@ -274,58 +316,67 @@ const SimpleDashboard = () => {
           </div>
         </div>
 
+        {/* Pipeline Section */}
         <div>
           <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-xl font-semibold text-white text-glow">Sales Pipeline</h2>
-            <div className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-5 h-5 text-primary" />
+              <h2 className="section-title">Revenue Pipeline</h2>
+            </div>
+            <div className="flex items-center gap-3 flex-1 max-w-md">
               <SearchBar 
-                placeholder="Search prospects..." 
+                placeholder="Search pipeline..." 
                 onSearch={setProspectSearch}
               />
               <ProspectDialog />
             </div>
           </div>
-          <Card className="glow-card bg-black/80 border-primary/40" data-testid="card-pipeline">
-            <CardContent className="p-6">
-              <div className="space-y-3">
+          
+          <div className="tactical-card" data-testid="card-pipeline">
+            <div className="p-4">
+              <div className="space-y-2 stagger-children">
                 {filteredProspects.slice(0, 8).map((prospect) => (
                   <div 
                     key={prospect.id} 
-                    className="flex items-center justify-between p-3 bg-black/60 rounded-lg border border-primary/20 hover:border-primary/40 transition-all hover-lift iridescent-hover group"
+                    className="flex items-center justify-between p-4 bg-black/60 border border-primary/10 hover:border-primary/30 transition-all group"
                     data-testid={`row-prospect-${prospect.id}`}
                   >
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-white font-medium" data-testid={`text-prospect-name-${prospect.id}`}>{prospect.name}</p>
-                        <span className="text-xs text-gray-500">•</span>
-                        <p className="text-sm text-gray-400" data-testid={`text-prospect-org-${prospect.id}`}>{prospect.organization}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="text-white font-medium" data-testid={`text-prospect-name-${prospect.id}`}>
+                          {prospect.name}
+                        </span>
+                        <span className="text-gray-600">|</span>
+                        <span className="text-sm text-gray-400 font-mono" data-testid={`text-prospect-org-${prospect.id}`}>
+                          {prospect.organization}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded border border-primary/30" data-testid={`text-prospect-stage-${prospect.id}`}>
+                      <div className="flex items-center gap-4 mt-2">
+                        <span className="text-xs px-2 py-1 border border-primary/30 text-primary font-mono uppercase" data-testid={`text-prospect-stage-${prospect.id}`}>
                           {prospect.stage}
                         </span>
-                        <span className="text-xs text-gray-500" data-testid={`text-prospect-probability-${prospect.id}`}>
-                          {prospect.probability}% probability
+                        <span className="text-xs text-gray-500 font-mono" data-testid={`text-prospect-probability-${prospect.id}`}>
+                          {prospect.probability}% PROB
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <div className="text-lg font-bold text-primary text-glow" data-testid={`text-prospect-value-${prospect.id}`}>
+                        <div className="data-value text-lg" data-testid={`text-prospect-value-${prospect.id}`}>
                           ${prospect.value.toLocaleString()}
                         </div>
-                        <div className="text-xs text-gray-500" data-testid={`text-prospect-expected-${prospect.id}`}>
-                          ${Math.round(prospect.value * (prospect.probability / 100)).toLocaleString()} expected
+                        <div className="text-xs text-gray-500 font-mono" data-testid={`text-prospect-expected-${prospect.id}`}>
+                          ${Math.round(prospect.value * (prospect.probability / 100)).toLocaleString()} EXP
                         </div>
                       </div>
                       <ProspectDialog 
                         prospect={prospect}
                         trigger={
                           <button 
-                            className="p-2 hover:bg-primary/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                            className="btn-tactical p-2 opacity-0 group-hover:opacity-100 transition-opacity"
                             data-testid={`button-edit-prospect-${prospect.id}`}
                           >
-                            <Pencil className="h-4 w-4 text-primary" />
+                            <Pencil className="h-4 w-4" />
                           </button>
                         }
                       />
@@ -334,17 +385,25 @@ const SimpleDashboard = () => {
                 ))}
                 
                 {filteredProspects.length === 0 && (
-                  <div className="text-center py-8" data-testid="empty-prospects">
-                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-2" />
-                    <p className="text-gray-400 mb-4">
-                      {prospectSearch ? "No prospects match your search" : "No prospects in pipeline"}
+                  <div className="text-center py-12" data-testid="empty-prospects">
+                    <Users className="h-12 w-12 text-primary/30 mx-auto mb-3" />
+                    <p className="text-gray-500 font-mono">
+                      {prospectSearch ? "NO PROSPECTS MATCH QUERY" : "NO ACTIVE PROSPECTS"}
                     </p>
-                    {!prospectSearch && <ProspectDialog />}
+                    {!prospectSearch && <div className="mt-4"><ProspectDialog /></div>}
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Status */}
+        <div className="mt-8 pt-4 border-t border-primary/10">
+          <div className="flex items-center justify-between text-xs text-gray-600 font-mono">
+            <span>MONEYBOT v2.0 | COMMAND CENTER</span>
+            <span>{currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </div>
         </div>
 
       </div>
