@@ -814,4 +814,105 @@
     background: rgba(0, 0, 0, 0.98) !important;
     border: 1px solid rgba(16, 185, 129, 0.3) !important;
   }
+
+  /* ========== MOBILE RESPONSIVE STYLES ========== */
+  
+  @media (max-width: 768px) {
+    /* Reduce grid density on mobile */
+    .tactical-grid {
+      background-size: 30px 30px, 30px 30px, 150px 150px, 150px 150px;
+    }
+
+    /* Lighter scanlines on mobile for better readability */
+    .scanlines::after {
+      opacity: 0.4;
+    }
+
+    /* Smaller mil-tags */
+    .mil-tag {
+      font-size: 7px;
+      padding: 1px 6px;
+      left: 12px;
+    }
+
+    /* Smaller corner brackets */
+    .corner-brackets::before,
+    .corner-brackets::after {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Compact data labels */
+    .data-label {
+      font-size: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    /* Smaller data values */
+    .data-value {
+      font-size: 1.25rem;
+    }
+
+    /* Compact section title */
+    .section-title {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+    }
+
+    /* Smaller classified badge */
+    .classified-badge {
+      font-size: 7px;
+      padding: 2px 6px;
+    }
+
+    /* Compact alert bars */
+    .alert-bar {
+      width: 3px;
+      height: 12px;
+    }
+
+    /* Touch-friendly buttons */
+    .btn-tactical {
+      padding: 12px 16px;
+      min-height: 44px;
+    }
+
+    /* Compact progress bars */
+    .progress-tactical {
+      height: 6px;
+    }
+
+    /* Disable hover lift on touch devices */
+    .hover-lift:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Active state for touch */
+    .hover-lift:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Extra small screens */
+    .data-value {
+      font-size: 1.1rem;
+    }
+
+    .section-title {
+      font-size: 9px;
+    }
+
+    .mil-tag {
+      font-size: 6px;
+      padding: 1px 4px;
+    }
+
+    /* Hide secure label on small screens */
+    .tactical-card::after {
+      display: none;
+    }
+  }
 }

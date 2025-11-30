@@ -77,8 +77,8 @@ export function StartupMetricsDisplay() {
   const metricCards = [
     { title: "MRR", value: formatCurrency(safeMetrics.mrr), code: "FIN-01", icon: DollarSign, sector: "ALPHA" },
     { title: "ARR", value: formatCurrency(safeMetrics.arr), code: "FIN-02", icon: TrendingUp, sector: "ALPHA" },
-    { title: "NET REV", value: formatCurrency(safeMetrics.netRevenue), code: "FIN-03", icon: DollarSign, sector: "ALPHA" },
-    { title: "MARGIN", value: `${safeMetrics.grossMargin.toFixed(1)}%`, code: "FIN-04", icon: PieChart, sector: "ALPHA" },
+    { title: "NET", value: formatCurrency(safeMetrics.netRevenue), code: "FIN-03", icon: DollarSign, sector: "ALPHA" },
+    { title: "MARGIN", value: `${safeMetrics.grossMargin.toFixed(0)}%`, code: "FIN-04", icon: PieChart, sector: "ALPHA" },
     { title: "CAC", value: formatCurrency(safeMetrics.cac), code: "EFF-01", icon: Target, sector: "BRAVO" },
     { title: "LTV", value: formatCurrency(safeMetrics.ltv), code: "EFF-02", icon: TrendingUp, sector: "BRAVO" },
     { 
@@ -89,7 +89,7 @@ export function StartupMetricsDisplay() {
       sector: "BRAVO",
       status: safeMetrics.ltvCacRatio >= 3 ? 'nominal' : safeMetrics.ltvCacRatio >= 1 ? 'caution' : 'critical'
     },
-    { title: "CONV", value: `${safeMetrics.conversionRate.toFixed(1)}%`, code: "EFF-04", icon: TrendingUp, sector: "BRAVO" },
+    { title: "CONV", value: `${safeMetrics.conversionRate.toFixed(0)}%`, code: "EFF-04", icon: TrendingUp, sector: "BRAVO" },
     { 
       title: "CHURN", 
       value: `${safeMetrics.churnRate.toFixed(1)}%`, 
@@ -100,7 +100,7 @@ export function StartupMetricsDisplay() {
     },
     { 
       title: "GROWTH", 
-      value: `${safeMetrics.growthRate.toFixed(1)}%`, 
+      value: `${safeMetrics.growthRate.toFixed(0)}%`, 
       code: "RET-02", 
       icon: TrendingUp, 
       sector: "CHARLIE",
@@ -111,7 +111,7 @@ export function StartupMetricsDisplay() {
     { title: "CASH", value: formatCurrency(safeMetrics.cashOnHand), code: "OPS-02", icon: DollarSign, sector: "DELTA" },
     { 
       title: "RUNWAY", 
-      value: `${safeMetrics.runway.toFixed(1)}mo`, 
+      value: `${safeMetrics.runway.toFixed(0)}mo`, 
       code: "OPS-03", 
       icon: Activity, 
       sector: "DELTA",
@@ -139,17 +139,48 @@ export function StartupMetricsDisplay() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-primary" />
-          <span className="section-title">TELEMETRY FEED</span>
+    <div className="space-y-2 md:space-y-3">
+      <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Activity className="w-3 h-3 md:w-4 md:h-4 text-primary" />
+          <span className="section-title text-[9px] md:text-xs">TELEMETRY</span>
         </div>
         <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent" />
-        <span className="classified-badge">LIVE DATA</span>
+        <span className="classified-badge text-[6px] md:text-[9px]">LIVE</span>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      {/* Mobile: Scrollable horizontal list */}
+      <div className="md:hidden overflow-x-auto -mx-3 px-3 pb-2">
+        <div className="flex gap-2" style={{ width: 'max-content' }}>
+          {metricCards.map((metric) => {
+            const Icon = metric.icon;
+            return (
+              <div 
+                key={metric.code}
+                className={`bg-black border border-primary/20 border-l-2 ${getSectorColor(metric.sector)} relative flex-shrink-0`}
+                style={{ width: '85px' }}
+                data-testid={`metric-${metric.title.toLowerCase().replace(/[:\s]/g, '-')}`}
+              >
+                <div className="absolute top-0 right-0 bg-primary/20 px-1 py-0.5">
+                  <span className="text-[6px] text-primary font-mono font-bold">{metric.code}</span>
+                </div>
+                <div className="p-2 pt-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="data-label text-[7px]">{metric.title}</span>
+                    <Icon className="w-2.5 h-2.5 text-primary/30" />
+                  </div>
+                  <div className={`font-mono text-xs font-bold ${getStatusClass(metric.status)}`} style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                    {metric.value}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop: Grid layout */}
+      <div className="hidden md:grid grid-cols-4 lg:grid-cols-7 gap-2">
         {metricCards.map((metric) => {
           const Icon = metric.icon;
           return (
