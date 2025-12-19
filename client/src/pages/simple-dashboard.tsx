@@ -573,64 +573,11 @@ const SimpleDashboard = () => {
           </div>
 
           {/* Goals Summary */}
-          <div className="mt-8 md:mt-10 border border-primary/20 bg-black/40">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
-              {/* Pilots Goal */}
-              <div className="border-b sm:border-b-0 sm:border-r border-primary/20 p-4">
-                <div className="text-[10px] text-gray-500 font-mono mb-1">PILOTS</div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-mono text-primary">{metrics.pilots}/{metrics.pilotsTarget}</div>
-                    <div className="text-[9px] text-gray-500 font-mono">{formatDeadline(metrics.pilotsDeadline)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-mono text-gray-400">{pilotsProgress.toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Districts Goal */}
-              <div className="border-b sm:border-b-0 sm:border-r border-primary/20 p-4">
-                <div className="text-[10px] text-gray-500 font-mono mb-1">DISTRICTS</div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-mono text-primary">{metrics.districts}/{metrics.districtsTarget}</div>
-                    <div className="text-[9px] text-gray-500 font-mono">{formatDeadline(metrics.districtsDeadline)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-mono text-gray-400">{districtsProgress.toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Students Goal */}
-              <div className="border-b lg:border-b-0 lg:border-r border-primary/20 p-4">
-                <div className="text-[10px] text-gray-500 font-mono mb-1">STUDENTS</div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-mono text-primary">{metrics.students.toLocaleString()}/{metrics.studentsTarget.toLocaleString()}</div>
-                    <div className="text-[9px] text-gray-500 font-mono">{formatDeadline(metrics.studentsDeadline)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-mono text-gray-400">{studentsProgress.toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Revenue Goal */}
-              <div className="p-4">
-                <div className="text-[10px] text-gray-500 font-mono mb-1">REVENUE</div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-mono text-primary">{formatCurrency(metrics.revenue)}/{formatCurrency(metrics.revenueTarget)}</div>
-                    <div className="text-[9px] text-gray-500 font-mono">{formatDeadline(metrics.revenueDeadline)}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-mono text-gray-400">{revenueProgress.toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8 md:mt-10 space-y-2">
+            <div className="font-mono text-sm text-primary">Pilots: {metrics.pilots}/{metrics.pilotsTarget}</div>
+            <div className="font-mono text-sm text-primary">Districts: {metrics.districts}/{metrics.districtsTarget}</div>
+            <div className="font-mono text-sm text-primary">Students: {metrics.students.toLocaleString()}/{metrics.studentsTarget.toLocaleString()}</div>
+            <div className="font-mono text-sm text-primary">Revenue: {formatCurrency(metrics.revenue)}/{formatCurrency(metrics.revenueTarget)}</div>
           </div>
 
           {/* Mission Status */}
