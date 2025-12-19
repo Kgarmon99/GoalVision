@@ -23,13 +23,13 @@ const SimpleDashboard = () => {
   const [metrics, setMetrics] = useState({
     revenue: 2100,
     revenueTarget: 10000,
-    revenuePrevious: 0,
-    growth: 27.5,
-    growthTarget: 30,
-    growthPrevious: 22,
-    students: 0,
-    studentsTarget: 100,
-    studentsPrevious: 0,
+    revenuePrevious: 1800,
+    pilots: 12,
+    pilotsTarget: 50,
+    pilotsPrevious: 10,
+    students: 1200,
+    studentsTarget: 5000,
+    studentsPrevious: 1000,
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -66,9 +66,9 @@ const SimpleDashboard = () => {
     : 0;
   const revenueUp = revenueChange >= 0;
 
-  const growthProgress = Math.min(100, (metrics.growth / metrics.growthTarget) * 100);
-  const growthChange = metrics.growth - metrics.growthPrevious;
-  const growthUp = growthChange >= 0;
+  const pilotsProgress = Math.min(100, (metrics.pilots / metrics.pilotsTarget) * 100);
+  const pilotsChange = metrics.pilots - metrics.pilotsPrevious;
+  const pilotsUp = pilotsChange >= 0;
 
   const studentsProgress = metrics.studentsTarget > 0 ? Math.min(100, (metrics.students / metrics.studentsTarget) * 100) : 0;
   const studentsChange = metrics.studentsPrevious > 0 
@@ -162,16 +162,15 @@ const SimpleDashboard = () => {
                 </div>
                 <div className="space-y-3">
                   <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
-                    <TrendingUp className="w-3 h-3" /> Growth %
+                    <TrendingUp className="w-3 h-3" /> Pilots
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <Label className="text-[10px] text-gray-500">Current</Label>
                       <Input
                         type="number"
-                        step="0.1"
-                        value={editMetrics.growth}
-                        onChange={(e) => setEditMetrics({...editMetrics, growth: Number(e.target.value)})}
+                        value={editMetrics.pilots}
+                        onChange={(e) => setEditMetrics({...editMetrics, pilots: Number(e.target.value)})}
                         className="h-9 text-sm"
                       />
                     </div>
@@ -179,9 +178,8 @@ const SimpleDashboard = () => {
                       <Label className="text-[10px] text-gray-500">Target</Label>
                       <Input
                         type="number"
-                        step="0.1"
-                        value={editMetrics.growthTarget}
-                        onChange={(e) => setEditMetrics({...editMetrics, growthTarget: Number(e.target.value)})}
+                        value={editMetrics.pilotsTarget}
+                        onChange={(e) => setEditMetrics({...editMetrics, pilotsTarget: Number(e.target.value)})}
                         className="h-9 text-sm"
                       />
                     </div>
@@ -189,9 +187,8 @@ const SimpleDashboard = () => {
                       <Label className="text-[10px] text-gray-500">Previous</Label>
                       <Input
                         type="number"
-                        step="0.1"
-                        value={editMetrics.growthPrevious}
-                        onChange={(e) => setEditMetrics({...editMetrics, growthPrevious: Number(e.target.value)})}
+                        value={editMetrics.pilotsPrevious}
+                        onChange={(e) => setEditMetrics({...editMetrics, pilotsPrevious: Number(e.target.value)})}
                         className="h-9 text-sm"
                       />
                     </div>
@@ -292,20 +289,20 @@ const SimpleDashboard = () => {
               </div>
             </div>
 
-            {/* GROWTH Card */}
-            <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-growth">
-              <div className="mil-tag">GRW-01</div>
+            {/* PILOTS Card */}
+            <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-pilots">
+              <div className="mil-tag">PLT-01</div>
               
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">GROWTH</div>
+                    <div className="data-label text-xs md:text-sm mb-2">PILOTS</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
-                      data-testid="text-growth-value"
+                      data-testid="text-pilots-value"
                     >
-                      {metrics.growth.toFixed(1)}%
+                      {metrics.pilots}
                     </div>
                   </div>
                   <TrendingUp className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -313,9 +310,9 @@ const SimpleDashboard = () => {
 
                 {/* Change Indicator */}
                 <div className="flex items-center gap-3 mb-4 md:mb-6">
-                  <div className={`flex items-center gap-1 px-2 py-1 border ${growthUp ? 'border-primary/50 text-primary' : 'border-red-500/50 text-red-500'}`}>
-                    {growthUp ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    <span className="font-mono text-sm font-bold">{growthUp ? '+' : ''}{growthChange.toFixed(1)}pp</span>
+                  <div className={`flex items-center gap-1 px-2 py-1 border ${pilotsUp ? 'border-primary/50 text-primary' : 'border-red-500/50 text-red-500'}`}>
+                    {pilotsUp ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <span className="font-mono text-sm font-bold">{pilotsUp ? '+' : ''}{pilotsChange}</span>
                   </div>
                   <span className="text-[10px] md:text-xs text-gray-500 font-mono">vs last period</span>
                 </div>
@@ -325,14 +322,14 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.growthTarget}%</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.pilotsTarget}</span>
                     </div>
-                    <span className="font-mono text-sm text-primary font-bold">{growthProgress.toFixed(0)}%</span>
+                    <span className="font-mono text-sm text-primary font-bold">{pilotsProgress.toFixed(0)}%</span>
                   </div>
                   <div className="progress-tactical h-3 md:h-4">
                     <div 
                       className="progress-tactical-fill" 
-                      style={{ width: `${growthProgress}%` }}
+                      style={{ width: `${pilotsProgress}%` }}
                     />
                   </div>
                 </div>
@@ -393,15 +390,15 @@ const SimpleDashboard = () => {
             <div className="inline-flex items-center gap-3 px-4 py-2 border border-primary/20 bg-black/50">
               <Zap className="w-3 h-3 md:w-4 md:h-4 text-primary animate-pulse" />
               <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase tracking-wider">
-                {revenueProgress >= 100 && growthProgress >= 100 && studentsProgress >= 100
+                {revenueProgress >= 100 && pilotsProgress >= 100 && studentsProgress >= 100
                   ? "ALL TARGETS ACHIEVED" 
-                  : revenueProgress >= 100 || growthProgress >= 100 || studentsProgress >= 100
+                  : revenueProgress >= 100 || pilotsProgress >= 100 || studentsProgress >= 100
                     ? "PARTIAL MISSION COMPLETE"
                     : "MISSION IN PROGRESS"
                 }
               </span>
               <div className={`w-2 h-2 rounded-full ${
-                revenueProgress >= 100 && growthProgress >= 100 && studentsProgress >= 100
+                revenueProgress >= 100 && pilotsProgress >= 100 && studentsProgress >= 100
                   ? 'bg-primary' 
                   : 'bg-yellow-500'
               } animate-pulse`} />
