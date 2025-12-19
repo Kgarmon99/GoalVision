@@ -8,17 +8,21 @@ import {
   ChevronDown,
   Target,
   Zap,
-  Users
+  Users,
+  RefreshCw
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import moneybotLogo from "../assets/moneybot-logo.png";
 
 const SimpleDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hubspotSyncing, setHubspotSyncing] = useState(false);
+  const { toast } = useToast();
   
   const [metrics, setMetrics] = useState({
     pilots: 5,
@@ -65,6 +69,40 @@ const SimpleDashboard = () => {
     setMetrics(editMetrics);
     localStorage.setItem('moneybot-core-metrics', JSON.stringify(editMetrics));
     setSettingsOpen(false);
+  };
+
+  const syncWithHubSpot = async () => {
+    setHubspotSyncing(true);
+    try {
+      const response = await fetch('/api/hubspot/deals/summary');
+      if (!response.ok) {
+        throw new Error('Failed to fetch HubSpot data');
+      }
+      const data = await response.json();
+      
+      const previousRevenue = metrics.revenue;
+      const newMetrics = {
+        ...metrics,
+        revenue: data.totalRevenue,
+        revenuePrevious: previousRevenue,
+      };
+      
+      setMetrics(newMetrics);
+      localStorage.setItem('moneybot-core-metrics', JSON.stringify(newMetrics));
+      
+      toast({
+        title: "HubSpot Synced",
+        description: `Updated revenue from ${data.totalDeals} deals: $${data.totalRevenue.toLocaleString()}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Could not connect to HubSpot",
+        variant: "destructive",
+      });
+    } finally {
+      setHubspotSyncing(false);
+    }
   };
 
   const districtsProgress = metrics.districtsTarget > 0 ? Math.min(100, (metrics.districts / metrics.districtsTarget) * 100) : 0;
@@ -128,6 +166,17 @@ const SimpleDashboard = () => {
               </div>
             </div>
           </div>
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={syncWithHubSpot}
+              disabled={hubspotSyncing}
+              className="btn-tactical p-2 md:p-2.5 flex items-center gap-2"
+              data-testid="button-hubspot-sync"
+            >
+              <RefreshCw className={`h-4 w-4 md:h-5 md:w-5 ${hubspotSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline text-xs font-mono">HUBSPOT</span>
+            </button>
           
           <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
             <DialogTrigger asChild>
@@ -321,6 +370,7 @@ const SimpleDashboard = () => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
       </div>
 
