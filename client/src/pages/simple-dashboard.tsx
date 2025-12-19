@@ -21,9 +21,9 @@ const SimpleDashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const [metrics, setMetrics] = useState({
-    pilots: 12,
+    pilots: 5,
     pilotsTarget: 50,
-    pilotsPrevious: 10,
+    pilotsPrevious: 3,
     districts: 4,
     districtsTarget: 10,
     districtsPrevious: 3,
