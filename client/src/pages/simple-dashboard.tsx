@@ -92,8 +92,11 @@ const SimpleDashboard = () => {
       
       toast({
         title: "HubSpot Synced",
-        description: `Updated revenue from ${data.totalDeals} deals: $${data.totalRevenue.toLocaleString()}`,
+        description: `Updated revenue from ${data.closedWonCount} won deals: $${data.totalRevenue.toLocaleString()}`,
       });
+      
+      // Refresh page after 1 second to ensure UI updates
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error: any) {
       toast({
         title: "Sync Failed",
