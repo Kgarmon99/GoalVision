@@ -74,12 +74,19 @@ export async function getDeals() {
 export async function getDealsSummary() {
   const deals = await getDeals();
   
-  // Common HubSpot stage IDs for closed/won deals
-  const closedWonStages = ['closedwon', 'closed_won', 'closed won', 'won'];
+  // HubSpot stage names that count as closed/won revenue
+  const closedWonStages = [
+    'closedwon', 
+    'closed_won', 
+    'closed won', 
+    'won',
+    'won (pilot contract signed)'
+  ];
   
   // Filter for closed/won deals only for revenue
   const closedWonDeals = deals.filter(deal => 
-    closedWonStages.includes(deal.stage.toLowerCase())
+    closedWonStages.includes(deal.stage.toLowerCase()) ||
+    deal.stage.toLowerCase().includes('won')
   );
   
   const closedWonRevenue = closedWonDeals.reduce((sum, deal) => sum + deal.amount, 0);
