@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { getDeals, getDealsSummary } from "./hubspot";
 import { 
   insertGoalSchema, 
   insertMetricSchema, 
@@ -1130,6 +1131,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve MoneyBot logo
   app.get("/moneybot-logo.png", (req, res) => {
     res.sendFile(path.resolve("public/moneybot-logo.png"));
+  });
+
+  // HubSpot Integration Routes
+  app.get("/api/hubspot/deals", async (req, res) => {
+    try {
+      const deals = await getDeals();
+      res.json(deals);
+    } catch (error: any) {
+      console.error("Error fetching HubSpot deals:", error);
+      res.status(500).json({ message: error.message || "Error fetching deals from HubSpot" });
+    }
+  });
+
+  app.get("/api/hubspot/deals/summary", async (req, res) => {
+    try {
+      const summary = await getDealsSummary();
+      res.json(summary);
+    } catch (error: any) {
+      console.error("Error fetching HubSpot deals summary:", error);
+      res.status(500).json({ message: error.message || "Error fetching deals summary" });
+    }
   });
 
   // Create the server
