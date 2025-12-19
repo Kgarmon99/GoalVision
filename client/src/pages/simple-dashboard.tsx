@@ -7,7 +7,8 @@ import {
   ChevronUp,
   ChevronDown,
   Target,
-  Zap
+  Zap,
+  Users
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,15 +21,22 @@ const SimpleDashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   
   const [metrics, setMetrics] = useState({
-    revenue: 125000,
-    revenueTarget: 200000,
-    revenuePrevious: 98000,
+    revenue: 2100,
+    revenueTarget: 10000,
+    revenuePrevious: 0,
     growth: 27.5,
     growthTarget: 30,
     growthPrevious: 22,
+    students: 0,
+    studentsTarget: 100,
+    studentsPrevious: 0,
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
+
+  useEffect(() => {
+    setEditMetrics(metrics);
+  }, [metrics]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -61,6 +69,12 @@ const SimpleDashboard = () => {
   const growthProgress = Math.min(100, (metrics.growth / metrics.growthTarget) * 100);
   const growthChange = metrics.growth - metrics.growthPrevious;
   const growthUp = growthChange >= 0;
+
+  const studentsProgress = metrics.studentsTarget > 0 ? Math.min(100, (metrics.students / metrics.studentsTarget) * 100) : 0;
+  const studentsChange = metrics.studentsPrevious > 0 
+    ? ((metrics.students - metrics.studentsPrevious) / metrics.studentsPrevious) * 100 
+    : (metrics.students > 0 ? 100 : 0);
+  const studentsUp = studentsChange >= 0;
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
@@ -183,6 +197,40 @@ const SimpleDashboard = () => {
                     </div>
                   </div>
                 </div>
+                <div className="space-y-3">
+                  <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-3 h-3" /> Students
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Current</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.students}
+                        onChange={(e) => setEditMetrics({...editMetrics, students: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Target</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.studentsTarget}
+                        onChange={(e) => setEditMetrics({...editMetrics, studentsTarget: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Previous</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.studentsPrevious}
+                        onChange={(e) => setEditMetrics({...editMetrics, studentsPrevious: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <Button onClick={saveMetrics} className="w-full bg-primary hover:bg-primary/80 text-black font-mono">
                   SAVE
                 </Button>
@@ -192,10 +240,10 @@ const SimpleDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content - Two Hero Metrics */}
+      {/* Main Content - Three Hero Metrics */}
       <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8">
-        <div className="w-full max-w-5xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="w-full max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             
             {/* REVENUE Card */}
             <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-revenue">
@@ -206,14 +254,14 @@ const SimpleDashboard = () => {
                   <div>
                     <div className="data-label text-xs md:text-sm mb-2">REVENUE</div>
                     <div 
-                      className="data-value text-4xl md:text-6xl font-black"
+                      className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-revenue-value"
                     >
                       {formatCurrency(metrics.revenue)}
                     </div>
                   </div>
-                  <DollarSign className="h-10 w-10 md:h-14 md:w-14 text-primary/30" />
+                  <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
                 </div>
 
                 {/* Change Indicator */}
@@ -253,14 +301,14 @@ const SimpleDashboard = () => {
                   <div>
                     <div className="data-label text-xs md:text-sm mb-2">GROWTH</div>
                     <div 
-                      className="data-value text-4xl md:text-6xl font-black"
+                      className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-growth-value"
                     >
                       {metrics.growth.toFixed(1)}%
                     </div>
                   </div>
-                  <TrendingUp className="h-10 w-10 md:h-14 md:w-14 text-primary/30" />
+                  <TrendingUp className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
                 </div>
 
                 {/* Change Indicator */}
@@ -291,6 +339,53 @@ const SimpleDashboard = () => {
               </div>
             </div>
 
+            {/* STUDENTS Card */}
+            <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-students">
+              <div className="mil-tag">STU-01</div>
+              
+              <div className="pt-4 md:pt-6">
+                <div className="flex items-start justify-between mb-4 md:mb-6">
+                  <div>
+                    <div className="data-label text-xs md:text-sm mb-2">STUDENTS</div>
+                    <div 
+                      className="data-value text-4xl md:text-5xl font-black"
+                      style={{ fontFamily: 'Orbitron, sans-serif' }}
+                      data-testid="text-students-value"
+                    >
+                      {metrics.students.toLocaleString()}
+                    </div>
+                  </div>
+                  <Users className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
+                </div>
+
+                {/* Change Indicator */}
+                <div className="flex items-center gap-3 mb-4 md:mb-6">
+                  <div className={`flex items-center gap-1 px-2 py-1 border ${studentsUp ? 'border-primary/50 text-primary' : 'border-red-500/50 text-red-500'}`}>
+                    {studentsUp ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <span className="font-mono text-sm font-bold">{studentsUp ? '+' : ''}{studentsChange.toFixed(0)}%</span>
+                  </div>
+                  <span className="text-[10px] md:text-xs text-gray-500 font-mono">vs last period</span>
+                </div>
+
+                {/* Progress to Target */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-3 h-3 text-primary/60" />
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.studentsTarget}</span>
+                    </div>
+                    <span className="font-mono text-sm text-primary font-bold">{studentsProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="progress-tactical h-3 md:h-4">
+                    <div 
+                      className="progress-tactical-fill" 
+                      style={{ width: `${studentsProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           {/* Mission Status */}
@@ -298,15 +393,15 @@ const SimpleDashboard = () => {
             <div className="inline-flex items-center gap-3 px-4 py-2 border border-primary/20 bg-black/50">
               <Zap className="w-3 h-3 md:w-4 md:h-4 text-primary animate-pulse" />
               <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase tracking-wider">
-                {revenueProgress >= 100 && growthProgress >= 100 
+                {revenueProgress >= 100 && growthProgress >= 100 && studentsProgress >= 100
                   ? "ALL TARGETS ACHIEVED" 
-                  : revenueProgress >= 100 || growthProgress >= 100
+                  : revenueProgress >= 100 || growthProgress >= 100 || studentsProgress >= 100
                     ? "PARTIAL MISSION COMPLETE"
                     : "MISSION IN PROGRESS"
                 }
               </span>
               <div className={`w-2 h-2 rounded-full ${
-                revenueProgress >= 100 && growthProgress >= 100 
+                revenueProgress >= 100 && growthProgress >= 100 && studentsProgress >= 100
                   ? 'bg-primary' 
                   : 'bg-yellow-500'
               } animate-pulse`} />
