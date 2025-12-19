@@ -24,15 +24,19 @@ const SimpleDashboard = () => {
     pilots: 5,
     pilotsTarget: 50,
     pilotsPrevious: 3,
+    pilotsDeadline: "2025-03-31",
     districts: 4,
     districtsTarget: 10,
     districtsPrevious: 3,
+    districtsDeadline: "2025-06-30",
     students: 320,
     studentsTarget: 5000,
     studentsPrevious: 250,
+    studentsDeadline: "2025-12-31",
     revenue: 2100,
-    revenueTarget: 10000,
+    revenueTarget: 25000,
     revenuePrevious: 1800,
+    revenueDeadline: "2025-12-31",
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -89,6 +93,11 @@ const SimpleDashboard = () => {
     return `$${value.toFixed(0)}`;
   };
 
+  const formatDeadline = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   
   return (
     <div className="min-h-screen bg-black tactical-grid scanlines flex flex-col">
@@ -138,7 +147,7 @@ const SimpleDashboard = () => {
                   <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-3 h-3" /> Pilots
                   </h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
                       <Label className="text-[10px] text-gray-500">Current</Label>
                       <Input
@@ -158,6 +167,15 @@ const SimpleDashboard = () => {
                       />
                     </div>
                     <div>
+                      <Label className="text-[10px] text-gray-500">Deadline</Label>
+                      <Input
+                        type="date"
+                        value={editMetrics.pilotsDeadline}
+                        onChange={(e) => setEditMetrics({...editMetrics, pilotsDeadline: e.target.value})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
                       <Label className="text-[10px] text-gray-500">Previous</Label>
                       <Input
                         type="number"
@@ -172,7 +190,7 @@ const SimpleDashboard = () => {
                   <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
                     <Target className="w-3 h-3" /> Districts
                   </h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
                       <Label className="text-[10px] text-gray-500">Current</Label>
                       <Input
@@ -192,6 +210,15 @@ const SimpleDashboard = () => {
                       />
                     </div>
                     <div>
+                      <Label className="text-[10px] text-gray-500">Deadline</Label>
+                      <Input
+                        type="date"
+                        value={editMetrics.districtsDeadline}
+                        onChange={(e) => setEditMetrics({...editMetrics, districtsDeadline: e.target.value})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
                       <Label className="text-[10px] text-gray-500">Previous</Label>
                       <Input
                         type="number"
@@ -206,7 +233,7 @@ const SimpleDashboard = () => {
                   <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
                     <Users className="w-3 h-3" /> Students
                   </h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
                       <Label className="text-[10px] text-gray-500">Current</Label>
                       <Input
@@ -226,6 +253,15 @@ const SimpleDashboard = () => {
                       />
                     </div>
                     <div>
+                      <Label className="text-[10px] text-gray-500">Deadline</Label>
+                      <Input
+                        type="date"
+                        value={editMetrics.studentsDeadline}
+                        onChange={(e) => setEditMetrics({...editMetrics, studentsDeadline: e.target.value})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
                       <Label className="text-[10px] text-gray-500">Previous</Label>
                       <Input
                         type="number"
@@ -240,7 +276,7 @@ const SimpleDashboard = () => {
                   <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
                     <DollarSign className="w-3 h-3" /> Revenue
                   </h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-4 gap-3">
                     <div>
                       <Label className="text-[10px] text-gray-500">Current</Label>
                       <Input
@@ -256,6 +292,15 @@ const SimpleDashboard = () => {
                         type="number"
                         value={editMetrics.revenueTarget}
                         onChange={(e) => setEditMetrics({...editMetrics, revenueTarget: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Deadline</Label>
+                      <Input
+                        type="date"
+                        value={editMetrics.revenueDeadline}
+                        onChange={(e) => setEditMetrics({...editMetrics, revenueDeadline: e.target.value})}
                         className="h-9 text-sm"
                       />
                     </div>
@@ -317,7 +362,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.pilotsTarget}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.pilotsTarget} by {formatDeadline(metrics.pilotsDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{pilotsProgress.toFixed(0)}%</span>
                   </div>
@@ -364,7 +409,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.districtsTarget}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.districtsTarget} by {formatDeadline(metrics.districtsDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{districtsProgress.toFixed(0)}%</span>
                   </div>
@@ -411,7 +456,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.studentsTarget}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.studentsTarget.toLocaleString()} by {formatDeadline(metrics.studentsDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{studentsProgress.toFixed(0)}%</span>
                   </div>
@@ -458,7 +503,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {formatCurrency(metrics.revenueTarget)}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {formatCurrency(metrics.revenueTarget)} by {formatDeadline(metrics.revenueDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{revenueProgress.toFixed(0)}%</span>
                   </div>
