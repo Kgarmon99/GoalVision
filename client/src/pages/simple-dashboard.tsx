@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   TrendingUp, 
+  DollarSign,
   Settings,
   Radio,
   ChevronUp,
@@ -29,6 +30,9 @@ const SimpleDashboard = () => {
     students: 1200,
     studentsTarget: 5000,
     studentsPrevious: 1000,
+    revenue: 2100,
+    revenueTarget: 10000,
+    revenuePrevious: 1800,
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -72,6 +76,18 @@ const SimpleDashboard = () => {
     ? ((metrics.students - metrics.studentsPrevious) / metrics.studentsPrevious) * 100 
     : (metrics.students > 0 ? 100 : 0);
   const studentsUp = studentsChange >= 0;
+
+  const revenueProgress = Math.min(100, (metrics.revenue / metrics.revenueTarget) * 100);
+  const revenueChange = metrics.revenuePrevious > 0 
+    ? ((metrics.revenue - metrics.revenuePrevious) / metrics.revenuePrevious) * 100 
+    : 0;
+  const revenueUp = revenueChange >= 0;
+
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+    return `$${value.toFixed(0)}`;
+  };
 
   
   return (
@@ -220,6 +236,40 @@ const SimpleDashboard = () => {
                     </div>
                   </div>
                 </div>
+                <div className="space-y-3">
+                  <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
+                    <DollarSign className="w-3 h-3" /> Revenue
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Current</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.revenue}
+                        onChange={(e) => setEditMetrics({...editMetrics, revenue: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Target</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.revenueTarget}
+                        onChange={(e) => setEditMetrics({...editMetrics, revenueTarget: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-gray-500">Previous</Label>
+                      <Input
+                        type="number"
+                        value={editMetrics.revenuePrevious}
+                        onChange={(e) => setEditMetrics({...editMetrics, revenuePrevious: Number(e.target.value)})}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <Button onClick={saveMetrics} className="w-full bg-primary hover:bg-primary/80 text-black font-mono">
                   SAVE
                 </Button>
@@ -229,10 +279,10 @@ const SimpleDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content - Three Hero Metrics */}
+      {/* Main Content - Four Hero Metrics */}
       <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8">
-        <div className="w-full max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div className="w-full max-w-7xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             
             {/* PILOTS Card */}
             <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-pilots">
@@ -375,6 +425,53 @@ const SimpleDashboard = () => {
               </div>
             </div>
 
+            {/* REVENUE Card */}
+            <div className="tactical-card corner-brackets p-6 md:p-8 relative" data-testid="card-revenue">
+              <div className="mil-tag">REV-01</div>
+              
+              <div className="pt-4 md:pt-6">
+                <div className="flex items-start justify-between mb-4 md:mb-6">
+                  <div>
+                    <div className="data-label text-xs md:text-sm mb-2">REVENUE</div>
+                    <div 
+                      className="data-value text-4xl md:text-5xl font-black"
+                      style={{ fontFamily: 'Orbitron, sans-serif' }}
+                      data-testid="text-revenue-value"
+                    >
+                      {formatCurrency(metrics.revenue)}
+                    </div>
+                  </div>
+                  <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
+                </div>
+
+                {/* Change Indicator */}
+                <div className="flex items-center gap-3 mb-4 md:mb-6">
+                  <div className={`flex items-center gap-1 px-2 py-1 border ${revenueUp ? 'border-primary/50 text-primary' : 'border-red-500/50 text-red-500'}`}>
+                    {revenueUp ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <span className="font-mono text-sm font-bold">{revenueUp ? '+' : ''}{revenueChange.toFixed(1)}%</span>
+                  </div>
+                  <span className="text-[10px] md:text-xs text-gray-500 font-mono">vs last period</span>
+                </div>
+
+                {/* Progress to Target */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-3 h-3 text-primary/60" />
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {formatCurrency(metrics.revenueTarget)}</span>
+                    </div>
+                    <span className="font-mono text-sm text-primary font-bold">{revenueProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="progress-tactical h-3 md:h-4">
+                    <div 
+                      className="progress-tactical-fill" 
+                      style={{ width: `${revenueProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           {/* Mission Status */}
@@ -382,15 +479,15 @@ const SimpleDashboard = () => {
             <div className="inline-flex items-center gap-3 px-4 py-2 border border-primary/20 bg-black/50">
               <Zap className="w-3 h-3 md:w-4 md:h-4 text-primary animate-pulse" />
               <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase tracking-wider">
-                {pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100
+                {pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
                   ? "ALL TARGETS ACHIEVED" 
-                  : pilotsProgress >= 100 || districtsProgress >= 100 || studentsProgress >= 100
+                  : pilotsProgress >= 100 || districtsProgress >= 100 || studentsProgress >= 100 || revenueProgress >= 100
                     ? "PARTIAL MISSION COMPLETE"
                     : "MISSION IN PROGRESS"
                 }
               </span>
               <div className={`w-2 h-2 rounded-full ${
-                pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100
+                pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
                   ? 'bg-primary' 
                   : 'bg-yellow-500'
               } animate-pulse`} />
