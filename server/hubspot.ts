@@ -44,9 +44,35 @@ export async function getUncachableHubSpotClient() {
   return new Client({ accessToken });
 }
 
+// Fetch pipeline stages to map IDs to labels
+export async function getPipelineStages() {
+  const client = await getUncachableHubSpotClient();
+  
+  try {
+    const pipelines = await client.crm.pipelines.pipelinesApi.getAll('deals');
+    const stageMap: Record<string, { label: string; pipelineName: string }> = {};
+    
+    for (const pipeline of pipelines.results) {
+      for (const stage of pipeline.stages) {
+        stageMap[stage.id] = {
+          label: stage.label,
+          pipelineName: pipeline.label
+        };
+      }
+    }
+    
+    console.log('HubSpot pipeline stages:', stageMap);
+    return stageMap;
+  } catch (error) {
+    console.error('Error fetching pipeline stages:', error);
+    return {};
+  }
+}
+
 // Fetch all deals from HubSpot
 export async function getDeals() {
   const client = await getUncachableHubSpotClient();
+  const stageMap = await getPipelineStages();
   
   try {
     const response = await client.crm.deals.basicApi.getPage(
@@ -55,15 +81,21 @@ export async function getDeals() {
       ['dealname', 'amount', 'dealstage', 'closedate', 'pipeline', 'createdate']
     );
     
-    return response.results.map(deal => ({
-      id: deal.id,
-      name: deal.properties.dealname || 'Unnamed Deal',
-      amount: parseFloat(deal.properties.amount || '0'),
-      stage: deal.properties.dealstage || 'unknown',
-      closeDate: deal.properties.closedate || null,
-      createdAt: deal.properties.createdate || null,
-      pipeline: deal.properties.pipeline || 'default',
-    }));
+    return response.results.map(deal => {
+      const stageId = deal.properties.dealstage || 'unknown';
+      const stageInfo = stageMap[stageId];
+      
+      return {
+        id: deal.id,
+        name: deal.properties.dealname || 'Unnamed Deal',
+        amount: parseFloat(deal.properties.amount || '0'),
+        stage: stageId,
+        stageLabel: stageInfo?.label || stageId,
+        closeDate: deal.properties.closedate || null,
+        createdAt: deal.properties.createdate || null,
+        pipeline: deal.properties.pipeline || 'default',
+      };
+    });
   } catch (error) {
     console.error('Error fetching HubSpot deals:', error);
     throw error;
@@ -74,19 +106,9 @@ export async function getDeals() {
 export async function getDealsSummary() {
   const deals = await getDeals();
   
-  // HubSpot stage names that count as closed/won revenue
-  const closedWonStages = [
-    'closedwon', 
-    'closed_won', 
-    'closed won', 
-    'won',
-    'won (pilot contract signed)'
-  ];
-  
-  // Filter for closed/won deals only for revenue
+  // Filter for closed/won deals - check stage label for "won"
   const closedWonDeals = deals.filter(deal => 
-    closedWonStages.includes(deal.stage.toLowerCase()) ||
-    deal.stage.toLowerCase().includes('won')
+    deal.stageLabel.toLowerCase().includes('won')
   );
   
   const closedWonRevenue = closedWonDeals.reduce((sum, deal) => sum + deal.amount, 0);
@@ -94,9 +116,17 @@ export async function getDealsSummary() {
   const totalDeals = deals.length;
   const closedWonCount = closedWonDeals.length;
   
-  // Group deals by stage
+  // Group deals by stage label (human-readable)
   const stageGroups = deals.reduce((acc, deal) => {
-    acc[deal.stage] = (acc[deal.stage] || 0) + 1;
+    const label = deal.stageLabel;
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  // Revenue by stage for debugging
+  const revenueByStage = deals.reduce((acc, deal) => {
+    const label = deal.stageLabel;
+    acc[label] = (acc[label] || 0) + deal.amount;
     return acc;
   }, {} as Record<string, number>);
   
@@ -105,7 +135,8 @@ export async function getDealsSummary() {
     closedWonCount,
     closedWonRevenue,
     totalPipelineValue,
-    stageGroups
+    stageGroups,
+    revenueByStage
   });
   
   return {
@@ -114,6 +145,7 @@ export async function getDealsSummary() {
     totalDeals,
     closedWonCount,
     stageGroups,
+    revenueByStage,
     deals,
   };
 }
