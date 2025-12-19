@@ -106,9 +106,9 @@ export async function getDeals() {
 export async function getDealsSummary() {
   const deals = await getDeals();
   
-  // Filter for closed/won deals - check stage label for "won"
+  // Filter for "Won (Pilot Contract Signed)" deals only
   const closedWonDeals = deals.filter(deal => 
-    deal.stageLabel.toLowerCase().includes('won')
+    deal.stageLabel === 'Won (Pilot Contract Signed)'
   );
   
   const closedWonRevenue = closedWonDeals.reduce((sum, deal) => sum + deal.amount, 0);
