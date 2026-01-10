@@ -585,51 +585,20 @@ const SimpleDashboard = () => {
 
           </div>
 
-          {/* Goals Summary */}
-          <div className="mt-8 md:mt-10 space-y-4 bg-primary/5 p-6 border border-primary/20 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
-            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
-              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Schools Live</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.pilots} / {metrics.pilotsTarget}</span>
-            </div>
-            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
-              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Active Students</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{(metrics.students/1000000).toFixed(1)}M / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
-            </div>
-            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
-              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">ARR Revenue</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>${(metrics.revenue/1000000).toFixed(1)}M / ${(metrics.revenueTarget/1000000).toFixed(0)}M</span>
-            </div>
-            <div className="grid grid-cols-2 gap-4 border-b border-primary/20 pb-3">
-              <div className="flex justify-between items-end">
-                <span className="font-mono text-[10px] text-gray-400 uppercase tracking-widest">Daily Active Usage</span>
-                <span className="font-mono text-xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.activeUsage}% / {metrics.activeUsageTarget}%</span>
-              </div>
-              <div className="flex justify-between items-end">
-                <span className="font-mono text-[10px] text-gray-400 uppercase tracking-widest">Renewal Rate</span>
-                <span className="font-mono text-xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.renewalRate}% / {metrics.renewalRateTarget}%</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-[10px] text-gray-600 font-mono">MISSION DEADLINE: 12-01-2026</span>
-              <span className="text-[10px] text-primary/40 font-mono animate-pulse">NORTH STAR: CATEGORY AUTHORITY</span>
-            </div>
-          </div>
-
           {/* Mission Status */}
           <div className="mt-6 md:mt-8 text-center">
             <div className="inline-flex items-center gap-3 px-4 py-2 border border-primary/20 bg-black/50">
               <Zap className="w-3 h-3 md:w-4 md:h-4 text-primary animate-pulse" />
               <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase tracking-wider">
-                {pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
+                {pilotsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
                   ? "ALL TARGETS ACHIEVED" 
-                  : pilotsProgress >= 100 || districtsProgress >= 100 || studentsProgress >= 100 || revenueProgress >= 100
+                  : pilotsProgress >= 100 || studentsProgress >= 100 || revenueProgress >= 100
                     ? "PARTIAL MISSION COMPLETE"
                     : "MISSION IN PROGRESS"
                 }
               </span>
               <div className={`w-2 h-2 rounded-full ${
-                pilotsProgress >= 100 && districtsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
+                pilotsProgress >= 100 && studentsProgress >= 100 && revenueProgress >= 100
                   ? 'bg-primary' 
                   : 'bg-yellow-500'
               } animate-pulse`} />
