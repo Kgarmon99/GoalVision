@@ -26,21 +26,21 @@ const SimpleDashboard = () => {
   
   const [metrics, setMetrics] = useState({
     pilots: 5,
-    pilotsTarget: 50,
-    pilotsPrevious: 3,
-    pilotsDeadline: "2025-03-31",
+    pilotsTarget: 2500,
+    pilotsPrevious: 4,
+    pilotsDeadline: "2026-12-01",
     districts: 4,
-    districtsTarget: 10,
+    districtsTarget: 100,
     districtsPrevious: 3,
-    districtsDeadline: "2025-06-30",
+    districtsDeadline: "2026-12-01",
     students: 320,
-    studentsTarget: 5000,
-    studentsPrevious: 250,
-    studentsDeadline: "2025-12-31",
-    revenue: 2100,
-    revenueTarget: 25000,
-    revenuePrevious: 1800,
-    revenueDeadline: "2025-12-31",
+    studentsTarget: 3000000,
+    studentsPrevious: 300,
+    studentsDeadline: "2026-12-01",
+    revenue: 2030,
+    revenueTarget: 20000000,
+    revenuePrevious: 0,
+    revenueDeadline: "2026-12-01",
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -573,11 +573,23 @@ const SimpleDashboard = () => {
           </div>
 
           {/* Goals Summary */}
-          <div className="mt-8 md:mt-10 space-y-2">
-            <div className="font-mono text-sm text-primary">Pilots: {metrics.pilots}/{metrics.pilotsTarget}</div>
-            <div className="font-mono text-sm text-primary">Districts: {metrics.districts}/{metrics.districtsTarget}</div>
-            <div className="font-mono text-sm text-primary">Students: {metrics.students.toLocaleString()}/{metrics.studentsTarget.toLocaleString()}</div>
-            <div className="font-mono text-sm text-primary">Revenue: {formatCurrency(metrics.revenue)}/{formatCurrency(metrics.revenueTarget)}</div>
+          <div className="mt-8 md:mt-10 space-y-4">
+            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
+              <span className="font-mono text-xs text-gray-500 uppercase">Schools Live</span>
+              <span className="font-mono text-2xl text-primary font-bold">{metrics.pilots} / {metrics.pilotsTarget}</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
+              <span className="font-mono text-xs text-gray-500 uppercase">Districts</span>
+              <span className="font-mono text-2xl text-primary font-bold">{metrics.districts} / {metrics.districtsTarget}</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
+              <span className="font-mono text-xs text-gray-500 uppercase">Active Students</span>
+              <span className="font-mono text-2xl text-primary font-bold">{(metrics.students/1000).toFixed(1)}K / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
+            </div>
+            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
+              <span className="font-mono text-xs text-gray-500 uppercase">ARR Revenue</span>
+              <span className="font-mono text-2xl text-primary font-bold">${(metrics.revenue/1000).toFixed(1)}K / ${metrics.revenueTarget >= 1000000 ? (metrics.revenueTarget/1000000).toFixed(0) + 'M' : metrics.revenueTarget.toLocaleString()}</span>
+            </div>
           </div>
 
           {/* Mission Status */}
