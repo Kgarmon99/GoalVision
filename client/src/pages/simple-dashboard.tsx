@@ -396,7 +396,7 @@ const SimpleDashboard = () => {
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">PILOTS</div>
+                    <div className="data-label text-xs md:text-sm mb-2">SCHOOLS LIVE</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
@@ -405,7 +405,7 @@ const SimpleDashboard = () => {
                       {metrics.pilots}
                     </div>
                   </div>
-                  <TrendingUp className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
+                  <Radio className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
                 </div>
 
                 {/* Change Indicator */}
@@ -443,7 +443,7 @@ const SimpleDashboard = () => {
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">DISTRICTS</div>
+                    <div className="data-label text-xs md:text-sm mb-2 uppercase tracking-widest text-primary/70">Districts</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
@@ -452,7 +452,7 @@ const SimpleDashboard = () => {
                       {metrics.districts}
                     </div>
                   </div>
-                  <Target className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
+                  <TrendingUp className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
                 </div>
 
                 {/* Change Indicator */}
@@ -490,13 +490,13 @@ const SimpleDashboard = () => {
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">STUDENTS</div>
+                    <div className="data-label text-xs md:text-sm mb-2 uppercase tracking-widest text-primary/70">Active Students</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-students-value"
                     >
-                      {metrics.students.toLocaleString()}
+                      {metrics.students >= 1000000 ? (metrics.students/1000000).toFixed(1) + 'M' : metrics.students >= 1000 ? (metrics.students/1000).toFixed(1) + 'K' : metrics.students}
                     </div>
                   </div>
                   <Users className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -516,7 +516,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {metrics.studentsTarget.toLocaleString()} by {formatDeadline(metrics.studentsDeadline)}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {(metrics.studentsTarget/1000000).toFixed(1)}M by {formatDeadline(metrics.studentsDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{studentsProgress.toFixed(0)}%</span>
                   </div>
@@ -537,13 +537,13 @@ const SimpleDashboard = () => {
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">REVENUE</div>
+                    <div className="data-label text-xs md:text-sm mb-2 uppercase tracking-widest text-primary/70">ARR Revenue</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-revenue-value"
                     >
-                      {formatCurrency(metrics.revenue)}
+                      {metrics.revenue >= 1000000 ? '$' + (metrics.revenue/1000000).toFixed(1) + 'M' : formatCurrency(metrics.revenue)}
                     </div>
                   </div>
                   <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -563,7 +563,7 @@ const SimpleDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Target className="w-3 h-3 text-primary/60" />
-                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: {formatCurrency(metrics.revenueTarget)} by {formatDeadline(metrics.revenueDeadline)}</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-mono uppercase">Target: ${(metrics.revenueTarget/1000000).toFixed(0)}M by {formatDeadline(metrics.revenueDeadline)}</span>
                     </div>
                     <span className="font-mono text-sm text-primary font-bold">{revenueProgress.toFixed(0)}%</span>
                   </div>
