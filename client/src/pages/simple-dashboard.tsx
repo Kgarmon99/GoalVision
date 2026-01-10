@@ -58,7 +58,10 @@ const SimpleDashboard = () => {
     tomorrow: null
   });
 
+  const [newTodayItem, setNewTodayItem] = useState("");
   const [newTomorrowItem, setNewTomorrowItem] = useState("");
+  const [isEditingToday, setIsEditingToday] = useState(false);
+  const [isEditingTomorrow, setIsEditingTomorrow] = useState(false);
 
   const [editMetrics, setEditMetrics] = useState(metrics);
 
@@ -123,6 +126,24 @@ const SimpleDashboard = () => {
   const saveAttackItem = (newState: typeof attackItem) => {
     setAttackItem(newState);
     localStorage.setItem('moneybot-attack-item', JSON.stringify(newState));
+  };
+
+  const handleSetToday = () => {
+    if (!newTodayItem.trim()) return;
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const newState = {
+      ...attackItem,
+      today: { text: newTodayItem, completed: false, date: todayStr }
+    };
+    
+    saveAttackItem(newState);
+    setNewTodayItem("");
+    setIsEditingToday(false);
+    toast({
+      title: "OBJECTIVE UPDATED",
+      description: "Today's attack item has been set.",
+    });
   };
 
   const handleSetTomorrow = () => {
@@ -488,10 +509,42 @@ const SimpleDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                    <div className="w-1 h-1 bg-primary animate-ping" /> CURRENT ENGAGEMENT (TODAY)
-                  </h3>
-                  {attackItem.today ? (
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] flex items-center gap-2">
+                      <div className="w-1 h-1 bg-primary animate-ping" /> CURRENT ENGAGEMENT (TODAY)
+                    </h3>
+                    {attackItem.today && !isEditingToday && (
+                      <button 
+                        onClick={() => {
+                          setNewTodayItem(attackItem.today?.text || "");
+                          setIsEditingToday(true);
+                        }}
+                        className="text-[10px] text-primary/40 font-mono hover:text-primary transition-colors"
+                      >
+                        [EDIT]
+                      </button>
+                    )}
+                  </div>
+                  
+                  {isEditingToday ? (
+                    <div className="flex gap-2 mb-4">
+                      <input 
+                        type="text" 
+                        autoFocus
+                        value={newTodayItem}
+                        onChange={(e) => setNewTodayItem(e.target.value)}
+                        className="flex-1 bg-black/60 border border-primary/30 px-3 py-2 font-mono text-sm text-primary placeholder:text-primary/10 focus:outline-none focus:border-primary"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSetToday()}
+                        onBlur={() => !newTodayItem && setIsEditingToday(false)}
+                      />
+                      <button 
+                        onClick={handleSetToday}
+                        className="px-4 py-2 bg-primary/20 border border-primary/40 text-primary font-mono text-xs hover:bg-primary/30 transition-all uppercase"
+                      >
+                        SET
+                      </button>
+                    </div>
+                  ) : attackItem.today ? (
                     <div className={`p-6 border-2 transition-all ${attackItem.today.completed ? 'border-primary/20 bg-primary/5' : 'border-primary bg-black/60 shadow-[0_0_30px_rgba(16,185,129,0.1)]'}`}>
                       <div className="flex items-center gap-6">
                         <button 
@@ -516,8 +569,13 @@ const SimpleDashboard = () => {
                     </div>
                   ) : (
                     <div className="p-10 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-center bg-black/20">
-                      <ShieldAlert className="w-12 h-12 text-primary/20 mb-4" />
-                      <p className="font-mono text-sm text-gray-500 uppercase tracking-widest max-w-xs">No objective active. Engagement requires 24h prep.</p>
+                      <button 
+                        onClick={() => setIsEditingToday(true)}
+                        className="flex flex-col items-center group"
+                      >
+                        <ShieldAlert className="w-12 h-12 text-primary/20 mb-4 group-hover:text-primary/40 transition-colors" />
+                        <p className="font-mono text-sm text-gray-500 uppercase tracking-widest max-w-xs group-hover:text-gray-400 transition-colors">SET TODAY'S TARGET</p>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -525,10 +583,42 @@ const SimpleDashboard = () => {
 
               <div className="space-y-6 md:border-l md:border-primary/10 md:pl-12">
                 <div>
-                  <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                    <TargetIcon className="w-3 h-3" /> STRATEGIC PREP (FOR TOMORROW)
-                  </h3>
-                  {attackItem.tomorrow ? (
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] flex items-center gap-2">
+                      <TargetIcon className="w-3 h-3" /> STRATEGIC PREP (FOR TOMORROW)
+                    </h3>
+                    {attackItem.tomorrow && !isEditingTomorrow && (
+                      <button 
+                        onClick={() => {
+                          setNewTomorrowItem(attackItem.tomorrow?.text || "");
+                          setIsEditingTomorrow(true);
+                        }}
+                        className="text-[10px] text-primary/40 font-mono hover:text-primary transition-colors"
+                      >
+                        [EDIT]
+                      </button>
+                    )}
+                  </div>
+                  
+                  {isEditingTomorrow ? (
+                    <div className="space-y-4">
+                      <input 
+                        type="text" 
+                        autoFocus
+                        value={newTomorrowItem}
+                        onChange={(e) => setNewTomorrowItem(e.target.value)}
+                        className="w-full bg-black/60 border-2 border-primary/30 px-4 py-4 font-mono text-lg text-primary placeholder:text-primary/10 focus:outline-none focus:border-primary transition-all shadow-[inset_0_0_10px_rgba(var(--primary),0.05)]"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSetTomorrow()}
+                        onBlur={() => !newTomorrowItem && setIsEditingTomorrow(false)}
+                      />
+                      <button 
+                        onClick={handleSetTomorrow}
+                        className="w-full py-4 bg-primary text-black font-mono text-sm font-black hover:bg-primary/90 transition-all uppercase tracking-[0.2em]"
+                      >
+                        LOCK TARGET
+                      </button>
+                    </div>
+                  ) : attackItem.tomorrow ? (
                     <div className="p-6 border border-primary/30 bg-primary/5 flex items-center justify-between group/tomorrow relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                       <div className="flex-1 min-w-0">
