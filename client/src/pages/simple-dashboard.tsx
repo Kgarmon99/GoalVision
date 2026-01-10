@@ -41,6 +41,10 @@ const SimpleDashboard = () => {
     revenueTarget: 20000000,
     revenuePrevious: 0,
     revenueDeadline: "2026-12-01",
+    activeUsage: 35,
+    activeUsageTarget: 40,
+    renewalRate: 92,
+    renewalRateTarget: 90
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -583,20 +587,26 @@ const SimpleDashboard = () => {
               <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.pilots} / {metrics.pilotsTarget}</span>
             </div>
             <div className="flex justify-between items-end border-b border-primary/20 pb-3">
-              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Districts</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.districts} / {metrics.districtsTarget}</span>
-            </div>
-            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
               <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Active Students</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{(metrics.students/1000).toFixed(1)}K / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{(metrics.students/1000000).toFixed(1)}M / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
             </div>
             <div className="flex justify-between items-end border-b border-primary/20 pb-3">
               <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">ARR Revenue</span>
-              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>${(metrics.revenue/1000).toFixed(1)}K / ${metrics.revenueTarget >= 1000000 ? (metrics.revenueTarget/1000000).toFixed(0) + 'M' : metrics.revenueTarget.toLocaleString()}</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>${(metrics.revenue/1000000).toFixed(1)}M / ${(metrics.revenueTarget/1000000).toFixed(0)}M</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4 border-b border-primary/20 pb-3">
+              <div className="flex justify-between items-end">
+                <span className="font-mono text-[10px] text-gray-400 uppercase tracking-widest">Daily Active Usage</span>
+                <span className="font-mono text-xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.activeUsage}% / {metrics.activeUsageTarget}%</span>
+              </div>
+              <div className="flex justify-between items-end">
+                <span className="font-mono text-[10px] text-gray-400 uppercase tracking-widest">Renewal Rate</span>
+                <span className="font-mono text-xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.renewalRate}% / {metrics.renewalRateTarget}%</span>
+              </div>
             </div>
             <div className="flex justify-between items-center pt-2">
               <span className="text-[10px] text-gray-600 font-mono">MISSION DEADLINE: 12-01-2026</span>
-              <span className="text-[10px] text-primary/40 font-mono animate-pulse">LIVE TRACKING ACTIVE</span>
+              <span className="text-[10px] text-primary/40 font-mono animate-pulse">NORTH STAR: CATEGORY AUTHORITY</span>
             </div>
           </div>
 
