@@ -9,7 +9,9 @@ import {
   Target,
   Zap,
   Users,
-  RefreshCw
+  RefreshCw,
+  Check,
+  ShieldAlert
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,16 @@ const SimpleDashboard = () => {
     renewalRateTarget: 90
   });
 
+  const [attackItem, setAttackItem] = useState<{
+    today: { text: string; completed: boolean; date: string } | null;
+    tomorrow: { text: string; date: string } | null;
+  }>({
+    today: null,
+    tomorrow: null
+  });
+
+  const [newTomorrowItem, setNewTomorrowItem] = useState("");
+
   const [editMetrics, setEditMetrics] = useState(metrics);
 
   useEffect(() => {
@@ -64,7 +76,6 @@ const SimpleDashboard = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Only override if the targets aren't the new 2026 ones
         if (parsed.studentsTarget !== 3000000 || parsed.revenueTarget !== 20000000) {
           localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
         } else {
@@ -76,7 +87,79 @@ const SimpleDashboard = () => {
     } else {
       localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
     }
+
+    // Load Attack Item
+    const savedAttack = localStorage.getItem('moneybot-attack-item');
+    if (savedAttack) {
+      try {
+        const parsed = JSON.parse(savedAttack);
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Handle date roll-over logic
+        let updatedToday = parsed.today;
+        let updatedTomorrow = parsed.tomorrow;
+
+        // If today's date in storage is older than actual today, 
+        // move tomorrow to today (if it matches today's date)
+        if (updatedToday && updatedToday.date < todayStr) {
+          if (updatedTomorrow && updatedTomorrow.date === todayStr) {
+            updatedToday = { ...updatedTomorrow, completed: false };
+            updatedTomorrow = null;
+          } else {
+            updatedToday = null;
+          }
+        }
+        
+        const newState = { today: updatedToday, tomorrow: updatedTomorrow };
+        setAttackItem(newState);
+        localStorage.setItem('moneybot-attack-item', JSON.stringify(newState));
+      } catch (e) {
+        console.error('Failed to load attack item', e);
+      }
+    }
   }, []);
+
+  const saveAttackItem = (newState: typeof attackItem) => {
+    setAttackItem(newState);
+    localStorage.setItem('moneybot-attack-item', JSON.stringify(newState));
+  };
+
+  const handleSetTomorrow = () => {
+    if (!newTomorrowItem.trim()) return;
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const newState = {
+      ...attackItem,
+      tomorrow: { text: newTomorrowItem, date: tomorrowStr }
+    };
+    
+    saveAttackItem(newState);
+    setNewTomorrowItem("");
+    toast({
+      title: "OBJECTIVE LOCKED",
+      description: "Target set for tomorrow's mission.",
+    });
+  };
+
+  const toggleTodayComplete = () => {
+    if (!attackItem.today) return;
+    
+    const newState = {
+      ...attackItem,
+      today: { ...attackItem.today, completed: !attackItem.today.completed }
+    };
+    
+    saveAttackItem(newState);
+    if (newState.today && newState.today.completed) {
+      toast({
+        title: "MISSION ACCOMPLISHED",
+        description: "The primary objective has been neutralized.",
+      });
+    }
+  };
 
   const saveMetrics = () => {
     setMetrics(editMetrics);
@@ -391,8 +474,102 @@ const SimpleDashboard = () => {
       </div>
 
       {/* Main Content - Four Hero Metrics */}
-      <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8">
-        <div className="w-full max-w-7xl">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 md:py-8 overflow-y-auto">
+        <div className="w-full max-w-7xl space-y-6 md:space-y-8">
+          
+          {/* Attack Item of the Day - Atomic Habits Design */}
+          <div className="tactical-card border-primary/40 bg-primary/5 p-6 md:p-10 relative overflow-hidden group min-h-[300px] flex flex-col justify-center shadow-[inset_0_0_50px_rgba(var(--primary),0.05)]">
+            <div className="mil-tag bg-primary text-black font-black tracking-widest">PRIMARY OBJECTIVE: THE DAILY ATTACK</div>
+            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-100 transition-opacity">
+              <Zap className="w-8 h-8 text-primary" />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-primary animate-ping" /> CURRENT ENGAGEMENT (TODAY)
+                  </h3>
+                  {attackItem.today ? (
+                    <div className={`p-6 border-2 transition-all ${attackItem.today.completed ? 'border-primary/20 bg-primary/5' : 'border-primary bg-black/60 shadow-[0_0_30px_rgba(16,185,129,0.1)]'}`}>
+                      <div className="flex items-center gap-6">
+                        <button 
+                          onClick={toggleTodayComplete}
+                          className={`w-12 h-12 md:w-16 md:h-16 border-2 flex items-center justify-center transition-all shrink-0 ${
+                            attackItem.today.completed 
+                              ? 'bg-primary border-primary text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
+                              : 'border-primary text-primary hover:bg-primary/10 hover:scale-105'
+                          }`}
+                        >
+                          {attackItem.today.completed && <Check className="w-8 h-8 md:w-10 md:h-10 stroke-[4]" />}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-mono text-2xl md:text-4xl font-black tracking-tight leading-tight break-words ${attackItem.today.completed ? 'line-through text-gray-600 opacity-50' : 'text-white'}`} style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                            {attackItem.today.text}
+                          </div>
+                          <div className="text-[10px] text-primary/40 font-mono mt-2 uppercase tracking-widest animate-pulse">
+                            {attackItem.today.completed ? 'MISSION ACCOMPLISHED' : 'STATUS: LETHAL EXECUTION REQUIRED'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-10 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-center bg-black/20">
+                      <ShieldAlert className="w-12 h-12 text-primary/20 mb-4" />
+                      <p className="font-mono text-sm text-gray-500 uppercase tracking-widest max-w-xs">No objective active. Engagement requires 24h prep.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-6 md:border-l md:border-primary/10 md:pl-12">
+                <div>
+                  <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <Target className="w-3 h-3" /> STRATEGIC PREP (FOR TOMORROW)
+                  </h3>
+                  {attackItem.tomorrow ? (
+                    <div className="p-6 border border-primary/30 bg-primary/5 flex items-center justify-between group/tomorrow relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                      <div className="flex-1 min-w-0">
+                        <span className="font-mono text-lg text-primary/70 truncate block">{attackItem.tomorrow.text}</span>
+                        <span className="text-[10px] text-gray-600 font-mono uppercase mt-1 block tracking-tighter">LOCKED FOR 0400H DEPLOYMENT</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          value={newTomorrowItem}
+                          onChange={(e) => setNewTomorrowItem(e.target.value)}
+                          placeholder="IDENTIFY THE ONE MOVE..."
+                          className="w-full bg-black/60 border-2 border-primary/30 px-4 py-4 font-mono text-lg text-primary placeholder:text-primary/10 focus:outline-none focus:border-primary transition-all shadow-[inset_0_0_10px_rgba(var(--primary),0.05)]"
+                          onKeyDown={(e) => e.key === 'Enter' && handleSetTomorrow()}
+                        />
+                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary/10" />
+                      </div>
+                      <button 
+                        onClick={handleSetTomorrow}
+                        className="w-full py-4 bg-primary text-black font-mono text-sm font-black hover:bg-primary/90 hover:scale-[1.01] transition-all uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                      >
+                        LOCK TARGET
+                      </button>
+                    </div>
+                  )}
+                  <div className="mt-4 flex items-start gap-2 p-3 bg-black/30 border border-primary/5">
+                    <div className="text-primary/40 text-xs mt-0.5">※</div>
+                    <p className="text-[10px] text-gray-600 font-mono uppercase leading-relaxed italic">
+                      ATOMIC HABIT: <span className="text-primary/60">MAKE IT OBVIOUS</span>. REDUCE COGNITIVE FRICTION BY SETTING THE SINGLE MOVE BEFORE THE SUN GOES DOWN.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             
             {/* PILOTS Card */}
