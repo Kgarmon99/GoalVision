@@ -44,8 +44,7 @@ const SimpleDashboard = () => {
     activeUsage: 35,
     activeUsageTarget: 40,
     renewalRate: 92,
-    renewalRateTarget: 90,
-    attackOfTheDay: "Attack teacher onboarding friction. Speed to 'Aha' is the #1 constraint."
+    renewalRateTarget: 90
   });
 
   const [editMetrics, setEditMetrics] = useState(metrics);
@@ -381,17 +380,6 @@ const SimpleDashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-xs text-gray-400 font-mono uppercase tracking-wider flex items-center gap-2">
-                    <Zap className="w-3 h-3" /> Attack of the Day
-                  </h3>
-                  <Input
-                    value={editMetrics.attackOfTheDay || ""}
-                    onChange={(e) => setEditMetrics({...editMetrics, attackOfTheDay: e.target.value})}
-                    placeholder="Enter today's strategic focus..."
-                    className="h-9 text-sm"
-                  />
-                </div>
                 <Button onClick={saveMetrics} className="w-full bg-primary hover:bg-primary/80 text-black font-mono">
                   SAVE
                 </Button>
@@ -405,20 +393,6 @@ const SimpleDashboard = () => {
       {/* Main Content - Four Hero Metrics */}
       <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8">
         <div className="w-full max-w-7xl">
-          {/* Attack of the Day Banner */}
-          <div className="mb-6 border border-red-500/30 bg-red-500/5 p-4 relative overflow-hidden flex items-center gap-4">
-            <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
-            <div className="flex items-center justify-center w-10 h-10 border border-red-500/50 bg-black shrink-0">
-              <Zap className="w-6 h-6 text-red-500 animate-pulse" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[10px] font-mono text-red-500/70 uppercase tracking-[0.2em] mb-1">STRATEGIC COMMAND: ATTACK OF THE DAY</div>
-              <div className="text-lg md:text-xl font-bold text-white tracking-wide uppercase truncate" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                {metrics.attackOfTheDay || "AWAITING INTEL..."}
-              </div>
-            </div>
-          </div>
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             
             {/* PILOTS Card */}
