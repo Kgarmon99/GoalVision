@@ -513,17 +513,34 @@ const SimpleDashboard = () => {
                     <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] flex items-center gap-2">
                       <div className="w-1 h-1 bg-primary animate-ping" /> CURRENT ENGAGEMENT (TODAY)
                     </h3>
-                    {attackItem.today && !isEditingToday && (
-                      <button 
-                        onClick={() => {
-                          setNewTodayItem(attackItem.today?.text || "");
-                          setIsEditingToday(true);
-                        }}
-                        className="text-[10px] text-primary/40 font-mono hover:text-primary transition-colors"
-                      >
-                        [EDIT]
-                      </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {attackItem.today && !isEditingToday && (
+                        <button 
+                          onClick={() => {
+                            setNewTodayItem(attackItem.today?.text || "");
+                            setIsEditingToday(true);
+                          }}
+                          className="text-[10px] text-primary/40 font-mono hover:text-primary transition-colors"
+                        >
+                          [EDIT]
+                        </button>
+                      )}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="text-[10px] text-primary/40 font-mono hover:text-primary transition-colors">
+                            [LOG]
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-black border-primary/30 max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="text-primary font-mono tracking-wider">MISSION LOG</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4 space-y-4">
+                            <p className="text-xs text-gray-500 font-mono italic">Recent mission history will be archived here.</p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                   
                   {isEditingToday ? (
