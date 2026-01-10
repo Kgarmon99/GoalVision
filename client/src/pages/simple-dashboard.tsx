@@ -62,6 +62,9 @@ const SimpleDashboard = () => {
       } catch (e) {
         console.error('Failed to load metrics', e);
       }
+    } else {
+      // If no saved data, ensure defaults are set in localStorage
+      localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
     }
   }, []);
 
@@ -573,22 +576,27 @@ const SimpleDashboard = () => {
           </div>
 
           {/* Goals Summary */}
-          <div className="mt-8 md:mt-10 space-y-4">
-            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
-              <span className="font-mono text-xs text-gray-500 uppercase">Schools Live</span>
-              <span className="font-mono text-2xl text-primary font-bold">{metrics.pilots} / {metrics.pilotsTarget}</span>
+          <div className="mt-8 md:mt-10 space-y-4 bg-primary/5 p-6 border border-primary/20 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary/20" />
+            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
+              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Schools Live</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.pilots} / {metrics.pilotsTarget}</span>
             </div>
-            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
-              <span className="font-mono text-xs text-gray-500 uppercase">Districts</span>
-              <span className="font-mono text-2xl text-primary font-bold">{metrics.districts} / {metrics.districtsTarget}</span>
+            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
+              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Districts</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{metrics.districts} / {metrics.districtsTarget}</span>
             </div>
-            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
-              <span className="font-mono text-xs text-gray-500 uppercase">Active Students</span>
-              <span className="font-mono text-2xl text-primary font-bold">{(metrics.students/1000).toFixed(1)}K / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
+            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
+              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">Active Students</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>{(metrics.students/1000).toFixed(1)}K / {(metrics.studentsTarget/1000000).toFixed(1)}M</span>
             </div>
-            <div className="flex justify-between items-end border-b border-primary/10 pb-2">
-              <span className="font-mono text-xs text-gray-500 uppercase">ARR Revenue</span>
-              <span className="font-mono text-2xl text-primary font-bold">${(metrics.revenue/1000).toFixed(1)}K / ${metrics.revenueTarget >= 1000000 ? (metrics.revenueTarget/1000000).toFixed(0) + 'M' : metrics.revenueTarget.toLocaleString()}</span>
+            <div className="flex justify-between items-end border-b border-primary/20 pb-3">
+              <span className="font-mono text-sm text-gray-400 uppercase tracking-widest">ARR Revenue</span>
+              <span className="font-mono text-4xl text-primary font-black" style={{ fontFamily: 'Orbitron, sans-serif' }}>${(metrics.revenue/1000).toFixed(1)}K / ${metrics.revenueTarget >= 1000000 ? (metrics.revenueTarget/1000000).toFixed(0) + 'M' : metrics.revenueTarget.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center pt-2">
+              <span className="text-[10px] text-gray-600 font-mono">MISSION DEADLINE: 12-01-2026</span>
+              <span className="text-[10px] text-primary/40 font-mono animate-pulse">LIVE TRACKING ACTIVE</span>
             </div>
           </div>
 
