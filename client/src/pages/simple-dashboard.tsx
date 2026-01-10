@@ -59,15 +59,21 @@ const SimpleDashboard = () => {
   }, []);
 
   useEffect(() => {
+    // Force clear old local storage data if it exists to ensure new 2026 targets apply
     const saved = localStorage.getItem('moneybot-core-metrics');
     if (saved) {
       try {
-        setMetrics(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Only override if the targets aren't the new 2026 ones
+        if (parsed.studentsTarget !== 3000000 || parsed.revenueTarget !== 20000000) {
+          localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
+        } else {
+          setMetrics(parsed);
+        }
       } catch (e) {
-        console.error('Failed to load metrics', e);
+        localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
       }
     } else {
-      // If no saved data, ensure defaults are set in localStorage
       localStorage.setItem('moneybot-core-metrics', JSON.stringify(metrics));
     }
   }, []);
@@ -129,7 +135,7 @@ const SimpleDashboard = () => {
     : (metrics.students > 0 ? 100 : 0);
   const studentsUp = studentsChange >= 0;
 
-  const revenueProgress = Math.min(100, (metrics.revenue / metrics.revenueTarget) * 100);
+  const revenueProgress = metrics.revenueTarget > 0 ? Math.min(100, (metrics.revenue / metrics.revenueTarget) * 100) : 0;
   const revenueChange = metrics.revenuePrevious > 0 
     ? ((metrics.revenue - metrics.revenuePrevious) / metrics.revenuePrevious) * 100 
     : 0;
