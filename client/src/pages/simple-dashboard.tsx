@@ -11,7 +11,8 @@ import {
   Users,
   RefreshCw,
   Check,
-  ShieldAlert
+  ShieldAlert,
+  Target as TargetIcon
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -525,7 +526,7 @@ const SimpleDashboard = () => {
               <div className="space-y-6 md:border-l md:border-primary/10 md:pl-12">
                 <div>
                   <h3 className="font-mono text-xs text-primary/50 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                    <Target className="w-3 h-3" /> STRATEGIC PREP (FOR TOMORROW)
+                    <TargetIcon className="w-3 h-3" /> STRATEGIC PREP (FOR TOMORROW)
                   </h3>
                   {attackItem.tomorrow ? (
                     <div className="p-6 border border-primary/30 bg-primary/5 flex items-center justify-between group/tomorrow relative overflow-hidden">
