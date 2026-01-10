@@ -396,13 +396,13 @@ const SimpleDashboard = () => {
               <div className="pt-4 md:pt-6">
                 <div className="flex items-start justify-between mb-4 md:mb-6">
                   <div>
-                    <div className="data-label text-xs md:text-sm mb-2">SCHOOLS LIVE</div>
+                    <div className="data-label text-xs md:text-sm mb-2 uppercase tracking-widest text-primary/70">Schools Live</div>
                     <div 
                       className="data-value text-4xl md:text-5xl font-black"
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-pilots-value"
                     >
-                      {metrics.pilots}
+                      {metrics.pilots} / {metrics.pilotsTarget}
                     </div>
                   </div>
                   <Radio className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -449,7 +449,7 @@ const SimpleDashboard = () => {
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-districts-value"
                     >
-                      {metrics.districts}
+                      {metrics.districts} / {metrics.districtsTarget}
                     </div>
                   </div>
                   <TrendingUp className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -496,7 +496,7 @@ const SimpleDashboard = () => {
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-students-value"
                     >
-                      {metrics.students >= 1000000 ? (metrics.students/1000000).toFixed(1) + 'M' : metrics.students >= 1000 ? (metrics.students/1000).toFixed(1) + 'K' : metrics.students}
+                      {metrics.students >= 1000000 ? (metrics.students/1000000).toFixed(1) + 'M' : metrics.students >= 1000 ? (metrics.students/1000).toFixed(1) + 'K' : metrics.students} / {(metrics.studentsTarget/1000000).toFixed(1)}M
                     </div>
                   </div>
                   <Users className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
@@ -543,7 +543,7 @@ const SimpleDashboard = () => {
                       style={{ fontFamily: 'Orbitron, sans-serif' }}
                       data-testid="text-revenue-value"
                     >
-                      {metrics.revenue >= 1000000 ? '$' + (metrics.revenue/1000000).toFixed(1) + 'M' : formatCurrency(metrics.revenue)}
+                      {metrics.revenue >= 1000000 ? '$' + (metrics.revenue/1000000).toFixed(1) + 'M' : formatCurrency(metrics.revenue)} / ${(metrics.revenueTarget/1000000).toFixed(0)}M
                     </div>
                   </div>
                   <DollarSign className="h-8 w-8 md:h-12 md:w-12 text-primary/30" />
