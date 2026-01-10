@@ -129,12 +129,19 @@ const SimpleDashboard = () => {
   };
 
   const handleSetToday = () => {
-    if (!newTodayItem.trim()) return;
+    if (!newTodayItem.trim()) {
+      setIsEditingToday(false);
+      return;
+    }
     
     const todayStr = new Date().toISOString().split('T')[0];
     const newState = {
       ...attackItem,
-      today: { text: newTodayItem, completed: false, date: todayStr }
+      today: { 
+        text: newTodayItem, 
+        completed: attackItem.today?.completed ?? false, 
+        date: todayStr 
+      }
     };
     
     saveAttackItem(newState);
@@ -147,7 +154,10 @@ const SimpleDashboard = () => {
   };
 
   const handleSetTomorrow = () => {
-    if (!newTomorrowItem.trim()) return;
+    if (!newTomorrowItem.trim()) {
+      setIsEditingTomorrow(false);
+      return;
+    }
     
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -160,6 +170,7 @@ const SimpleDashboard = () => {
     
     saveAttackItem(newState);
     setNewTomorrowItem("");
+    setIsEditingTomorrow(false);
     toast({
       title: "OBJECTIVE LOCKED",
       description: "Target set for tomorrow's mission.",
