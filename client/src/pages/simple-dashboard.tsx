@@ -12,14 +12,77 @@ import {
   RefreshCw,
   Check,
   ShieldAlert,
-  Target as TargetIcon
+  Target as TargetIcon,
+  Calendar,
+  Rocket,
+  Shield,
+  ListChecks,
+  ChevronRight,
+  Landmark,
+  School
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import moneybotLogo from "../assets/moneybot-logo.png";
+
+const ROADMAP_DATA = [
+  {
+    quarter: "Q1",
+    theme: "Foundation → Proof",
+    goal: "Make it undeniable that MoneyBot works.",
+    items: [
+      "Platform stability and production reliability",
+      "Simple teacher onboarding (< 5 mins)",
+      "Student onboarding (< 2 mins)",
+      "Google + Clever auth fully reliable",
+      "Engagement loops and core gamification live",
+      "Admin + district dashboards activated",
+      "Initial CRA sponsor visibility and reporting"
+    ]
+  },
+  {
+    quarter: "Q2",
+    theme: "Acceleration → Lock-In",
+    goal: "Make schools dependent on MoneyBot.",
+    items: [
+      "Multi-school rollouts across the district",
+      "Daily usage patterns established",
+      "Deeper gamification and habit-forming engagement",
+      "Full streak system & badges",
+      "Student profile becomes identity-based",
+      "Clear sponsor ROI and impact reporting",
+      "District- and state-level distribution underway"
+    ]
+  },
+  {
+    quarter: "Q3",
+    theme: "Scale → Authority",
+    goal: "Make MoneyBot the obvious choice.",
+    items: [
+      "Back-to-school district-wide deployment",
+      "Standardized implementation across schools",
+      "Longitudinal student growth data visible",
+      "Public proof: case studies, leadership confidence",
+      "MoneyBot recognized as category authority"
+    ]
+  },
+  {
+    quarter: "Q4",
+    theme: "Default Status",
+    goal: "Make opting out feel silly & irresponsible.",
+    items: [
+      "Renewals and multi-year agreements finalized",
+      "Statewide frameworks and long-term planning",
+      "Institutional trust with boards and leadership",
+      "Year-end impact reports delivered",
+      "MoneyBot positioned as default infrastructure"
+    ]
+  }
+];
 
 const SimpleDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
