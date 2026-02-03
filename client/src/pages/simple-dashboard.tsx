@@ -134,8 +134,11 @@ const SimpleDashboard = () => {
   
   // Roadmap editable items - allows custom text per item
   const [roadmapItems, setRoadmapItems] = useState<Record<string, string>>({});
+  const [deletedRoadmapItems, setDeletedRoadmapItems] = useState<Record<string, boolean>>({});
+  const [addedRoadmapItems, setAddedRoadmapItems] = useState<Record<string, string[]>>({});
   const [editingRoadmapItem, setEditingRoadmapItem] = useState<string | null>(null);
   const [editingRoadmapText, setEditingRoadmapText] = useState("");
+  const [newItemText, setNewItemText] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setEditMetrics(metrics);
@@ -213,6 +216,26 @@ const SimpleDashboard = () => {
         console.error('Failed to load roadmap items', e);
       }
     }
+
+    // Load Roadmap deleted items
+    const savedDeleted = localStorage.getItem('moneybot-roadmap-deleted');
+    if (savedDeleted) {
+      try {
+        setDeletedRoadmapItems(JSON.parse(savedDeleted));
+      } catch (e) {
+        console.error('Failed to load deleted items', e);
+      }
+    }
+
+    // Load Roadmap added items
+    const savedAdded = localStorage.getItem('moneybot-roadmap-added');
+    if (savedAdded) {
+      try {
+        setAddedRoadmapItems(JSON.parse(savedAdded));
+      } catch (e) {
+        console.error('Failed to load added items', e);
+      }
+    }
   }, []);
 
   const saveAttackItem = (newState: typeof attackItem) => {
@@ -220,27 +243,40 @@ const SimpleDashboard = () => {
     localStorage.setItem('moneybot-attack-item', JSON.stringify(newState));
   };
 
-  const toggleRoadmapItem = (quarter: string, itemIdx: number) => {
+  const toggleRoadmapItem = (quarter: string, itemIdx: string | number) => {
     const key = `${quarter}-${itemIdx}`;
     const newCompleted = { ...roadmapCompleted, [key]: !roadmapCompleted[key] };
     setRoadmapCompleted(newCompleted);
     localStorage.setItem('moneybot-roadmap-completed', JSON.stringify(newCompleted));
   };
 
-  const getQuarterProgress = (quarter: string, totalItems: number) => {
+  const getQuarterProgress = (quarter: string, baseItemsCount: number) => {
+    const addedItems = addedRoadmapItems[quarter] || [];
+    const totalCount = baseItemsCount + addedItems.length;
     let completed = 0;
-    for (let i = 0; i < totalItems; i++) {
-      if (roadmapCompleted[`${quarter}-${i}`]) completed++;
+    
+    // Check base items
+    for (let i = 0; i < baseItemsCount; i++) {
+      if (!deletedRoadmapItems[`${quarter}-${i}`] && roadmapCompleted[`${quarter}-${i}`]) completed++;
     }
-    return { completed, total: totalItems, percent: totalItems > 0 ? Math.round((completed / totalItems) * 100) : 0 };
+    
+    // Check added items
+    addedItems.forEach((_, idx) => {
+      if (roadmapCompleted[`${quarter}-add-${idx}`]) completed++;
+    });
+
+    const activeBaseItems = Array.from({ length: baseItemsCount }).filter((_, i) => !deletedRoadmapItems[`${quarter}-${i}`]).length;
+    const activeTotal = activeBaseItems + addedItems.length;
+
+    return { completed, total: activeTotal, percent: activeTotal > 0 ? Math.round((completed / activeTotal) * 100) : 0 };
   };
 
-  const getRoadmapItemText = (quarter: string, idx: number, defaultText: string) => {
+  const getRoadmapItemText = (quarter: string, idx: string | number, defaultText: string) => {
     const key = `${quarter}-${idx}`;
     return roadmapItems[key] ?? defaultText;
   };
 
-  const startEditingRoadmapItem = (quarter: string, idx: number, currentText: string) => {
+  const startEditingRoadmapItem = (quarter: string, idx: string | number, currentText: string) => {
     const key = `${quarter}-${idx}`;
     setEditingRoadmapItem(key);
     setEditingRoadmapText(currentText);
@@ -254,6 +290,45 @@ const SimpleDashboard = () => {
     }
     setEditingRoadmapItem(null);
     setEditingRoadmapText("");
+  };
+
+  const deleteRoadmapItem = (quarter: string, idx: number) => {
+    const key = `${quarter}-${idx}`;
+    const newDeleted = { ...deletedRoadmapItems, [key]: true };
+    setDeletedRoadmapItems(newDeleted);
+    localStorage.setItem('moneybot-roadmap-deleted', JSON.stringify(newDeleted));
+    toast({
+      title: "ITEM DELETED",
+      description: "Roadmap objective removed.",
+    });
+  };
+
+  const deleteAddedRoadmapItem = (quarter: string, idx: number) => {
+    const currentAdded = [...(addedRoadmapItems[quarter] || [])];
+    currentAdded.splice(idx, 1);
+    const newAdded = { ...addedRoadmapItems, [quarter]: currentAdded };
+    setAddedRoadmapItems(newAdded);
+    localStorage.setItem('moneybot-roadmap-added', JSON.stringify(newAdded));
+    toast({
+      title: "ITEM DELETED",
+      description: "Custom objective removed.",
+    });
+  };
+
+  const addRoadmapItem = (quarter: string) => {
+    const text = newItemText[quarter]?.trim();
+    if (!text) return;
+
+    const currentAdded = [...(addedRoadmapItems[quarter] || []), text];
+    const newAdded = { ...addedRoadmapItems, [quarter]: currentAdded };
+    setAddedRoadmapItems(newAdded);
+    localStorage.setItem('moneybot-roadmap-added', JSON.stringify(newAdded));
+    
+    setNewItemText({ ...newItemText, [quarter]: "" });
+    toast({
+      title: "ITEM ADDED",
+      description: "New objective locked into roadmap.",
+    });
   };
 
   const handleSetToday = () => {
@@ -931,6 +1006,8 @@ const SimpleDashboard = () => {
                       <div className="space-y-2">
                         {quarter.items.map((item, idx) => {
                           const key = `${quarter.quarter}-${idx}`;
+                          if (deletedRoadmapItems[key]) return null;
+                          
                           const isCompleted = roadmapCompleted[key];
                           const displayText = getRoadmapItemText(quarter.quarter, idx, item);
                           const isEditing = editingRoadmapItem === key;
@@ -978,15 +1055,110 @@ const SimpleDashboard = () => {
                               >
                                 {displayText}
                               </span>
-                              <button
-                                onClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
-                                className="opacity-0 group-hover:opacity-100 text-[8px] text-primary/50 hover:text-primary font-mono uppercase transition-all"
-                              >
-                                edit
-                              </button>
+                              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button
+                                  onClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
+                                  className="text-[8px] text-primary/50 hover:text-primary font-mono uppercase"
+                                >
+                                  edit
+                                </button>
+                                <button
+                                  onClick={() => deleteRoadmapItem(quarter.quarter, idx)}
+                                  className="text-[8px] text-red-500/50 hover:text-red-500 font-mono uppercase"
+                                >
+                                  del
+                                </button>
+                              </div>
                             </div>
                           );
                         })}
+                        
+                        {/* Custom Added Items */}
+                        {(addedRoadmapItems[quarter.quarter] || []).map((itemText, idx) => {
+                          const key = `${quarter.quarter}-add-${idx}`;
+                          const isCompleted = roadmapCompleted[key];
+                          const isEditing = editingRoadmapItem === key;
+                          
+                          if (isEditing) {
+                            return (
+                              <div key={`add-${idx}`} className="flex items-start gap-2">
+                                <div className="w-4 h-4 shrink-0 border border-primary/30 mt-0.5" />
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={editingRoadmapText}
+                                  onChange={(e) => setEditingRoadmapText(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') saveRoadmapItemEdit();
+                                    if (e.key === 'Escape') { setEditingRoadmapItem(null); setEditingRoadmapText(""); }
+                                  }}
+                                  onBlur={saveRoadmapItemEdit}
+                                  className="flex-1 bg-black/60 border border-primary/40 px-2 py-0.5 text-[10px] font-mono text-primary focus:outline-none focus:border-primary"
+                                />
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div
+                              key={`add-${idx}`}
+                              className="flex items-start gap-2 w-full hover:bg-primary/5 p-1 -m-1 rounded transition-colors group"
+                            >
+                              <button
+                                onClick={() => toggleRoadmapItem(quarter.quarter, `add-${idx}`)}
+                                className={`w-4 h-4 shrink-0 border flex items-center justify-center mt-0.5 transition-all ${
+                                  isCompleted 
+                                    ? 'bg-primary border-primary text-black' 
+                                    : 'border-primary/30 group-hover:border-primary/60'
+                                }`}
+                              >
+                                {isCompleted && <Check className="w-3 h-3 stroke-[3]" />}
+                              </button>
+                              <span 
+                                onClick={() => startEditingRoadmapItem(quarter.quarter, `add-${idx}`, itemText)}
+                                className={`flex-1 text-[10px] font-mono leading-tight transition-all cursor-pointer ${
+                                  isCompleted ? 'text-primary/70 line-through' : 'text-gray-400 group-hover:text-gray-300'
+                                }`}
+                              >
+                                {itemText}
+                              </span>
+                              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button
+                                  onClick={() => startEditingRoadmapItem(quarter.quarter, `add-${idx}`, itemText)}
+                                  className="text-[8px] text-primary/50 hover:text-primary font-mono uppercase"
+                                >
+                                  edit
+                                </button>
+                                <button
+                                  onClick={() => deleteAddedRoadmapItem(quarter.quarter, idx)}
+                                  className="text-[8px] text-red-500/50 hover:text-red-500 font-mono uppercase"
+                                >
+                                  del
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Add New Item Input */}
+                      <div className="pt-4 mt-2 border-t border-primary/10">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="ADD OBJECTIVE..."
+                            value={newItemText[quarter.quarter] || ""}
+                            onChange={(e) => setNewItemText({ ...newItemText, [quarter.quarter]: e.target.value })}
+                            onKeyDown={(e) => e.key === 'Enter' && addRoadmapItem(quarter.quarter)}
+                            className="flex-1 bg-black/40 border border-primary/20 px-2 py-1 text-[9px] font-mono text-primary placeholder:text-primary/20 focus:outline-none focus:border-primary/40"
+                          />
+                          <button
+                            onClick={() => addRoadmapItem(quarter.quarter)}
+                            className="px-2 py-1 bg-primary/10 border border-primary/30 text-primary font-mono text-[8px] hover:bg-primary/20 uppercase"
+                          >
+                            Add
+                          </button>
+                        </div>
                       </div>
 
                       {(() => {
