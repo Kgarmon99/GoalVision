@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Circle, Building2, ChevronDown, ChevronRight, Search, Filter, Phone, Calendar, Edit, CheckCheck, Target } from "lucide-react";
+import { CheckCircle2, Circle, Building2, ChevronDown, ChevronRight, Search, Filter, Phone, Calendar, Edit, CheckCheck, Target, Zap } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -169,6 +169,19 @@ export default function SchoolsPage() {
     };
   }, [schools]);
 
+  const resetAllProgressMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/schools/reset', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/schools'] });
+      toast({
+        title: "PROGRESS RESET",
+        description: "All school leads have been reset to pending status.",
+      });
+    },
+  });
+
   const toggleRegion = (regionId: number) => {
     const newCollapsed = new Set(collapsedRegions);
     if (newCollapsed.has(regionId)) {
@@ -188,8 +201,22 @@ export default function SchoolsPage() {
     <div className="min-h-screen cosmic-bg">
       <div className="border-b border-primary/30 bg-black/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold text-white text-glow">KASS Regions Map</h1>
-          <p className="text-sm text-gray-400 mt-1">Kentucky Association of School Superintendents</p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white text-glow">KASS Regions Map</h1>
+              <p className="text-sm text-gray-400 mt-1">Kentucky Association of School Superintendents</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => resetAllProgressMutation.mutate()}
+              disabled={resetAllProgressMutation.isPending}
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300 font-mono text-[10px] uppercase tracking-wider"
+            >
+              <Zap className="w-3 h-3 mr-2" />
+              Reset All Progress
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -419,56 +446,58 @@ export default function SchoolsPage() {
                                   <Building2 className="w-4 h-4 text-gray-500 flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <div className="text-white text-sm font-medium truncate">
+                                      <div className="text-white text-sm font-medium truncate group-hover:text-primary transition-colors">
                                         {school.name}
                                       </div>
                                       {school.priority > 0 && (
                                         <div className="flex gap-0.5">
                                           {Array.from({ length: school.priority }).map((_, i) => (
-                                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-yellow-500/80 shadow-[0_0_5px_rgba(234,179,8,0.5)]" />
+                                            <div key={i} className="w-1 h-1 rounded-full bg-yellow-500/60" />
                                           ))}
                                         </div>
                                       )}
                                     </div>
-                                    <div className="text-xs text-gray-500 flex items-center gap-2">
-                                      <span>{school.type === 'middle' ? 'Middle' : 'High'}</span>
-                                      <span>•</span>
-                                      <span className="truncate">{school.district}</span>
+                                    <div className="text-[10px] text-gray-500 flex items-center gap-1.5 font-mono">
+                                      <span className="uppercase">{school.type}</span>
+                                      <span className="text-gray-700">|</span>
+                                      <span className="truncate opacity-70">{school.district}</span>
                                       {school.contactedDate && (
                                         <>
-                                          <span>•</span>
-                                          <span>{new Date(school.contactedDate).toLocaleDateString()}</span>
+                                          <span className="text-gray-700">|</span>
+                                          <span className="text-primary/60">{new Date(school.contactedDate).toLocaleDateString()}</span>
                                         </>
                                       )}
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {school.responseStatus !== 'pending' && (
-                                      <Badge className={`text-xs ${STATUS_COLORS[school.responseStatus] || STATUS_COLORS.pending}`}>
+                                      <div className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-tighter ${STATUS_COLORS[school.responseStatus] || STATUS_COLORS.pending}`}>
                                         {school.responseStatus.replace(/-/g, ' ')}
-                                      </Badge>
+                                      </div>
                                     )}
-                                    {!school.contacted && (
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                      {!school.contacted && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 w-7 p-0 text-primary hover:bg-primary/20"
+                                          onClick={() => quickContactMutation.mutate(school.id)}
+                                          disabled={quickContactMutation.isPending}
+                                          data-testid={`button-quick-contact-${school.id}`}
+                                        >
+                                          <CheckCheck className="w-3.5 h-3.5" />
+                                        </Button>
+                                      )}
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => quickContactMutation.mutate(school.id)}
-                                        disabled={quickContactMutation.isPending}
-                                        data-testid={`button-quick-contact-${school.id}`}
+                                        className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-white/10"
+                                        onClick={() => setEditingSchool(school)}
+                                        data-testid={`button-edit-school-${school.id}`}
                                       >
-                                        <CheckCheck className="w-4 h-4" />
+                                        <Edit className="w-3.5 h-3.5" />
                                       </Button>
-                                    )}
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                      onClick={() => setEditingSchool(school)}
-                                      data-testid={`button-edit-school-${school.id}`}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
+                                    </div>
                                   </div>
                                 </div>
                               ))}

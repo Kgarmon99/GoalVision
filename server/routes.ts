@@ -687,6 +687,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset all school progress
+  app.post("/api/schools/reset", async (_req, res) => {
+    try {
+      await storage.resetAllSchools();
+      // Invalidate relevant caches
+      serverCache.invalidate("schools:all");
+      serverCache.invalidateByPrefix("regions:");
+      res.json({ message: "All schools reset successfully" });
+    } catch (error) {
+      console.error("Error resetting schools:", error);
+      res.status(500).json({ message: "Error resetting schools" });
+    }
+  });
+
   // Region Routes
   
   // Get all regions

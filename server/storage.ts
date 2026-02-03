@@ -152,6 +152,7 @@ export interface IStorage {
   // School methods
   getAllSchools(): Promise<School[]>;
   getSchoolsByRegion(regionId: number): Promise<School[]>;
+  resetAllSchools(): Promise<void>;
   getSchool(id: number): Promise<School | undefined>;
   createSchool(school: InsertSchool): Promise<School>;
   updateSchool(id: number, school: Partial<InsertSchool>): Promise<School | undefined>;
@@ -1034,7 +1035,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(schools.regionId, regionId))
       .orderBy(asc(schools.type), asc(schools.name));
   }
-  
+
+  async resetAllSchools(): Promise<void> {
+    await db.update(schools).set({
+      contacted: false,
+      contactedDate: null,
+      responseStatus: "pending",
+      notes: "",
+    });
+  }
+
   async getSchool(id: number): Promise<School | undefined> {
     const [school] = await db.select().from(schools).where(eq(schools.id, id));
     return school;
