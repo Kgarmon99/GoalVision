@@ -77,6 +77,7 @@ app.use((req, res, next) => {
   if (isDevelopment) {
     await setupVite(app, server);
   } else {
+    // In production, serve static files after API routes are registered
     serveStatic(app);
   }
 

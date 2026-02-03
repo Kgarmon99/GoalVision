@@ -87,18 +87,48 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+  // In production, the built server runs from dist/index.js
+  // So __dirname is dist/, and static files are in dist/public
+  // But we need to handle both local and deployed paths
+  const possiblePaths = [
+    path.resolve(__dirname, "public"),           // dist/public (when running from dist/)
+    path.resolve(__dirname, "..", "dist", "public"), // dist/public (alternative)
+    path.resolve(process.cwd(), "dist", "public"),    // dist/public (from project root)
+  ];
 
-  if (!fs.existsSync(distPath)) {
+  let distPath: string | null = null;
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      distPath = possiblePath;
+      break;
+    }
+  }
+
+  if (!distPath) {
+    // Log all attempted paths for debugging
+    log(`Static files not found. Tried: ${possiblePaths.join(", ")}`, "server-error");
+    log(`Current __dirname: ${__dirname}`, "server-error");
+    log(`Current cwd: ${process.cwd()}`, "server-error");
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory. Tried: ${possiblePaths.join(", ")}. Make sure to build the client first with 'npm run build'`,
     );
   }
 
+  log(`Serving static files from: ${distPath}`, "express");
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // fall through to index.html for SPA routing (but skip API routes)
+  app.get("*", (req, res, next) => {
+    // Skip API routes - they should be handled by registerRoutes
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    
+    const indexPath = path.resolve(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).json({ error: "Not found", message: "Static files not built. Run 'npm run build' first." });
+    }
   });
 }
