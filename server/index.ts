@@ -50,9 +50,20 @@ app.use((req, res, next) => {
 (async () => {
   try {
     // Set NODE_ENV to production if not set (for cloud deployments)
+    // Railway and other platforms set PORT, so use that as indicator
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = process.env.PORT ? 'production' : 'development';
+      log(`NODE_ENV not set, defaulting to: ${process.env.NODE_ENV}`, "express");
     }
+    
+    // Force production mode if PORT is set (Railway always sets this)
+    if (process.env.PORT && process.env.NODE_ENV !== 'production') {
+      log(`PORT is set (${process.env.PORT}), forcing production mode`, "express");
+      process.env.NODE_ENV = 'production';
+    }
+    
+    log(`Starting server in ${process.env.NODE_ENV} mode`, "express");
+    log(`PORT: ${process.env.PORT || 'not set (using default 5000)'}`, "express");
     
     const server = await registerRoutes(app);
 

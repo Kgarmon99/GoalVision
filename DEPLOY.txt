@@ -1,0 +1,11 @@
+EASIEST WAY TO DEPLOY (2 minutes):
+
+1. Go to: https://railway.app
+2. Click "Start a New Project" 
+3. Click "Deploy from GitHub repo"
+4. Select: GoalVision
+5. DONE! You get a URL automatically.
+
+That's it! No configuration needed - everything is already set up.
+
+Your app will be live at: https://your-app-name.up.railway.app

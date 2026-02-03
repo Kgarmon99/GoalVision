@@ -89,11 +89,13 @@ export async function setupVite(app: Express, server: Server) {
 export function serveStatic(app: Express) {
   // In production, the built server runs from dist/index.js
   // So __dirname is dist/, and static files are in dist/public
-  // But we need to handle both local and deployed paths
+  // But we need to handle both local and deployed paths (Railway, etc.)
   const possiblePaths = [
-    path.resolve(__dirname, "public"),           // dist/public (when running from dist/)
-    path.resolve(__dirname, "..", "dist", "public"), // dist/public (alternative)
-    path.resolve(process.cwd(), "dist", "public"),    // dist/public (from project root)
+    path.resolve(__dirname, "public"),                    // dist/public (when running from dist/)
+    path.resolve(__dirname, "..", "dist", "public"),      // dist/public (alternative)
+    path.resolve(process.cwd(), "dist", "public"),       // dist/public (from project root)
+    path.resolve(process.cwd(), "public"),                // public (if build puts it at root)
+    path.join(process.cwd(), "dist", "public"),           // dist/public (using join)
   ];
 
   let distPath: string | null = null;
