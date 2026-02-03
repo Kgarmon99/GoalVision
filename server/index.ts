@@ -1,6 +1,17 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  log(`Unhandled Rejection at: ${promise}, reason: ${reason}`, "server-error");
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  log(`Uncaught Exception: ${error}`, "server-error");
+});
 
 const app = express();
 app.use(express.json());
@@ -37,9 +48,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    // Set NODE_ENV to production if not set (for cloud deployments)
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = process.env.PORT ? 'production' : 'development';
+    }
+    
+    const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
@@ -55,39 +72,33 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Default to development if NODE_ENV is not set
+  const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV === "development";
+  if (isDevelopment) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Try to serve on port 5000, with fallback options
-  const tryPorts = [5000, 5001, 5002, 5003];
-
-  const startServer = (portIndex = 0) => {
-    if (portIndex >= tryPorts.length) {
-      log(`Failed to start server: All ports are in use`);
-      process.exit(1);
-      return;
+  // Use PORT from environment variable (required for cloud platforms) or default to 5000
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+  
+  // In production (cloud), always use 0.0.0.0 to accept connections from any interface
+  // In development on Windows, use localhost
+  const isProduction = process.env.NODE_ENV === 'production';
+  const host = isProduction ? '0.0.0.0' : (process.platform === 'win32' ? 'localhost' : '0.0.0.0');
+  
+  server.listen(port, host, () => {
+    log(`serving on http://${host}:${port}`);
+    if (isProduction) {
+      log(`Production mode: Application is ready to accept connections`);
     }
-
-    const port = tryPorts[portIndex];
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    }).on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        log(`Port ${port} is in use, trying next port...`);
-        startServer(portIndex + 1);
-      } else {
-        log(`Error starting server: ${err.message}`);
-        throw err;
-      }
-    });
-  };
-
-  startServer();
+  }).on('error', (err: any) => {
+    log(`Error starting server: ${err.message}`, "server-error");
+    throw err;
+  });
+  } catch (error) {
+    log(`Failed to start server: ${error}`, "server-error");
+    process.exit(1);
+  }
 })();

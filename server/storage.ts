@@ -188,6 +188,8 @@ export class MemStorage implements IStorage {
   private subtasksData: Map<number, Subtask>;
   private weeksData: Map<number, Week>;
   private prospectsData: Map<number, Prospect>;
+  private regionsData: Map<number, Region>;
+  private schoolsData: Map<number, School>;
 
   
   private currentUserId: number;
@@ -198,6 +200,8 @@ export class MemStorage implements IStorage {
   private currentSubtaskId: number;
   private currentWeekId: number;
   private currentProspectId: number;
+  private currentRegionId: number;
+  private currentSchoolId: number;
 
 
   constructor() {
@@ -209,6 +213,8 @@ export class MemStorage implements IStorage {
     this.subtasksData = new Map();
     this.weeksData = new Map();
     this.prospectsData = new Map();
+    this.regionsData = new Map();
+    this.schoolsData = new Map();
 
     
     this.currentUserId = 1;
@@ -219,6 +225,8 @@ export class MemStorage implements IStorage {
     this.currentSubtaskId = 1;
     this.currentWeekId = 1;
     this.currentProspectId = 1;
+    this.currentRegionId = 1;
+    this.currentSchoolId = 1;
 
     
     // Call initializeData as async function
@@ -420,6 +428,335 @@ export class MemStorage implements IStorage {
     for (const prospect of sampleProspects) {
       await this.createProspect(prospect);
     }
+    
+    // Initialize regions and schools
+    await this.initializeRegionsAndSchools();
+  }
+  
+  // Initialize all KASS regions and schools
+  private async initializeRegionsAndSchools() {
+    // Initialize all 18 KASS regions
+    const kassRegions: InsertRegion[] = [
+      { regionNumber: 1, name: "Region 1 - Far West", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 2, name: "Region 2 - West", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 3, name: "Region 3 - Northwest", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 4, name: "Region 4 - Southwest", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 5, name: "Region 5 - West Central", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 6, name: "Region 6 - North Central", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 7, name: "Region 7 - Northern", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 8, name: "Region 8 - Central North", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 9, name: "Region 9 - Northeast", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 10, name: "Region 10 - East", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 11, name: "Region 11 - Far East", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 12, name: "Region 12 - Southeast", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 13, name: "Region 13 - South", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 14, name: "Region 14 - South Central", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 15, name: "Region 15 - South", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 16, name: "Region 16 - South Central", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 17, name: "Region 17 - Central", conquered: false, conqueredDate: null, targetDate: null },
+      { regionNumber: 18, name: "Region 18 - Central", conquered: false, conqueredDate: null, targetDate: null },
+    ];
+    
+    // Create regions if they don't exist
+    for (const regionData of kassRegions) {
+      const existing = Array.from(this.regionsData.values()).find(r => r.regionNumber === regionData.regionNumber);
+      if (!existing) {
+        await this.createRegion(regionData);
+      }
+    }
+    
+    // Initialize schools
+    await this.initializeSchools();
+  }
+  
+  // Initialize comprehensive school data for all Kentucky KASS regions
+  private async initializeSchools() {
+    const existingSchools = await this.getAllSchools();
+    if (existingSchools.length > 0) {
+      return; // Schools already initialized
+    }
+    
+    // Get all regions to map region numbers to IDs
+    const allRegions = await this.getAllRegions();
+    const regionMap = new Map(allRegions.map(r => [r.regionNumber, r.id]));
+    
+    // Get comprehensive Kentucky school data
+    const kentuckySchools = this.getKentuckySchoolData();
+    
+    // Create schools for each region
+    for (const schoolData of kentuckySchools) {
+      const regionId = regionMap.get(schoolData.regionNumber);
+      if (regionId) {
+        await this.createSchool({
+          regionId,
+          name: schoolData.name,
+          type: schoolData.type,
+          district: schoolData.district,
+          contacted: false,
+          contactedDate: null,
+          responseStatus: "pending",
+          notes: schoolData.notes || "",
+          priority: schoolData.priority || 0,
+        });
+      }
+    }
+  }
+  
+  // Get comprehensive Kentucky school data (shared method)
+  private getKentuckySchoolData(): Array<{
+    regionNumber: number;
+    name: string;
+    type: "middle" | "high";
+    district: string;
+    notes?: string;
+    priority?: number;
+  }> {
+    return [
+      // Region 1 - Far West (Fulton, Hickman, Carlisle, Ballard counties)
+      { regionNumber: 1, name: "Fulton County High School", type: "high", district: "Fulton County Schools", priority: 3 },
+      { regionNumber: 1, name: "Fulton County Middle School", type: "middle", district: "Fulton County Schools", priority: 3 },
+      { regionNumber: 1, name: "Hickman County High School", type: "high", district: "Hickman County Schools", priority: 3 },
+      { regionNumber: 1, name: "Hickman County Middle School", type: "middle", district: "Hickman County Schools", priority: 3 },
+      { regionNumber: 1, name: "Carlisle County High School", type: "high", district: "Carlisle County Schools", priority: 2 },
+      { regionNumber: 1, name: "Carlisle County Middle School", type: "middle", district: "Carlisle County Schools", priority: 2 },
+      { regionNumber: 1, name: "Ballard Memorial High School", type: "high", district: "Ballard County Schools", priority: 2 },
+      { regionNumber: 1, name: "Ballard Memorial Middle School", type: "middle", district: "Ballard County Schools", priority: 2 },
+      
+      // Region 2 - West (Calloway, Marshall, Graves, McCracken counties)
+      { regionNumber: 2, name: "Calloway County High School", type: "high", district: "Calloway County Schools", priority: 4 },
+      { regionNumber: 2, name: "Calloway County Middle School", type: "middle", district: "Calloway County Schools", priority: 4 },
+      { regionNumber: 2, name: "Marshall County High School", type: "high", district: "Marshall County Schools", priority: 4 },
+      { regionNumber: 2, name: "Marshall County Middle School", type: "middle", district: "Marshall County Schools", priority: 4 },
+      { regionNumber: 2, name: "Graves County High School", type: "high", district: "Graves County Schools", priority: 3 },
+      { regionNumber: 2, name: "Graves County Middle School", type: "middle", district: "Graves County Schools", priority: 3 },
+      { regionNumber: 2, name: "McCracken County High School", type: "high", district: "McCracken County Schools", priority: 5 },
+      { regionNumber: 2, name: "McCracken County Middle School", type: "middle", district: "McCracken County Schools", priority: 5 },
+      { regionNumber: 2, name: "Paducah Tilghman High School", type: "high", district: "Paducah Independent Schools", priority: 5 },
+      { regionNumber: 2, name: "Paducah Middle School", type: "middle", district: "Paducah Independent Schools", priority: 5 },
+      
+      // Region 3 - Northwest (Henderson, Daviess, Ohio, McLean counties)
+      { regionNumber: 3, name: "Henderson County High School", type: "high", district: "Henderson County Schools", priority: 4 },
+      { regionNumber: 3, name: "Henderson County Middle School", type: "middle", district: "Henderson County Schools", priority: 4 },
+      { regionNumber: 3, name: "Daviess County High School", type: "high", district: "Daviess County Schools", priority: 5 },
+      { regionNumber: 3, name: "Daviess County Middle School", type: "middle", district: "Daviess County Schools", priority: 5 },
+      { regionNumber: 3, name: "Ohio County High School", type: "high", district: "Ohio County Schools", priority: 3 },
+      { regionNumber: 3, name: "Ohio County Middle School", type: "middle", district: "Ohio County Schools", priority: 3 },
+      { regionNumber: 3, name: "McLean County High School", type: "high", district: "McLean County Schools", priority: 2 },
+      { regionNumber: 3, name: "McLean County Middle School", type: "middle", district: "McLean County Schools", priority: 2 },
+      { regionNumber: 3, name: "Owensboro High School", type: "high", district: "Owensboro Independent Schools", priority: 5 },
+      { regionNumber: 3, name: "Owensboro Middle School", type: "middle", district: "Owensboro Independent Schools", priority: 5 },
+      
+      // Region 4 - Southwest (Christian, Todd, Trigg, Logan counties)
+      { regionNumber: 4, name: "Christian County High School", type: "high", district: "Christian County Schools", priority: 4 },
+      { regionNumber: 4, name: "Christian County Middle School", type: "middle", district: "Christian County Schools", priority: 4 },
+      { regionNumber: 4, name: "Todd County Central High School", type: "high", district: "Todd County Schools", priority: 3 },
+      { regionNumber: 4, name: "Todd County Central Middle School", type: "middle", district: "Todd County Schools", priority: 3 },
+      { regionNumber: 4, name: "Trigg County High School", type: "high", district: "Trigg County Schools", priority: 3 },
+      { regionNumber: 4, name: "Trigg County Middle School", type: "middle", district: "Trigg County Schools", priority: 3 },
+      { regionNumber: 4, name: "Logan County High School", type: "high", district: "Logan County Schools", priority: 3 },
+      { regionNumber: 4, name: "Logan County Middle School", type: "middle", district: "Logan County Schools", priority: 3 },
+      { regionNumber: 4, name: "Hopkinsville High School", type: "high", district: "Hopkinsville Independent Schools", priority: 4 },
+      { regionNumber: 4, name: "Hopkinsville Middle School", type: "middle", district: "Hopkinsville Independent Schools", priority: 4 },
+      
+      // Region 5 - West Central (Butler, Muhlenberg, Edmonson, Warren counties)
+      { regionNumber: 5, name: "Butler County High School", type: "high", district: "Butler County Schools", priority: 3 },
+      { regionNumber: 5, name: "Butler County Middle School", type: "middle", district: "Butler County Schools", priority: 3 },
+      { regionNumber: 5, name: "Muhlenberg County High School", type: "high", district: "Muhlenberg County Schools", priority: 3 },
+      { regionNumber: 5, name: "Muhlenberg County Middle School", type: "middle", district: "Muhlenberg County Schools", priority: 3 },
+      { regionNumber: 5, name: "Edmonson County High School", type: "high", district: "Edmonson County Schools", priority: 2 },
+      { regionNumber: 5, name: "Edmonson County Middle School", type: "middle", district: "Edmonson County Schools", priority: 2 },
+      { regionNumber: 5, name: "Warren Central High School", type: "high", district: "Warren County Schools", priority: 5 },
+      { regionNumber: 5, name: "Warren Central Middle School", type: "middle", district: "Warren County Schools", priority: 5 },
+      { regionNumber: 5, name: "Bowling Green High School", type: "high", district: "Bowling Green Independent Schools", priority: 5 },
+      { regionNumber: 5, name: "Bowling Green Middle School", type: "middle", district: "Bowling Green Independent Schools", priority: 5 },
+      
+      // Region 6 - North Central (Jefferson County - Louisville area)
+      { regionNumber: 6, name: "DuPont Manual High School", type: "high", district: "Jefferson County Public Schools", priority: 5 },
+      { regionNumber: 6, name: "Male High School", type: "high", district: "Jefferson County Public Schools", priority: 5 },
+      { regionNumber: 6, name: "Ballard High School", type: "high", district: "Jefferson County Public Schools", priority: 5 },
+      { regionNumber: 6, name: "Butler Traditional High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Eastern High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Fern Creek High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Iroquois High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Jeffersontown High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Moore Traditional High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Pleasure Ridge Park High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Seneca High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Southern High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Valley High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Western High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Atherton High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Brown School", type: "high", district: "Jefferson County Public Schools", priority: 3 },
+      { regionNumber: 6, name: "Central High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Doss High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Fairdale High School", type: "high", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Barret Traditional Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Crosby Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Farnsley Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Kammerer Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Meyzeek Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Newburg Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Noe Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Ramsey Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Westport Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      { regionNumber: 6, name: "Wheatley Middle School", type: "middle", district: "Jefferson County Public Schools", priority: 4 },
+      
+      // Region 7 - Northern (Kenton, Boone, Campbell, Grant counties)
+      { regionNumber: 7, name: "Kenton County High School", type: "high", district: "Kenton County Schools", priority: 4 },
+      { regionNumber: 7, name: "Kenton County Middle School", type: "middle", district: "Kenton County Schools", priority: 4 },
+      { regionNumber: 7, name: "Boone County High School", type: "high", district: "Boone County Schools", priority: 5 },
+      { regionNumber: 7, name: "Boone County Middle School", type: "middle", district: "Boone County Schools", priority: 5 },
+      { regionNumber: 7, name: "Campbell County High School", type: "high", district: "Campbell County Schools", priority: 4 },
+      { regionNumber: 7, name: "Campbell County Middle School", type: "middle", district: "Campbell County Schools", priority: 4 },
+      { regionNumber: 7, name: "Grant County High School", type: "high", district: "Grant County Schools", priority: 3 },
+      { regionNumber: 7, name: "Grant County Middle School", type: "middle", district: "Grant County Schools", priority: 3 },
+      { regionNumber: 7, name: "Covington Catholic High School", type: "high", district: "Covington Independent Schools", priority: 4 },
+      { regionNumber: 7, name: "Covington Middle School", type: "middle", district: "Covington Independent Schools", priority: 4 },
+      { regionNumber: 7, name: "Newport High School", type: "high", district: "Newport Independent Schools", priority: 3 },
+      { regionNumber: 7, name: "Newport Middle School", type: "middle", district: "Newport Independent Schools", priority: 3 },
+      
+      // Region 8 - Central North (Shelby, Henry, Oldham, Trimble counties)
+      { regionNumber: 8, name: "Shelby County High School", type: "high", district: "Shelby County Schools", priority: 4 },
+      { regionNumber: 8, name: "Shelby County Middle School", type: "middle", district: "Shelby County Schools", priority: 4 },
+      { regionNumber: 8, name: "Henry County High School", type: "high", district: "Henry County Schools", priority: 3 },
+      { regionNumber: 8, name: "Henry County Middle School", type: "middle", district: "Henry County Schools", priority: 3 },
+      { regionNumber: 8, name: "Oldham County High School", type: "high", district: "Oldham County Schools", priority: 5 },
+      { regionNumber: 8, name: "Oldham County Middle School", type: "middle", district: "Oldham County Schools", priority: 5 },
+      { regionNumber: 8, name: "Trimble County High School", type: "high", district: "Trimble County Schools", priority: 2 },
+      { regionNumber: 8, name: "Trimble County Middle School", type: "middle", district: "Trimble County Schools", priority: 2 },
+      { regionNumber: 8, name: "North Oldham High School", type: "high", district: "Oldham County Schools", priority: 4 },
+      { regionNumber: 8, name: "South Oldham High School", type: "high", district: "Oldham County Schools", priority: 4 },
+      
+      // Region 9 - Northeast (Boyd, Carter, Greenup, Lawrence counties)
+      { regionNumber: 9, name: "Boyd County High School", type: "high", district: "Boyd County Schools", priority: 4 },
+      { regionNumber: 9, name: "Boyd County Middle School", type: "middle", district: "Boyd County Schools", priority: 4 },
+      { regionNumber: 9, name: "Carter County High School", type: "high", district: "Carter County Schools", priority: 3 },
+      { regionNumber: 9, name: "Carter County Middle School", type: "middle", district: "Carter County Schools", priority: 3 },
+      { regionNumber: 9, name: "Greenup County High School", type: "high", district: "Greenup County Schools", priority: 3 },
+      { regionNumber: 9, name: "Greenup County Middle School", type: "middle", district: "Greenup County Schools", priority: 3 },
+      { regionNumber: 9, name: "Lawrence County High School", type: "high", district: "Lawrence County Schools", priority: 3 },
+      { regionNumber: 9, name: "Lawrence County Middle School", type: "middle", district: "Lawrence County Schools", priority: 3 },
+      { regionNumber: 9, name: "Ashland Blazer High School", type: "high", district: "Ashland Independent Schools", priority: 5 },
+      { regionNumber: 9, name: "Ashland Middle School", type: "middle", district: "Ashland Independent Schools", priority: 5 },
+      { regionNumber: 9, name: "Russell High School", type: "high", district: "Russell Independent Schools", priority: 4 },
+      { regionNumber: 9, name: "Russell Middle School", type: "middle", district: "Russell Independent Schools", priority: 4 },
+      
+      // Region 10 - East (Pike, Floyd, Johnson, Magoffin counties)
+      { regionNumber: 10, name: "Pike County Central High School", type: "high", district: "Pike County Schools", priority: 4 },
+      { regionNumber: 10, name: "Pike County Middle School", type: "middle", district: "Pike County Schools", priority: 4 },
+      { regionNumber: 10, name: "Floyd Central High School", type: "high", district: "Floyd County Schools", priority: 4 },
+      { regionNumber: 10, name: "Floyd County Middle School", type: "middle", district: "Floyd County Schools", priority: 4 },
+      { regionNumber: 10, name: "Johnson Central High School", type: "high", district: "Johnson County Schools", priority: 3 },
+      { regionNumber: 10, name: "Johnson County Middle School", type: "middle", district: "Johnson County Schools", priority: 3 },
+      { regionNumber: 10, name: "Magoffin County High School", type: "high", district: "Magoffin County Schools", priority: 3 },
+      { regionNumber: 10, name: "Magoffin County Middle School", type: "middle", district: "Magoffin County Schools", priority: 3 },
+      { regionNumber: 10, name: "Pikeville High School", type: "high", district: "Pikeville Independent Schools", priority: 5 },
+      { regionNumber: 10, name: "Pikeville Middle School", type: "middle", district: "Pikeville Independent Schools", priority: 5 },
+      { regionNumber: 10, name: "Prestonsburg High School", type: "high", district: "Floyd County Schools", priority: 4 },
+      { regionNumber: 10, name: "Prestonsburg Middle School", type: "middle", district: "Floyd County Schools", priority: 4 },
+      
+      // Region 11 - Far East (Pike, Letcher, Perry, Knott counties)
+      { regionNumber: 11, name: "East Ridge High School", type: "high", district: "Pike County Schools", priority: 3 },
+      { regionNumber: 11, name: "Shelby Valley High School", type: "high", district: "Pike County Schools", priority: 3 },
+      { regionNumber: 11, name: "Letcher County Central High School", type: "high", district: "Letcher County Schools", priority: 4 },
+      { regionNumber: 11, name: "Letcher County Middle School", type: "middle", district: "Letcher County Schools", priority: 4 },
+      { regionNumber: 11, name: "Perry County Central High School", type: "high", district: "Perry County Schools", priority: 4 },
+      { regionNumber: 11, name: "Perry County Middle School", type: "middle", district: "Perry County Schools", priority: 4 },
+      { regionNumber: 11, name: "Knott County Central High School", type: "high", district: "Knott County Schools", priority: 3 },
+      { regionNumber: 11, name: "Knott County Middle School", type: "middle", district: "Knott County Schools", priority: 3 },
+      { regionNumber: 11, name: "Hazard High School", type: "high", district: "Perry County Schools", priority: 4 },
+      { regionNumber: 11, name: "Hazard Middle School", type: "middle", district: "Perry County Schools", priority: 4 },
+      
+      // Region 12 - Southeast (Harlan, Bell, Leslie, Clay counties)
+      { regionNumber: 12, name: "Harlan County High School", type: "high", district: "Harlan County Schools", priority: 4 },
+      { regionNumber: 12, name: "Harlan County Middle School", type: "middle", district: "Harlan County Schools", priority: 4 },
+      { regionNumber: 12, name: "Bell County High School", type: "high", district: "Bell County Schools", priority: 3 },
+      { regionNumber: 12, name: "Bell County Middle School", type: "middle", district: "Bell County Schools", priority: 3 },
+      { regionNumber: 12, name: "Leslie County High School", type: "high", district: "Leslie County Schools", priority: 3 },
+      { regionNumber: 12, name: "Leslie County Middle School", type: "middle", district: "Leslie County Schools", priority: 3 },
+      { regionNumber: 12, name: "Clay County High School", type: "high", district: "Clay County Schools", priority: 3 },
+      { regionNumber: 12, name: "Clay County Middle School", type: "middle", district: "Clay County Schools", priority: 3 },
+      { regionNumber: 12, name: "Harlan High School", type: "high", district: "Harlan Independent Schools", priority: 4 },
+      { regionNumber: 12, name: "Harlan Middle School", type: "middle", district: "Harlan Independent Schools", priority: 4 },
+      
+      // Region 13 - South (Knox, Whitley, Laurel, Rockcastle counties)
+      { regionNumber: 13, name: "Knox Central High School", type: "high", district: "Knox County Schools", priority: 4 },
+      { regionNumber: 13, name: "Knox County Middle School", type: "middle", district: "Knox County Schools", priority: 4 },
+      { regionNumber: 13, name: "Whitley County High School", type: "high", district: "Whitley County Schools", priority: 4 },
+      { regionNumber: 13, name: "Whitley County Middle School", type: "middle", district: "Whitley County Schools", priority: 4 },
+      { regionNumber: 13, name: "North Laurel High School", type: "high", district: "Laurel County Schools", priority: 4 },
+      { regionNumber: 13, name: "South Laurel High School", type: "high", district: "Laurel County Schools", priority: 4 },
+      { regionNumber: 13, name: "Laurel County Middle School", type: "middle", district: "Laurel County Schools", priority: 4 },
+      { regionNumber: 13, name: "Rockcastle County High School", type: "high", district: "Rockcastle County Schools", priority: 3 },
+      { regionNumber: 13, name: "Rockcastle County Middle School", type: "middle", district: "Rockcastle County Schools", priority: 3 },
+      { regionNumber: 13, name: "Corbin High School", type: "high", district: "Corbin Independent Schools", priority: 5 },
+      { regionNumber: 13, name: "Corbin Middle School", type: "middle", district: "Corbin Independent Schools", priority: 5 },
+      
+      // Region 14 - South Central (Pulaski, Wayne, Russell, Casey counties)
+      { regionNumber: 14, name: "Pulaski County High School", type: "high", district: "Pulaski County Schools", priority: 4 },
+      { regionNumber: 14, name: "Pulaski County Middle School", type: "middle", district: "Pulaski County Schools", priority: 4 },
+      { regionNumber: 14, name: "Wayne County High School", type: "high", district: "Wayne County Schools", priority: 3 },
+      { regionNumber: 14, name: "Wayne County Middle School", type: "middle", district: "Wayne County Schools", priority: 3 },
+      { regionNumber: 14, name: "Russell County High School", type: "high", district: "Russell County Schools", priority: 3 },
+      { regionNumber: 14, name: "Russell County Middle School", type: "middle", district: "Russell County Schools", priority: 3 },
+      { regionNumber: 14, name: "Casey County High School", type: "high", district: "Casey County Schools", priority: 3 },
+      { regionNumber: 14, name: "Casey County Middle School", type: "middle", district: "Casey County Schools", priority: 3 },
+      { regionNumber: 14, name: "Somerset High School", type: "high", district: "Somerset Independent Schools", priority: 5 },
+      { regionNumber: 14, name: "Somerset Middle School", type: "middle", district: "Somerset Independent Schools", priority: 5 },
+      
+      // Region 15 - South (Monroe, Cumberland, Clinton, Adair counties)
+      { regionNumber: 15, name: "Monroe County High School", type: "high", district: "Monroe County Schools", priority: 3 },
+      { regionNumber: 15, name: "Monroe County Middle School", type: "middle", district: "Monroe County Schools", priority: 3 },
+      { regionNumber: 15, name: "Cumberland County High School", type: "high", district: "Cumberland County Schools", priority: 2 },
+      { regionNumber: 15, name: "Cumberland County Middle School", type: "middle", district: "Cumberland County Schools", priority: 2 },
+      { regionNumber: 15, name: "Clinton County High School", type: "high", district: "Clinton County Schools", priority: 2 },
+      { regionNumber: 15, name: "Clinton County Middle School", type: "middle", district: "Clinton County Schools", priority: 2 },
+      { regionNumber: 15, name: "Adair County High School", type: "high", district: "Adair County Schools", priority: 3 },
+      { regionNumber: 15, name: "Adair County Middle School", type: "middle", district: "Adair County Schools", priority: 3 },
+      
+      // Region 16 - South Central (Cumberland, Metcalfe, Barren, Hart counties)
+      { regionNumber: 16, name: "Barren County High School", type: "high", district: "Barren County Schools", priority: 4 },
+      { regionNumber: 16, name: "Barren County Middle School", type: "middle", district: "Barren County Schools", priority: 4 },
+      { regionNumber: 16, name: "Metcalfe County High School", type: "high", district: "Metcalfe County Schools", priority: 2 },
+      { regionNumber: 16, name: "Metcalfe County Middle School", type: "middle", district: "Metcalfe County Schools", priority: 2 },
+      { regionNumber: 16, name: "Hart County High School", type: "high", district: "Hart County Schools", priority: 3 },
+      { regionNumber: 16, name: "Hart County Middle School", type: "middle", district: "Hart County Schools", priority: 3 },
+      { regionNumber: 16, name: "Glasgow High School", type: "high", district: "Glasgow Independent Schools", priority: 4 },
+      { regionNumber: 16, name: "Glasgow Middle School", type: "middle", district: "Glasgow Independent Schools", priority: 4 },
+      
+      // Region 17 - Central (Fayette, Madison, Jessamine, Woodford counties)
+      { regionNumber: 17, name: "Lafayette High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Paul Laurence Dunbar High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Henry Clay High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Tates Creek High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Bryan Station High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Frederick Douglass High School", type: "high", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Lexington Traditional Magnet School", type: "high", district: "Fayette County Public Schools", priority: 4 },
+      { regionNumber: 17, name: "Edwin O. Smith Middle School", type: "middle", district: "Fayette County Public Schools", priority: 5 },
+      { regionNumber: 17, name: "Jessamine County Middle School", type: "middle", district: "Fayette County Public Schools", priority: 4 },
+      { regionNumber: 17, name: "Madison Central High School", type: "high", district: "Madison County Schools", priority: 5 },
+      { regionNumber: 17, name: "Madison Southern High School", type: "high", district: "Madison County Schools", priority: 4 },
+      { regionNumber: 17, name: "Madison Middle School", type: "middle", district: "Madison County Schools", priority: 4 },
+      { regionNumber: 17, name: "Jessamine County High School", type: "high", district: "Jessamine County Schools", priority: 4 },
+      { regionNumber: 17, name: "West Jessamine High School", type: "high", district: "Jessamine County Schools", priority: 4 },
+      { regionNumber: 17, name: "Jessamine County Middle School", type: "middle", district: "Jessamine County Schools", priority: 4 },
+      { regionNumber: 17, name: "Woodford County High School", type: "high", district: "Woodford County Schools", priority: 4 },
+      { regionNumber: 17, name: "Woodford County Middle School", type: "middle", district: "Woodford County Schools", priority: 4 },
+      { regionNumber: 17, name: "Berea Community High School", type: "high", district: "Berea Independent Schools", priority: 4 },
+      { regionNumber: 17, name: "Berea Community Middle School", type: "middle", district: "Berea Independent Schools", priority: 4 },
+      
+      // Region 18 - Central (Casey, Lincoln, Garrard, Boyle counties)
+      { regionNumber: 18, name: "Casey County High School", type: "high", district: "Casey County Schools", priority: 3 },
+      { regionNumber: 18, name: "Casey County Middle School", type: "middle", district: "Casey County Schools", priority: 3 },
+      { regionNumber: 18, name: "Lincoln County High School", type: "high", district: "Lincoln County Schools", priority: 4 },
+      { regionNumber: 18, name: "Lincoln County Middle School", type: "middle", district: "Lincoln County Schools", priority: 4 },
+      { regionNumber: 18, name: "Garrard County High School", type: "high", district: "Garrard County Schools", priority: 3 },
+      { regionNumber: 18, name: "Garrard County Middle School", type: "middle", district: "Garrard County Schools", priority: 3 },
+      { regionNumber: 18, name: "Boyle County High School", type: "high", district: "Boyle County Schools", priority: 4 },
+      { regionNumber: 18, name: "Boyle County Middle School", type: "middle", district: "Boyle County Schools", priority: 4 },
+      { regionNumber: 18, name: "Danville High School", type: "high", district: "Danville Independent Schools", priority: 5 },
+      { regionNumber: 18, name: "Danville Middle School", type: "middle", district: "Danville Independent Schools", priority: 5 },
+    ];
   }
 
   // User methods
@@ -723,6 +1060,93 @@ export class MemStorage implements IStorage {
   async deleteProspect(id: number): Promise<boolean> {
     return this.prospectsData.delete(id);
   }
+  
+  // Region methods
+  async getAllRegions(): Promise<Region[]> {
+    return Array.from(this.regionsData.values()).sort((a, b) => a.regionNumber - b.regionNumber);
+  }
+  
+  async getRegion(id: number): Promise<Region | undefined> {
+    return this.regionsData.get(id);
+  }
+  
+  async getRegionByNumber(regionNumber: number): Promise<Region | undefined> {
+    return Array.from(this.regionsData.values()).find(r => r.regionNumber === regionNumber);
+  }
+  
+  async createRegion(insertRegion: InsertRegion): Promise<Region> {
+    const id = this.currentRegionId++;
+    const region: Region = {
+      ...insertRegion,
+      id,
+      conquered: insertRegion.conquered ?? false,
+      conqueredDate: insertRegion.conqueredDate ?? null,
+      targetDate: insertRegion.targetDate ?? null,
+    };
+    this.regionsData.set(id, region);
+    return region;
+  }
+  
+  async updateRegion(id: number, region: Partial<InsertRegion>): Promise<Region | undefined> {
+    const existingRegion = this.regionsData.get(id);
+    if (!existingRegion) return undefined;
+    
+    const updatedRegion = { ...existingRegion, ...region };
+    this.regionsData.set(id, updatedRegion);
+    return updatedRegion;
+  }
+  
+  // School methods
+  async getAllSchools(): Promise<School[]> {
+    return Array.from(this.schoolsData.values());
+  }
+  
+  async getSchoolsByRegion(regionId: number): Promise<School[]> {
+    return Array.from(this.schoolsData.values()).filter(s => s.regionId === regionId);
+  }
+  
+  async getSchool(id: number): Promise<School | undefined> {
+    return this.schoolsData.get(id);
+  }
+  
+  async createSchool(insertSchool: InsertSchool): Promise<School> {
+    const id = this.currentSchoolId++;
+    const school: School = {
+      ...insertSchool,
+      id,
+      contacted: insertSchool.contacted ?? false,
+      contactedDate: insertSchool.contactedDate ?? null,
+      responseStatus: insertSchool.responseStatus ?? "pending",
+      notes: insertSchool.notes ?? "",
+      priority: insertSchool.priority ?? 0,
+    };
+    this.schoolsData.set(id, school);
+    return school;
+  }
+  
+  async updateSchool(id: number, school: Partial<InsertSchool>): Promise<School | undefined> {
+    const existingSchool = this.schoolsData.get(id);
+    if (!existingSchool) return undefined;
+    
+    const updatedSchool = { ...existingSchool, ...school };
+    this.schoolsData.set(id, updatedSchool);
+    return updatedSchool;
+  }
+  
+  async deleteSchool(id: number): Promise<boolean> {
+    return this.schoolsData.delete(id);
+  }
+  
+  async resetAllSchools(): Promise<void> {
+    for (const school of this.schoolsData.values()) {
+      this.schoolsData.set(school.id, {
+        ...school,
+        contacted: false,
+        contactedDate: null,
+        responseStatus: "pending",
+      });
+    }
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1014,6 +1438,11 @@ export class DatabaseStorage implements IStorage {
     return region;
   }
   
+  async createRegion(insertRegion: InsertRegion): Promise<Region> {
+    const [region] = await db.insert(regions).values(insertRegion).returning();
+    return region;
+  }
+  
   async updateRegion(id: number, region: Partial<InsertRegion>): Promise<Region | undefined> {
     const [updatedRegion] = await db
       .update(regions)
@@ -1068,7 +1497,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(schools).where(eq(schools.id, id));
     return !!result;
   }
-  
+
   // Gamification methods
   async getOrCreateProfile(userId: number = 1): Promise<GamificationProfile> {
     const [profile] = await db
@@ -1269,6 +1698,7 @@ export class DatabaseStorage implements IStorage {
 
   // Initialize database with sample data
   async initializeData() {
+    try {
     // Check if database is empty
     const existingGoals = await this.getAllGoals();
     
@@ -1479,11 +1909,152 @@ export class DatabaseStorage implements IStorage {
       
       await Promise.all(sampleProspects.map(prospect => this.createProspect(prospect)));
     }
+    
+    // Initialize regions and schools for all KASS regions
+    await this.initializeRegionsAndSchools();
+    } catch (error) {
+      console.error("Failed to initialize database data:", error);
+      // Don't throw - allow server to start even if initialization fails
+    }
+  }
+  
+  // Initialize all KASS regions and schools
+  async initializeRegionsAndSchools() {
+    try {
+      // Initialize all 18 KASS regions
+      const kassRegions: InsertRegion[] = [
+        { regionNumber: 1, name: "Region 1 - Far West", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 2, name: "Region 2 - West", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 3, name: "Region 3 - Northwest", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 4, name: "Region 4 - Southwest", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 5, name: "Region 5 - West Central", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 6, name: "Region 6 - North Central", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 7, name: "Region 7 - Northern", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 8, name: "Region 8 - Central North", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 9, name: "Region 9 - Northeast", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 10, name: "Region 10 - East", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 11, name: "Region 11 - Far East", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 12, name: "Region 12 - Southeast", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 13, name: "Region 13 - South", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 14, name: "Region 14 - South Central", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 15, name: "Region 15 - South", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 16, name: "Region 16 - South Central", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 17, name: "Region 17 - Central", conquered: false, conqueredDate: null, targetDate: null },
+        { regionNumber: 18, name: "Region 18 - Central", conquered: false, conqueredDate: null, targetDate: null },
+      ];
+      
+      // Create regions if they don't exist
+      const existingRegions = await this.getAllRegions();
+      const existingRegionNumbers = new Set(existingRegions.map(r => r.regionNumber));
+      
+      for (const regionData of kassRegions) {
+        if (!existingRegionNumbers.has(regionData.regionNumber)) {
+          try {
+            await this.createRegion(regionData);
+          } catch (error) {
+            console.error(`Failed to create region ${regionData.regionNumber}:`, error);
+          }
+        }
+      }
+      
+      // Initialize schools
+      await this.initializeSchools();
+    } catch (error) {
+      console.error("Failed to initialize regions and schools:", error);
+    }
+  }
+  
+  // Initialize comprehensive school data for all Kentucky KASS regions
+  async initializeSchools() {
+    try {
+      // Check if schools already exist
+      const existingSchools = await this.getAllSchools();
+      if (existingSchools.length > 0) {
+        console.log(`Schools already initialized (${existingSchools.length} schools found)`);
+        return;
+      }
+      
+      // Get all regions to map region numbers to IDs
+      const allRegions = await this.getAllRegions();
+      if (allRegions.length === 0) {
+        console.log("No regions found, skipping school initialization");
+        return;
+      }
+      
+      const regionMap = new Map(allRegions.map(r => [r.regionNumber, r.id]));
+      
+      // Comprehensive Kentucky school data organized by KASS region
+      const kentuckySchools = this.getKentuckySchoolData();
+      
+      let createdCount = 0;
+      // Create schools for each region
+      for (const schoolData of kentuckySchools) {
+        const regionId = regionMap.get(schoolData.regionNumber);
+        if (regionId) {
+          try {
+            await this.createSchool({
+              regionId,
+              name: schoolData.name,
+              type: schoolData.type,
+              district: schoolData.district,
+              contacted: false,
+              contactedDate: null,
+              responseStatus: "pending",
+              notes: schoolData.notes || "",
+              priority: schoolData.priority || 0,
+            });
+            createdCount++;
+          } catch (error) {
+            console.error(`Failed to create school ${schoolData.name}:`, error);
+            // Continue with other schools
+          }
+        } else {
+          console.warn(`Region ${schoolData.regionNumber} not found for school ${schoolData.name}`);
+        }
+      }
+      
+      console.log(`Initialized ${createdCount} schools across ${allRegions.length} regions`);
+    } catch (error) {
+      console.error("Failed to initialize schools:", error);
+      // Don't throw - allow server to continue
+    }
+  }
+  
+  // Get comprehensive Kentucky school data (shared method)
+  // Uses MemStorage's method to ensure consistency
+  getKentuckySchoolData(): Array<{
+    regionNumber: number;
+    name: string;
+    type: "middle" | "high";
+    district: string;
+    notes?: string;
+    priority?: number;
+  }> {
+    // Use MemStorage's comprehensive data
+    const tempMemStorage = new MemStorage();
+    return (tempMemStorage as any).getKentuckySchoolData();
   }
 }
 
-// Create a database storage instance
-export const storage = new DatabaseStorage();
+// Note: School data is defined in MemStorage.getKentuckySchoolData() method
+// DatabaseStorage uses that method to ensure consistency
 
-// Initialize the database with sample data
-storage.initializeData().catch(console.error);
+// Use MemStorage for local development if database is not available
+// Otherwise use DatabaseStorage for production
+// For now, default to MemStorage to avoid connection issues during local development
+let storageInstance: IStorage;
+
+// Only use DatabaseStorage if explicitly enabled and DATABASE_URL is set
+if (db && process.env.USE_DATABASE === 'true' && process.env.DATABASE_URL) {
+  storageInstance = new DatabaseStorage();
+  // Initialize the database with sample data (non-blocking)
+  storageInstance.initializeData().catch((error) => {
+    console.error("Failed to initialize database:", error.message);
+    // Continue anyway - server can still start
+  });
+} else {
+  // Default to MemStorage for local development
+  storageInstance = new MemStorage();
+}
+
+export const storage = storageInstance;

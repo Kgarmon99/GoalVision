@@ -29,14 +29,18 @@ export async function setupVite(app: Express, server: Server) {
     allowedHosts: true,
   };
 
+  // Resolve the async vite config
+  const resolvedConfig = typeof viteConfig === 'function' ? await viteConfig() : viteConfig;
+
   const vite = await createViteServer({
-    ...viteConfig,
+    ...resolvedConfig,
     configFile: false,
     customLogger: {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
+        // Don't exit on Vite errors - let the server continue running
+        // process.exit(1);
       },
     },
     server: serverOptions,
@@ -44,8 +48,20 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
-  app.use("*", async (req, res, next) => {
+  
+  // Catch-all route for HTML pages only (not API routes or Vite assets)
+  app.get("*", async (req, res, next) => {
     const url = req.originalUrl;
+
+    // Skip API routes, Vite client, and any requests that look like assets
+    // Let Vite middleware handle those first
+    if (url.startsWith("/api") || 
+        url.startsWith("/@") || 
+        url.startsWith("/node_modules") ||
+        url.startsWith("/src/") ||
+        (url.includes(".") && !url.endsWith(".html"))) {
+      return next();
+    }
 
     try {
       const clientTemplate = path.resolve(
