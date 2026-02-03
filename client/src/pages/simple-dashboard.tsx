@@ -129,6 +129,14 @@ const SimpleDashboard = () => {
 
   const [editMetrics, setEditMetrics] = useState(metrics);
 
+  // Roadmap completion state - tracks which items are checked off
+  const [roadmapCompleted, setRoadmapCompleted] = useState<Record<string, boolean>>({});
+  
+  // Roadmap editable items - allows custom text per item
+  const [roadmapItems, setRoadmapItems] = useState<Record<string, string>>({});
+  const [editingRoadmapItem, setEditingRoadmapItem] = useState<string | null>(null);
+  const [editingRoadmapText, setEditingRoadmapText] = useState("");
+
   useEffect(() => {
     setEditMetrics(metrics);
   }, [metrics]);
@@ -185,11 +193,67 @@ const SimpleDashboard = () => {
         console.error('Failed to load attack item', e);
       }
     }
+
+    // Load Roadmap completed state
+    const savedRoadmap = localStorage.getItem('moneybot-roadmap-completed');
+    if (savedRoadmap) {
+      try {
+        setRoadmapCompleted(JSON.parse(savedRoadmap));
+      } catch (e) {
+        console.error('Failed to load roadmap state', e);
+      }
+    }
+
+    // Load Roadmap editable items
+    const savedRoadmapItems = localStorage.getItem('moneybot-roadmap-items');
+    if (savedRoadmapItems) {
+      try {
+        setRoadmapItems(JSON.parse(savedRoadmapItems));
+      } catch (e) {
+        console.error('Failed to load roadmap items', e);
+      }
+    }
   }, []);
 
   const saveAttackItem = (newState: typeof attackItem) => {
     setAttackItem(newState);
     localStorage.setItem('moneybot-attack-item', JSON.stringify(newState));
+  };
+
+  const toggleRoadmapItem = (quarter: string, itemIdx: number) => {
+    const key = `${quarter}-${itemIdx}`;
+    const newCompleted = { ...roadmapCompleted, [key]: !roadmapCompleted[key] };
+    setRoadmapCompleted(newCompleted);
+    localStorage.setItem('moneybot-roadmap-completed', JSON.stringify(newCompleted));
+  };
+
+  const getQuarterProgress = (quarter: string, totalItems: number) => {
+    let completed = 0;
+    for (let i = 0; i < totalItems; i++) {
+      if (roadmapCompleted[`${quarter}-${i}`]) completed++;
+    }
+    return { completed, total: totalItems, percent: totalItems > 0 ? Math.round((completed / totalItems) * 100) : 0 };
+  };
+
+  const getRoadmapItemText = (quarter: string, idx: number, defaultText: string) => {
+    const key = `${quarter}-${idx}`;
+    return roadmapItems[key] ?? defaultText;
+  };
+
+  const startEditingRoadmapItem = (quarter: string, idx: number, currentText: string) => {
+    const key = `${quarter}-${idx}`;
+    setEditingRoadmapItem(key);
+    setEditingRoadmapText(currentText);
+  };
+
+  const saveRoadmapItemEdit = () => {
+    if (editingRoadmapItem && editingRoadmapText.trim()) {
+      const newItems = { ...roadmapItems, [editingRoadmapItem]: editingRoadmapText.trim() };
+      setRoadmapItems(newItems);
+      localStorage.setItem('moneybot-roadmap-items', JSON.stringify(newItems));
+    }
+    setEditingRoadmapItem(null);
+    setEditingRoadmapText("");
   };
 
   const handleSetToday = () => {
@@ -865,35 +929,75 @@ const SimpleDashboard = () => {
                       </div>
 
                       <div className="space-y-2">
-                        {quarter.items.map((item, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <div className={`w-4 h-4 shrink-0 border flex items-center justify-center mt-0.5 ${
-                              qIdx === 0 && idx < 2 
-                                ? 'bg-primary border-primary text-black' 
-                                : 'border-primary/30'
-                            }`}>
-                              {qIdx === 0 && idx < 2 && <Check className="w-3 h-3 stroke-[3]" />}
+                        {quarter.items.map((item, idx) => {
+                          const key = `${quarter.quarter}-${idx}`;
+                          const isCompleted = roadmapCompleted[key];
+                          const displayText = getRoadmapItemText(quarter.quarter, idx, item);
+                          const isEditing = editingRoadmapItem === key;
+                          
+                          if (isEditing) {
+                            return (
+                              <div key={idx} className="flex items-start gap-2">
+                                <div className="w-4 h-4 shrink-0 border border-primary/30 mt-0.5" />
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={editingRoadmapText}
+                                  onChange={(e) => setEditingRoadmapText(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') saveRoadmapItemEdit();
+                                    if (e.key === 'Escape') { setEditingRoadmapItem(null); setEditingRoadmapText(""); }
+                                  }}
+                                  onBlur={saveRoadmapItemEdit}
+                                  className="flex-1 bg-black/60 border border-primary/40 px-2 py-0.5 text-[10px] font-mono text-primary focus:outline-none focus:border-primary"
+                                />
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-2 w-full hover:bg-primary/5 p-1 -m-1 rounded transition-colors group"
+                            >
+                              <button
+                                onClick={() => toggleRoadmapItem(quarter.quarter, idx)}
+                                className={`w-4 h-4 shrink-0 border flex items-center justify-center mt-0.5 transition-all ${
+                                  isCompleted 
+                                    ? 'bg-primary border-primary text-black' 
+                                    : 'border-primary/30 group-hover:border-primary/60'
+                                }`}
+                              >
+                                {isCompleted && <Check className="w-3 h-3 stroke-[3]" />}
+                              </button>
+                              <span 
+                                onDoubleClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
+                                className={`flex-1 text-[10px] font-mono leading-tight transition-all cursor-text ${
+                                  isCompleted ? 'text-primary/70 line-through' : 'text-gray-400 group-hover:text-gray-300'
+                                }`}
+                                title="Double-click to edit"
+                              >
+                                {displayText}
+                              </span>
                             </div>
-                            <span className={`text-[10px] font-mono leading-tight ${
-                              qIdx === 0 && idx < 2 ? 'text-primary/70 line-through' : 'text-gray-400'
-                            }`}>
-                              {item}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
-                      {qIdx === 0 && (
-                        <div className="pt-3 border-t border-primary/20">
-                          <div className="flex items-center justify-between text-[10px] font-mono">
-                            <span className="text-gray-500 uppercase">Progress</span>
-                            <span className="text-primary font-bold">2/7</span>
+                      {(() => {
+                        const progress = getQuarterProgress(quarter.quarter, quarter.items.length);
+                        return (
+                          <div className="pt-3 border-t border-primary/20">
+                            <div className="flex items-center justify-between text-[10px] font-mono">
+                              <span className="text-gray-500 uppercase">Progress</span>
+                              <span className="text-primary font-bold">{progress.completed}/{progress.total}</span>
+                            </div>
+                            <div className="progress-tactical h-2 mt-2">
+                              <div className="progress-tactical-fill" style={{ width: `${progress.percent}%` }} />
+                            </div>
                           </div>
-                          <div className="progress-tactical h-2 mt-2">
-                            <div className="progress-tactical-fill" style={{ width: '28%' }} />
-                          </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   </div>
                 ))}
