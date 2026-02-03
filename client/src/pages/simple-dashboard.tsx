@@ -1004,26 +1004,45 @@ const SimpleDashboard = () => {
               </div>
 
               {/* Roadmap Timeline */}
-              <div className="tactical-card border-primary/20 p-6">
-                <div className="mil-tag">TIMELINE</div>
-                <div className="pt-6">
-                  <div className="flex items-center justify-between gap-4 overflow-x-auto pb-4">
-                    {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((month, idx) => (
-                      <div key={month} className="flex flex-col items-center min-w-[50px]">
-                        <div className={`w-3 h-3 rounded-full ${idx < 1 ? 'bg-primary' : 'bg-primary/20'}`} />
-                        <div className="w-px h-4 bg-primary/20" />
-                        <span className={`text-[9px] font-mono uppercase ${idx < 1 ? 'text-primary' : 'text-gray-500'}`}>
-                          {month}
-                        </span>
-                        {idx < 3 && <span className="text-[8px] text-primary/40 font-mono mt-1">Q1</span>}
-                        {idx >= 3 && idx < 6 && <span className="text-[8px] text-gray-600 font-mono mt-1">Q2</span>}
-                        {idx >= 6 && idx < 9 && <span className="text-[8px] text-gray-600 font-mono mt-1">Q3</span>}
-                        {idx >= 9 && <span className="text-[8px] text-gray-600 font-mono mt-1">Q4</span>}
+              {(() => {
+                const currentMonth = currentTime.getMonth(); // 0-indexed (0 = Jan, 11 = Dec)
+                const currentQuarter = Math.floor(currentMonth / 3); // 0 = Q1, 3 = Q4
+                return (
+                  <div className="tactical-card border-primary/20 p-6">
+                    <div className="mil-tag">TIMELINE</div>
+                    <div className="pt-6">
+                      <div className="flex items-center justify-between gap-4 overflow-x-auto pb-4">
+                        {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((month, idx) => {
+                          const isPast = idx < currentMonth;
+                          const isCurrent = idx === currentMonth;
+                          const quarterIdx = Math.floor(idx / 3);
+                          const isActiveQuarter = quarterIdx === currentQuarter;
+                          
+                          return (
+                            <div key={month} className="flex flex-col items-center min-w-[50px]">
+                              <div className={`w-3 h-3 rounded-full ${
+                                isCurrent ? 'bg-primary animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' :
+                                isPast ? 'bg-primary' : 'bg-primary/20'
+                              }`} />
+                              <div className={`w-px h-4 ${isPast || isCurrent ? 'bg-primary/40' : 'bg-primary/20'}`} />
+                              <span className={`text-[9px] font-mono uppercase ${
+                                isCurrent ? 'text-primary font-bold' :
+                                isPast ? 'text-primary/70' : 'text-gray-500'
+                              }`}>
+                                {month}
+                              </span>
+                              {idx < 3 && <span className={`text-[8px] font-mono mt-1 ${isActiveQuarter ? 'text-primary' : 'text-primary/40'}`}>Q1</span>}
+                              {idx >= 3 && idx < 6 && <span className={`text-[8px] font-mono mt-1 ${isActiveQuarter ? 'text-primary' : 'text-gray-600'}`}>Q2</span>}
+                              {idx >= 6 && idx < 9 && <span className={`text-[8px] font-mono mt-1 ${isActiveQuarter ? 'text-primary' : 'text-gray-600'}`}>Q3</span>}
+                              {idx >= 9 && <span className={`text-[8px] font-mono mt-1 ${isActiveQuarter ? 'text-primary' : 'text-gray-600'}`}>Q4</span>}
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </TabsContent>
           </Tabs>
         </div>
