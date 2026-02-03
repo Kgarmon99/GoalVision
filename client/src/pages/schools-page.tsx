@@ -71,6 +71,9 @@ const STATUS_COLORS: Record<string, string> = {
 export default function SchoolsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [collapsedRegions, setCollapsedRegions] = useState<Set<number>>(new Set());
   const [editingSchool, setEditingSchool] = useState<School | null>(null);
   const { toast } = useToast();
@@ -121,14 +124,30 @@ export default function SchoolsPage() {
 
   const filteredSchools = useMemo(() => {
     if (!schools) return [];
-    return schools.filter(school => {
+    let result = schools.filter(school => {
       const matchesSearch = searchTerm === "" || 
         school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         school.district.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || school.responseStatus === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesType = typeFilter === "all" || school.type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
     });
-  }, [schools, searchTerm, statusFilter]);
+
+    // Sort the results
+    result.sort((a, b) => {
+      let valA: any = a[sortField as keyof School];
+      let valB: any = b[sortField as keyof School];
+      
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+      
+      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
+      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [schools, searchTerm, statusFilter, typeFilter, sortField, sortOrder]);
 
   const filteredSchoolsByRegion = useMemo(() => {
     return filteredSchools.reduce((acc, school) => {
@@ -242,31 +261,80 @@ export default function SchoolsPage() {
         {/* Search and Filter */}
         <Card className="glow-card bg-black/80 border-primary/40">
           <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Search schools or districts..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black/50 border-primary/20 text-white"
-                  data-testid="input-search-schools"
-                />
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search schools or districts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-black/50 border-primary/20 text-white"
+                    data-testid="input-search-schools"
+                  />
+                </div>
+                <div className="grid grid-cols-2 md:flex gap-4">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full md:w-[160px] bg-black/50 border-primary/20 text-white">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="interested">Interested</SelectItem>
+                      <SelectItem value="not-interested">Not Interested</SelectItem>
+                      <SelectItem value="meeting-scheduled">Meeting Scheduled</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full md:w-[140px] bg-black/50 border-primary/20 text-white">
+                      <Building2 className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="middle">Middle School</SelectItem>
+                      <SelectItem value="high">High School</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-[200px] bg-black/50 border-primary/20 text-white" data-testid="select-status-filter">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="interested">Interested</SelectItem>
-                  <SelectItem value="not-interested">Not Interested</SelectItem>
-                  <SelectItem value="meeting-scheduled">Meeting Scheduled</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-primary/10">
+                <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Sort by:</span>
+                <div className="flex gap-2">
+                  {[
+                    { id: 'name', label: 'Name' },
+                    { id: 'district', label: 'District' },
+                    { id: 'priority', label: 'Priority' },
+                    { id: 'responseStatus', label: 'Status' }
+                  ].map((field) => (
+                    <Button
+                      key={field.id}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        if (sortField === field.id) {
+                          setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                        } else {
+                          setSortField(field.id);
+                          setSortOrder("asc");
+                        }
+                      }}
+                      className={`h-7 px-3 text-[10px] font-mono uppercase border ${
+                        sortField === field.id 
+                          ? 'border-primary/60 bg-primary/10 text-primary' 
+                          : 'border-primary/10 text-gray-500 hover:text-gray-300'
+                      }`}
+                    >
+                      {field.label} {sortField === field.id && (sortOrder === "asc" ? "↑" : "↓")}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -350,8 +418,17 @@ export default function SchoolsPage() {
                                   </div>
                                   <Building2 className="w-4 h-4 text-gray-500 flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
-                                    <div className="text-white text-sm font-medium truncate">
-                                      {school.name}
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-white text-sm font-medium truncate">
+                                        {school.name}
+                                      </div>
+                                      {school.priority > 0 && (
+                                        <div className="flex gap-0.5">
+                                          {Array.from({ length: school.priority }).map((_, i) => (
+                                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-yellow-500/80 shadow-[0_0_5px_rgba(234,179,8,0.5)]" />
+                                          ))}
+                                        </div>
+                                      )}
                                     </div>
                                     <div className="text-xs text-gray-500 flex items-center gap-2">
                                       <span>{school.type === 'middle' ? 'Middle' : 'High'}</span>
