@@ -971,14 +971,19 @@ const SimpleDashboard = () => {
                                 {isCompleted && <Check className="w-3 h-3 stroke-[3]" />}
                               </button>
                               <span 
-                                onDoubleClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
-                                className={`flex-1 text-[10px] font-mono leading-tight transition-all cursor-text ${
+                                onClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
+                                className={`flex-1 text-[10px] font-mono leading-tight transition-all cursor-pointer ${
                                   isCompleted ? 'text-primary/70 line-through' : 'text-gray-400 group-hover:text-gray-300'
                                 }`}
-                                title="Double-click to edit"
                               >
                                 {displayText}
                               </span>
+                              <button
+                                onClick={() => startEditingRoadmapItem(quarter.quarter, idx, displayText)}
+                                className="opacity-0 group-hover:opacity-100 text-[8px] text-primary/50 hover:text-primary font-mono uppercase transition-all"
+                              >
+                                edit
+                              </button>
                             </div>
                           );
                         })}
