@@ -12,6 +12,18 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* iOS safe areas for Capacitor / notched devices */
+  .safe-area-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
 }
 
 @layer base {
