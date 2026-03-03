@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "build:mobile": "vite build && npx cap sync ios",
+    "build:mobile": "VITE_MOBILE=true vite build && npx cap sync ios",
     "start": "node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "postbuild": "node -e \"console.log('Build complete!')\"",
+    "ios": "npm run build:mobile && npx cap run ios",
+    "ios:build": "npm run build:mobile",
+    "ios:open": "npx cap open ios",
+    "ios:run": "npx cap run ios",
     "cap:sync": "npx cap sync ios",
     "cap:open:ios": "npx cap open ios"
   },

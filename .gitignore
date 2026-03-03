@@ -8,3 +8,10 @@ vite.config.ts.*
 .env.local
 .env.production
 .env.*.local
+
+# Xcode / iOS local
+ios/App/build
+ios/DerivedData
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata
+ios/App/App.xcodeproj/xcuserdata
+*.xcuserstate
