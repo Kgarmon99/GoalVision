@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { PersonalDashboard } from '@/types/personal-dashboard';
 import { loadPersonalDashboard, savePersonalDashboard } from '@/lib/personal-dashboard-storage';
+import { createDashboardFromTemplate } from '@/types/personal-dashboard';
 
 type DashboardContextValue = {
   dashboard: PersonalDashboard | null;
@@ -15,7 +16,15 @@ export function PersonalDashboardProvider({ children }: { children: React.ReactN
   const [dashboard, setDashboardState] = useState<PersonalDashboard | null>(null);
 
   useEffect(() => {
-    setDashboardState(loadPersonalDashboard());
+    const saved = loadPersonalDashboard();
+    if (saved) {
+      setDashboardState(saved);
+    } else {
+      // Force inject the MoneyBot dashboard if none exists
+      const moneyBotDash = createDashboardFromTemplate("MoneyBot GoalVision");
+      setDashboardState(moneyBotDash);
+      savePersonalDashboard(moneyBotDash);
+    }
   }, []);
 
   const setDashboard = useCallback((d: PersonalDashboard | null) => {

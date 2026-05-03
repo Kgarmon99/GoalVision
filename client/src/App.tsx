@@ -17,7 +17,7 @@ function NavLink({ href, icon: Icon, label }: { href: string; icon: React.Compon
   return (
     <Link href={href} className={`flex flex-col items-center justify-center gap-0.5 min-w-[72px] py-2 ${active ? "text-primary" : "text-primary/80"}`}>
       <Icon className="h-6 w-6" />
-      <span className="text-[10px] font-mono uppercase">{label}</span>
+      <span className="text-[10px] font-mono uppercase truncate max-w-full px-1">{label}</span>
     </Link>
   );
 }
@@ -35,20 +35,32 @@ function MobileShell({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleBackToHUD = () => {
+    window.location.href = "http://localhost:5050";
+  };
+
   return (
     <div className="flex flex-col h-screen safe-area-padding bg-black">
       <main className="flex-1 overflow-hidden min-h-0">{children}</main>
       <nav className="flex-shrink-0 border-t border-primary/20 bg-black/95 safe-area-bottom">
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
-          <NavLink href="/" icon={BarChart3} label="Dashboard" />
+          <NavLink href="/" icon={BarChart3} label="Vision" />
           <NavLink href="/roadmap" icon={Map} label="Roadmap" />
+          <button
+            type="button"
+            onClick={handleBackToHUD}
+            className="flex flex-col items-center justify-center gap-0.5 min-w-[72px] py-2 text-primary/80 hover:text-primary"
+          >
+            <Loader2 className="h-6 w-6" />
+            <span className="text-[10px] font-mono uppercase truncate max-w-full px-1">HUD</span>
+          </button>
           <button
             type="button"
             onClick={handleNewDashboard}
             className="flex flex-col items-center justify-center gap-0.5 min-w-[72px] py-2 text-primary/80 hover:text-primary"
           >
             <PlusCircle className="h-6 w-6" />
-            <span className="text-[10px] font-mono uppercase">New</span>
+            <span className="text-[10px] font-mono uppercase truncate max-w-full px-1">New</span>
           </button>
         </div>
       </nav>

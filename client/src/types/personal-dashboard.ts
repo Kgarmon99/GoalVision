@@ -40,7 +40,7 @@ export interface PersonalDashboard {
 
 export const DEFAULT_METRICS_TEMPLATE: DashboardMetric[] = [
   { id: 'm1', label: 'Schools Target', current: 1, target: 100, previous: 0, deadline: '2026-12-01', unit: '' },
-  { id: 'm2', label: 'CRM Leads', current: 110, target: 1000, previous: 34, deadline: '2026-12-01', unit: '' },
+  { id: 'm2', label: 'CRM Leads', current: 110, target: 110, previous: 34, deadline: '2026-12-01', unit: '' },
   { id: 'm3', label: 'Students Target', current: 0.11, target: 5, previous: 0, deadline: '2026-12-01', unit: 'M' },
   { id: 'm4', label: 'ARR Revenue', current: 1.42, target: 20, previous: 0, deadline: '2026-12-01', unit: '$M' },
 ];
