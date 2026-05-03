@@ -237,10 +237,9 @@ export class MemStorage implements IStorage {
     // Initialize with sample data
     // Goals
     const sampleGoals: InsertGoal[] = [
-      { name: "Funding", current: 3.2, target: 10, unit: "M", color: "primary" },
-      { name: "Revenue", current: 28.5, target: 100, unit: "M", color: "primary" },
-      { name: "User Growth", current: 42.8, target: 100, unit: "M", color: "primary" },
-      { name: "School Expansion", current: 2145, target: 10000, unit: "", color: "primary" },
+      { name: "Revenue", current: 1.42, target: 20, unit: "M", color: "primary" },
+      { name: "Students Served", current: 0.11, target: 5, unit: "M", color: "primary" },
+      { name: "School Outreach", current: 110, target: 10000, unit: "", color: "primary" },
     ];
     
     const createdGoals = [];
@@ -250,17 +249,13 @@ export class MemStorage implements IStorage {
     
     // Metrics
     const growthMetrics: InsertMetric[] = [
-      { name: "Monthly Active Users", value: "32.6M", previousValue: "31.6M", trend: 3.2, trendDirection: "up", category: "growth" },
-      { name: "User Retention Rate", value: "87.3%", previousValue: "86.1%", trend: 1.5, trendDirection: "up", category: "growth" },
-      { name: "Net Promoter Score", value: "72", previousValue: "69", trend: 4.0, trendDirection: "up", category: "growth" },
-      { name: "School Onboarding Rate", value: "876/month", previousValue: "1000/month", trend: -12.4, trendDirection: "down", category: "growth" },
+      { name: "Monthly Active Students", value: "110K", previousValue: "0", trend: 100, trendDirection: "up", category: "growth" },
+      { name: "Daily Velocity", value: "1,000/day", previousValue: "0", trend: 0, trendDirection: "neutral", category: "growth" },
     ];
     
     const revenueMetrics: InsertMetric[] = [
-      { name: "Monthly Recurring Revenue", value: "$2.37M", previousValue: "$2.20M", trend: 7.8, trendDirection: "up", category: "revenue" },
-      { name: "Annual Recurring Revenue", value: "$28.5M", previousValue: "$26.7M", trend: 6.9, trendDirection: "up", category: "revenue" },
-      { name: "Average Revenue Per User", value: "$5.12", previousValue: "$5.01", trend: 2.3, trendDirection: "up", category: "revenue" },
-      { name: "Churn Rate", value: "1.2%", previousValue: "1.5%", trend: 0.3, trendDirection: "up", category: "revenue" },
+      { name: "Monthly Revenue", value: "$1,428", previousValue: "$0", trend: 100, trendDirection: "up", category: "revenue" },
+      { name: "ARR Target", value: "$20.0M", previousValue: "$0", trend: 0, trendDirection: "neutral", category: "revenue" },
     ];
     
     for (const metric of [...growthMetrics, ...revenueMetrics]) {
