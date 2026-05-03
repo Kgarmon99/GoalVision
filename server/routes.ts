@@ -253,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Automatically update metrics based on the updated goal
       try {
         // Make a simple request to our metrics refresh endpoint
-        await fetch(`http://localhost:${process.env.PORT || 5000}/api/metrics/refresh`, {
+        await fetch(`http://localhost:${process.env.PORT || 5003}/api/metrics/refresh`, {
           method: 'POST',
         });
         

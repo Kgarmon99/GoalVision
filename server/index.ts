@@ -57,7 +57,7 @@ app.use((req, res, next) => {
     }
     
     log(`Starting server in ${process.env.NODE_ENV} mode`, "express");
-    log(`PORT: ${process.env.PORT || 'not set (using default 5000)'}`, "express");
+    log(`PORT: ${process.env.PORT || 'not set (using default 5003)'}`, "express");
     
     const server = await registerRoutes(app);
 
@@ -86,8 +86,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use PORT from environment variable (required for cloud platforms) or default to 5000
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+  // Use PORT from environment variable (required for cloud platforms) or default to 5003
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5003;
   
   // In production (cloud), always use 0.0.0.0 to accept connections from any interface
   // In development on Windows, use localhost
