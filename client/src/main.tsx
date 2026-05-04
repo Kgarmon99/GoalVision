@@ -1,3 +1,4 @@
+import "./lib/mockBackend";
 import { createRoot } from "react-dom/client";
 import { Router } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
